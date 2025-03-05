@@ -3,6 +3,15 @@ source("Percolation.R")
 library("dplyr")
 library("stringr")
 
+# removing self loops from the two internal networks ("metapathways")
+metapathway_gene_symbols <- metapathway_gene_symbols[which(!(
+  metapathway_gene_symbols$from == metapathway_gene_symbols$to)), ]
+
+metapathway_entrez_IDs <- metapathway_entrez_IDs[which(!(
+  metapathway_entrez_IDs$from == metapathway_entrez_IDs$to)), ]
+#save to rda file
+save(metapathway_gene_symbols, metapathway_entrez_IDs, file = "sysdata.rda")
+
 # import and refactor of normalised_counts dataset
 normalised_counts <- read.table(
   file = 'data_RNA_Seq_v2_mRNA_median_Zscores_normals.txt',

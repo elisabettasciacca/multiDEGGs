@@ -12,10 +12,6 @@ Authors@R:
           role = c("aut"),
           email = "silluziogianmarco@gmail.com",
           comment = c(ORCID = "")),
-      person(given = "Salvatore",family = "Alaimo",
-          role = c("ctb"),
-          email = "alaimos@dmi.unict.it",
-          comment = c(ORCID = "0000-0003-4825-7617")),  
       person(given = "Alfredo",family = "Pulvirenti",
           role = c("ctb"),
           email = "alfredo.pulvirenti@unict.it",
@@ -36,7 +32,7 @@ Encoding: UTF-8
 LazyData: false
 LazyDataCompression: gzip
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 biocViews: Sequencing, RNASeq, GeneExpression, Transcription, 
     DifferentialExpression, Regression, ImmunoOncology, NetworkEnrichment,
     NetworkInference, BiomedicalInformatics, Transcriptomics, ShinyApps,
