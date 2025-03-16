@@ -10,8 +10,7 @@ get_diffNetworks_singleOmic(
   metadata,
   regression_method = "rlm",
   network = NULL,
-  entrezIDs = FALSE,
-  convert_to_gene_symbols = FALSE,
+  percentile_vector = seq(0.55, 0.98, by = 0.05),
   use_qvalues = FALSE,
   show_progressBar = TRUE,
   verbose = TRUE,
@@ -39,12 +38,6 @@ If NULL (default) a network of 10,537 molecular interactions obtained from
 KEGG, mirTARbase, miRecords and transmiR will be used.
 This has been obtained via the \code{exportgraph} function of the MITHrIL tool
 (Alaimo et al., 2016).}
-
-\item{entrezIDs}{logical (default FALSE) when genes are in \code{assayData} are
-entrez IDs (TRUE) or gene symbols (FALSE).}
-
-\item{convert_to_gene_symbols}{logical to be used when assayData entrez IDs
-must be converted to gene symbols. Default is FALSE.}
 
 \item{use_qvalues}{whether to use Storey's q values for multiple test
 adjustment. If FALSE (default), unadjusted p values will be used and shown

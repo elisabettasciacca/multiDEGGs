@@ -16,6 +16,8 @@ number indicating the position of the data in the assayDataList provided
 before (i.e. if transcriptomic data was second in the list, a list of
 all its differential interactions can be obtained with assayDataName = 2,
 if only one data table was provided assayDataName must be 1). Default 1.}
+
+\item{sig_threshold}{threshold for significance. Default 0.05.}
 }
 \value{
 a \code{data.frame} listing all the significant differential interactions

@@ -22,7 +22,7 @@ Authors@R:
           comment = c(ORCID = "0000-0001-9365-5345")))
 Description: The DEGGs package enables the exploration of differential gene-gene
     correlations across user-defined groups of samples.
-    Provided with normalised counts and a design/metadata matrix,
+    Provided with normalised counts and a design/metadata matrix/vector,
     DEGGs extracts networks of biological group-specific interactions that can be
     interactively explored through a shiny user-friendly interface.
     For each gene–gene link, differential statistical significance and differential
@@ -42,7 +42,6 @@ URL: https://github.com/elisabettasciacca/DEGGs
 BugReports: https://github.com/elisabettasciacca/DEGGs/issues
 Suggests: 
 Imports:
-    AnnotationDbi,
     dplyr,
     DT,
     grDevices, 
@@ -52,7 +51,6 @@ Imports:
     MASS,
     magrittr,
     methods,
-    org.Hs.eg.db,
     parallel,
     pbapply,
     pbmcapply,

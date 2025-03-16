@@ -1,14 +1,3 @@
-# lavora a una esportazione della network come immagine 
-# sistema la funzione node_boxplot che non si trova 
-# specifica se host e port devono essere character 
-# controlla che i rownames di tutti gli assayData siano nella network 
-# abbiano degli overlap 
-# valuta di togliere la conversione entrez 
-# crea la citation funciton 
-# rifare la vignette 
-# pensare a cosa fare del boxplot, se mostrarne solo uno o una tab multipla 
-# valutare se aggiungere un valore del percentile come parametro 
-
 #' Generate multi-omic differential networks
 #'
 #' Generate a multi-layer differential network with interaction p values
@@ -45,10 +34,14 @@
 #' KEGG, mirTARbase, miRecords and transmiR will be used.
 #' This has been obtained via the `exportgraph` function of the MITHrIL tool
 #' (Alaimo et al., 2016).
-#' @param entrezIDs logical (default FALSE) when genes are in `assayData` are 
-#' entrez IDs (TRUE) or gene symbols (FALSE).
-#' @param convert_to_gene_symbols logical to be used when assayData entrez IDs
-#' must be converted to gene symbols. Default is FALSE. 
+#' @param  percentile_vector a numeric vector specifying the percentiles to be
+#' used in the percolation analysis. By default, it is defined as 
+#' `seq(0.65, 0.98, by = 0.05)`, which generates a sequence of percentiles
+#' starting at 0.55, meaning that targets (genes/proteins...) whose expression 
+#' value is under the 65th percentile of the whole matrix will be excluded 
+#' automatically from the network. Selecting lower starting percentiles allows 
+#' more genes (and consequently more links) to be included, but it also 
+#' increases computational time.
 #' @param use_qvalues whether to use Storey's q values for multiple test
 #' adjustment. If FALSE (default), unadjusted p values will be used and shown
 #' in the output.
@@ -57,17 +50,16 @@
 #' p values or adjusted p values for each link.
 #' @export
 get_diffNetworks <- function(assayData,
-                                  metadata,
-                                  category_variable = NULL,
-                                  regression_method = 'rlm',
-                                  category_subset = NULL,
-                                  network = NULL,
-                                  entrezIDs = FALSE,
-                                  convert_to_gene_symbols = FALSE,
-                                  use_qvalues = FALSE,
-                                  show_progressBar = TRUE,
-                                  verbose = TRUE, 
-                                  cores = parallel::detectCores() / 2) {
+                             metadata,
+                             category_variable = NULL,
+                             regression_method = 'rlm',
+                             category_subset = NULL,
+                             network = NULL,
+                             percentile_vector = seq(0.35, 0.98, by = 0.05),
+                             use_qvalues = FALSE,
+                             show_progressBar = TRUE,
+                             verbose = TRUE, 
+                             cores = parallel::detectCores() / 2) {
   
   
   if (!(is.list(assayData) || 
@@ -106,20 +98,20 @@ get_diffNetworks <- function(assayData,
     assayDataName <- names(assayDataList)[i]
     assayData <- assayDataList[[assayDataName]]
     
-    diffNetworks <- tryCatch({
-      get_diffNetworks_singleOmic(assayData,
-                                       assayDataName, 
-                                       metadata,
-                                       regression_method,
-                                       network,
-                                       entrezIDs,
-                                       convert_to_gene_symbols,
-                                       use_qvalues,
-                                       show_progressBar,
-                                       verbose, 
-                                       cores)
+    diffNetworks <- 
+      tryCatch({
+        get_diffNetworks_singleOmic(assayData,
+                                    assayDataName, 
+                                    metadata,
+                                    regression_method,
+                                    network,
+                                    percentile_vector,
+                                    use_qvalues,
+                                    show_progressBar,
+                                    verbose, 
+                                    cores)
       }, error = function(e) { cat(conditionMessage(e)) })
-    })
+  })
   names(diffNetworks_list) <- names(assayDataList)
   
   degg <- list(
@@ -152,10 +144,6 @@ get_diffNetworks <- function(assayData,
 #' KEGG, mirTARbase, miRecords and transmiR will be used.
 #' This has been obtained via the `exportgraph` function of the MITHrIL tool
 #' (Alaimo et al., 2016).
-#' @param entrezIDs logical (default FALSE) when genes are in `assayData` are 
-#' entrez IDs (TRUE) or gene symbols (FALSE).
-#' @param convert_to_gene_symbols logical to be used when assayData entrez IDs
-#' must be converted to gene symbols. Default is FALSE. 
 #' @param use_qvalues whether to use Storey's q values for multiple test
 #' adjustment. If FALSE (default), unadjusted p values will be used and shown
 #' in the output.
@@ -163,22 +151,22 @@ get_diffNetworks <- function(assayData,
 #' @importFrom rlang .data
 #' @return a list of differential networks, one per category
 get_diffNetworks_singleOmic <- function(assayData,
-                                 assayDataName,
-                                 metadata,
-                                 regression_method = 'rlm',
-                                 network = NULL,
-                                 entrezIDs = FALSE,
-                                 convert_to_gene_symbols = FALSE,
-                                 use_qvalues = FALSE,
-                                 show_progressBar = TRUE,
-                                 verbose = TRUE, 
-                                 cores = parallel::detectCores() / 2) {
+                                        assayDataName,
+                                        metadata,
+                                        regression_method = 'rlm',
+                                        network = NULL,
+                                        percentile_vector = seq(0.55, 0.98,
+                                                                by = 0.05), 
+                                        use_qvalues = FALSE,
+                                        show_progressBar = TRUE,
+                                        verbose = TRUE, 
+                                        cores = parallel::detectCores() / 2) {
   
   if (verbose) (
-    message(paste0("Generating ", assayDataName, " network layer..."))
+    message(paste0("\nGenerating ", assayDataName, " network layer..."))
   )
   sig_var <- ifelse(use_qvalues, "q.value", "p.value")
-
+  
   if (!(is.matrix(assayData) || is.data.frame(assayData))) (
     stop(paste0(assayDataName, " is not a matrix or data.frame"))
   )
@@ -189,67 +177,47 @@ get_diffNetworks_singleOmic <- function(assayData,
   )
   
   # align metadata and assayData
-  # check for assayData sample IDs that don't exist in metadata
-  missing_assaySamples <- colnames(assayData)[which(!(colnames(assayData) %in% 
-                                                   names(metadata)))]
-  if (length(missing_assaySamples) != 0) {
-    warning(paste0("The following samples IDs are missing in metadata and will 
-                   be removed from ", assayDataName, "columns.",
-                   missing_assaySamples))
-    assayData <- assayData[, !which(colnames(assayData) %in% 
-                                      missing_assaySamples), drop = FALSE]
+  if (length(intersect(colnames(assayData), names(metadata))) == 0) {
+    stop(paste0("Sample IDs in metadata and ", assayDataName, " don't match."))
   }
-  # check for metadata sample IDs that don't exist in assayData
+  
+  # remove assayData samples that don't exist in metadata (because they
+  # were missing or because they were filtered out due to the category_subset)
+  assayData <- assayData[, which(colnames(assayData) %in% names(metadata)),
+                         drop = FALSE]
+  
+  # check and remove metadata sample IDs that don't exist in assayData
   missing_metadataSamples <- names(metadata)[which(!(names(metadata) %in% 
                                                        colnames(assayData)))]
   
   if (length(missing_metadataSamples) != 0) {
-    warning(cat("The following samples IDs are missing in ", assayDataName, ".",
-              missing_assaySamples))
-    metadata <- metadata[which(!(missing_metadataSamples %in% 
-                                   colnames(assayData)))]
+    missing_samples_formatted <- paste(missing_metadataSamples, collapse = ", ")
+    message(paste0("\nThe following samples IDs are missing in ", assayDataName, 
+                   ":\n", missing_samples_formatted))
+    metadata <- metadata[!(names(metadata) %in% missing_metadataSamples)]
+    
     if(length(unique(metadata)) == 1) (
       stop(paste0("All sample IDs in ", assayDataName, " belong to one 
                   category. No differential analysis is possible."))
     )
   }
   
-  if (convert_to_gene_symbols) {
-    num_entrez_rows <- nrow(assayData)
-    
-    genesymbol <- AnnotationDbi::mapIds(
-      x = org.Hs.eg.db::org.Hs.eg.db,
-      keys = rownames(assayData),
-      keytype = 'ENTREZID',
-      column = 'SYMBOL'
-    )
-    assayData <- cbind(assayData, genesymbol)
-
-    assayData <- subset(assayData, !is.na(assayData[, "genesymbol"]))
-    rownames(assayData) <- assayData[, "genesymbol"]
-    assayData <- assayData[, colnames(assayData) != "genesymbol"]
-
-    if (num_entrez_rows - nrow(assayData) > 0 && verbose) (
-        message(num_entrez_rows - nrow(assayData),
-                " genes had no matching gene symbol.") 
-    )
-  }
-  
   if (!is.null(network)) (
     # user provided network
     network_to_use <- network
-    ) else (
-    # if not provided, use the internally stored network 
-      if (entrezIDs) {
-        network_to_use <- metapathway_entrez_IDs
-      } else {
-        network_to_use <- metapathway_gene_symbols
-      }
+  ) else (
+      network_to_use <- metapathway_gene_symbols
   )
   
   edges <- network_to_use %>%
     dplyr::filter(.data$from %in% rownames(assayData)) %>%
     dplyr::filter(.data$to %in% rownames(assayData))  
+  
+  if (nrow(edges) == 0) (
+    stop(paste0("Rownames of ", assayDataName, " don't match any link of the 
+                biological network. Check if names need conversion to gene 
+                symbols or entrez IDs. Alternatively, provide more data."))
+  )
   
   # Remove duplicate edges
   edges$edge_ID <- paste(edges$from, edges$to)
@@ -259,19 +227,14 @@ get_diffNetworks_singleOmic <- function(assayData,
   nodes <- c(edges[, 1], edges[, 2]) %>%
     unique()
   
-  if (!any(rownames(assayData) %in% nodes)) (
-    stop(paste0("Any rowname in ", assayDataName, " exist in the 
-    biological network. Check if names need conversion to gene symbols or
-    entrez IDs."))
-  )
   assayData <- assayData[rownames(assayData) %in% nodes, ]
-
+  
   categories <- levels(metadata)
   
   # pairwise contrasts are necessary for more than 2 categories  
   contrasts <- utils::combn(categories, m = 2) %>%
     as.data.frame()
-
+  
   # create categories (duplicating assay data for each category)
   category_median_list <- lapply(categories, function(one_category) {
     # Get sample IDs belonging to the current category
@@ -286,23 +249,22 @@ get_diffNetworks_singleOmic <- function(assayData,
     return(category_vec)
   })
   names(category_median_list) <- categories
-
+  
   # Percolation analysis: 
   # calculate interaction p values per percentile and select the percentile 
   # network with the highest number of significant interactions 
-  percentile_vector <- seq(0.7, 0.98, by = 0.05)
   sig_edges_count <- 0
-
+  
   if (Sys.info()["sysname"] == "Windows") {
     cl <- parallel::makeCluster(cores)
-
+    
     parallel::clusterExport(cl, c(
       "percentile_vector", "category_median_list", "contrasts", 
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
       "assayData", "calc_pvalues_network", "metadata",
       "sig_edges_count", "sig_var"
     ), envir = environment())
-
+    
     parallel::clusterEvalQ(cl, {
       library("dplyr")
     })
@@ -384,21 +346,20 @@ get_diffNetworks_singleOmic <- function(assayData,
     
   }
   names(pvalues_list) <- percentile_vector
-
+  
   # Extract the network filtered at the optimal threshold percentile
   # (the one with the highest number of statistically significant interactions)
   sig_pvalues <- sapply(pvalues_list, function(networks) {
     if (!inherits(networks, "try-error") && !is.null(networks)) {
       return(networks$sig_pvalues_count)
-      }
-    })
-
+    }
+  }) %>% unlist()
+  
   if (length(sig_pvalues) == 0) {
     stop("No significant differences detected across categories.")
   }
-
+  
   best_percentile <- sig_pvalues[which.max(sig_pvalues)]
-
   if (verbose) (
     message("Percolation analysis: genes whose expression is below the ",
             as.numeric(names(best_percentile)) * 100,
@@ -527,13 +488,12 @@ calc_pvalues_percentile <- function(assayData,
                                     regression_method = "rlm",
                                     edges,
                                     sig_edges_count) {
-  
   # 1st filtering step: remove low expressed genes in each category
   # (genes under the percentile threshold)
-  cut_off <- stats::quantile(as.matrix(assayData), prob = percentile)
+  cut_off <- stats::quantile(as.matrix(assayData), prob = percentile, na.rm = T)
   user_message <- paste0("No gene above the threshold (", percentile * 100,
                          "th percentile).")
-
+  
   category_median_list <- lapply(category_median_list, function(category_vec) {
     category_vec <- category_vec[category_vec > cut_off]
     if (length(category_vec) == 0) (
@@ -541,7 +501,7 @@ calc_pvalues_percentile <- function(assayData,
     )
     return(category_vec)
   })
-
+  
   # format to string vectors to allow easy detection of overlapping edges
   networks_to_string <- lapply(category_median_list, function(category_vec) {
     if (!is.character(category_vec)) {
@@ -555,7 +515,7 @@ calc_pvalues_percentile <- function(assayData,
     }
     return(network_to_string)
   })
-
+  
   # find overlapping edges across categories
   common_links <- lapply(contrasts, function(contrast) {
     return(intersect(
@@ -565,9 +525,9 @@ calc_pvalues_percentile <- function(assayData,
   }) %>%
     unlist() %>%
     unique()
- 
- # remove error message from final list links 
- if (user_message %in% common_links) (
+  
+  # remove error message from final list links 
+  if (user_message %in% common_links) (
     common_links <- common_links[!(common_links %in% user_message)]
   )
   
@@ -583,14 +543,14 @@ calc_pvalues_percentile <- function(assayData,
     )
     return(subnetwork)
   })
-
+  
   # count tot edges left per category
   tot_edges <- unlist(lapply(categories_network_list, function(category_network) {
     if (!is.character(category_network)) (
       nrow(category_network)
     )
   })) %>% sum()
-
+  
   # calculate interaction p values
   pvalues_list <- lapply(categories_network_list, function(category_network) {
     return(calc_pvalues_network(
@@ -602,16 +562,17 @@ calc_pvalues_percentile <- function(assayData,
       sig_var = sig_var
     ))
   })
-
   # count significant p values
   if (tot_edges > sig_edges_count) {
     # num tot edges greater than previous sig edges count
     p_values_sig_count <- unlist(lapply(pvalues_list, function(category_network) {
-      if (!is.null(dim(category_network))) (
-        # return the number of significant pvalues or qvalues
-        return(sum(category_network[, sig_var] < 0.05))
-      )
-      else ( return(0) )
+      if (!is.null(dim(category_network))) {
+        num_sig_links <- sum(category_network[, sig_var] < 0.05, na.rm = TRUE)
+        # return the number of links with significant pvalues or qvalues
+        if (!is.na(num_sig_links)) {
+          return(num_sig_links)
+        } else {return(0)}
+      } else {return(0)}
     }))
     num_sig_pvalues <- sum(p_values_sig_count) # these are pvalues or qvalues
     
@@ -629,7 +590,6 @@ calc_pvalues_percentile <- function(assayData,
     }
     pvalues_list <- append(pvalues_list, num_sig_pvalues)
     names(pvalues_list)[length(pvalues_list)] <- "sig_pvalues_count"
-
     return(pvalues_list)
   } else {
     # previous sig edges count greater than num tot edges, skip all calculations
@@ -649,18 +609,21 @@ calc_pvalues_network <- function(assayData,
                                  categories_length,
                                  regression_method = 'rlm',
                                  category_network) {
+  
   if (!is.character(category_network)) {
     if (nrow(category_network) > 0) {
       # prepare data
       df_list <- mapply(function(gene_B, gene_A) {
-        return(data.frame(t(assayData[gene_A, ]),
-          t(assayData[gene_B, ]),
-          metadata,
-          check.names = FALSE
-        ))
+        # using both t() and as.vector to be compatible with both matrices and dfs
+        df <- data.frame(as.vector(t(assayData[gene_A, ])),
+                         as.vector(t(assayData[gene_B, ])),
+                         metadata,
+                         check.names = FALSE)
+        colnames(df)[1:2] <- c(gene_A, gene_B)
+        return(df)
       }, gene_A = category_network$from, gene_B = category_network$to,
-         SIMPLIFY = FALSE)
-
+      SIMPLIFY = FALSE)
+      
       # calculate regressions with interaction term
       p_values <- lapply(df_list, function(df) {
         if (categories_length == 2) {
@@ -701,13 +664,13 @@ calc_pvalues_network <- function(assayData,
   } else {
     p_values <- "No specific links for this category."
   }
-
+  
   if (is.list(p_values)) {
     # make a data.frame with all values
     p_values <- as.data.frame(do.call("rbind", p_values))
     p_values$from <- as.character(p_values$from)
     p_values$to <- as.character(p_values$to)
-
+    
     if (sig_var == "q.value") {
       # adding Storey's q values
       q.values <- try(qvalue::qvalue(p_values[, "p.value"])$qvalues,
@@ -739,15 +702,16 @@ calc_pvalues_network <- function(assayData,
 #' before (i.e. if transcriptomic data was second in the list, a list of 
 #' all its differential interactions can be obtained with assayDataName = 2, 
 #' if only one data table was provided assayDataName must be 1). Default 1.
+#' @param sig_threshold threshold for significance. Default 0.05.
 #' @return a `data.frame` listing all the significant differential interactions
 #' found across categories for that particular omic data.
 #' This list can also be used to substitute or integrate feature selection in 
 #' machine learning models for the prediction of the categories.
 #' @export
 get_sig_deggs <- function(deggs_object, 
-                              assayDataName = 1, 
-                              sig_threshold = 0.05) {
-
+                          assayDataName = 1, 
+                          sig_threshold = 0.05) {
+  
   if (!inherits(deggs_object, "deggs")) (
     stop("Input must be a 'deggs' object")
   )
@@ -758,7 +722,7 @@ get_sig_deggs <- function(deggs_object,
   is_list <- vapply(deggs_object[["diffNetworks"]][[assayDataName]],
                     is.list, logical(1))
   diffNetworks_list <- deggs_object[["diffNetworks"]][[assayDataName]][is_list]
-  
+
   if (length(diffNetworks_list) == 0) {
     warning("No valid network found")
     return(data.frame())
@@ -779,7 +743,7 @@ get_sig_deggs <- function(deggs_object,
       return(NULL)
     }
   })
-    
+  
   # Remove NULL entries and combine results
   sig_edges_list <- sig_edges_list[!sapply(sig_edges_list, is.null)]
   
@@ -799,10 +763,12 @@ get_sig_deggs <- function(deggs_object,
 #'
 #' @param deggs_object an object of class `deggs` generated by
 #' `get_diffNetworks`
+#' @param sig_threshold threshold for significance. Default 0.05.
 #' @return a list of multilayer networks (in form of edge table), one per 
 #' category in the data. 
 #' @export
-get_multiOmics_diffNetworks <- function(deggs_object) {
+get_multiOmics_diffNetworks <- function(deggs_object,
+                                        sig_threshold = 0.05) {
   
   if (!inherits(deggs_object, "deggs")) (
     stop("Input must be a 'deggs' object")
@@ -815,6 +781,7 @@ get_multiOmics_diffNetworks <- function(deggs_object) {
   
   categories <- levels(deggs_object[["metadata"]])
   omicDatasets <- names(deggs_object[["assayData"]])
+  sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
   
   multiLayer_networks <- lapply(categories, function(category) {
     # Collect networks for this category from all omic datasets
@@ -850,6 +817,8 @@ get_multiOmics_diffNetworks <- function(deggs_object) {
       merged_network$layer <- as.factor(merged_network$layer)
       rownames(merged_network) <- paste0(rownames(merged_network), "_", 
                                          merged_network$layer)
+      merged_network <- merged_network[which(merged_network[, sig_var] < 
+                                               sig_threshold), ]
       return(merged_network)
     } else {
       warning(paste("No valid category_networks found for category:", category))
@@ -859,3 +828,4 @@ get_multiOmics_diffNetworks <- function(deggs_object) {
   names(multiLayer_networks) <- categories
   return(multiLayer_networks)
 }
+
