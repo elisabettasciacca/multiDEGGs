@@ -389,7 +389,7 @@ tidy_metadata <- function(category_subset = NULL,
                           verbose = FALSE) {
   
   # Convert metadata to a named vector based on input type
-  if (is.vector(metadata) && !is.list(metadata)) {
+  if (is.atomic(metadata) || is.factor(metadata)) {
     if (is.null(names(metadata))) {
       stop("Named vector required: metadata vector must have names.")
     }
@@ -405,7 +405,7 @@ tidy_metadata <- function(category_subset = NULL,
     category_vector <- metadata[, category_variable]
     names(category_vector) <- rownames(metadata)
   } else {
-    stop("metadata must be a named vector, matrix, or data.frame.")
+    stop("metadata must be a named vector/factor, matrix, or data.frame.")
   }
   
   # Subset seleted categories (optional)
