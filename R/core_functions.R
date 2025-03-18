@@ -718,7 +718,7 @@ get_sig_deggs <- function(deggs_object,
   
   sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
   
-  # Extract diffNetworks (those that are lists) and exlude sig_pvalues_count
+  # Extract diffNetworks (=those that are lists) and exlude sig_pvalues_count
   is_list <- vapply(deggs_object[["diffNetworks"]][[assayDataName]],
                     is.list, logical(1))
   diffNetworks_list <- deggs_object[["diffNetworks"]][[assayDataName]][is_list]
@@ -732,15 +732,15 @@ get_sig_deggs <- function(deggs_object,
   sig_edges_list <- lapply(diffNetworks_list, function(subnetwork) {
     # Check if subnetwork has any rows
     if (is.null(subnetwork) || nrow(subnetwork) == 0) {
-      return(NULL)
+      return(data.frame())
     }
     
     # Filter significant edges
     sig_rows <- subnetwork[, sig_var] < sig_threshold
-    if (any(sig_rows)) {
+    if (any(sig_rows, na.rm = TRUE)) {
       return(subnetwork[sig_rows, , drop = FALSE])
     } else {
-      return(NULL)
+      return(data.frame())
     }
   })
   
@@ -789,7 +789,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
       # Check if the omicDataset entry exists and is a list
       if (!is.list(deggs_object[["diffNetworks"]][[omicDataset]])) {
         warning(paste("Dataset", omicDataset, "is not a list. Skipping."))
-        return(NULL)
+        return(data.frame())
       }
       
       # Extract the network for this specific category and omicDataset
@@ -799,7 +799,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
       if (!is.data.frame(network)) {
         warning(paste("Category", category, "in dataset", omicDataset, 
                       "is not a data frame. Skipping."))
-        return(NULL)
+        return(data.frame())
       }
       
       # Add a source column to identify the omicDataset
@@ -822,7 +822,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
       return(merged_network)
     } else {
       warning(paste("No valid category_networks found for category:", category))
-      return(NULL)
+      return(data.frame())
     }
   })
   names(multiLayer_networks) <- categories

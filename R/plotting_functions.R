@@ -34,7 +34,7 @@ plot_regressions <- function(deggs_object,
   if (!is(deggs_object, "deggs")) {
     stop("deggs_object must be of class deggs")
   }
-    
+  
   if (!(is.character(gene_A) && is.character(gene_B))) {
     stop("Both GeneA and GeneB must be character.")
   }
@@ -44,7 +44,7 @@ plot_regressions <- function(deggs_object,
   assayData <- deggs_object[["assayData"]][[assayDataName]]
   categories <- deggs_object[["category_subset"]]
   regression_method <- deggs_object[["regression_method"]]
-
+  
   if (!gene_A %in% rownames(assayData)) (
     stop(paste0("gene_A is not in rownames(", assayDataName, ")"))
   )
@@ -113,23 +113,23 @@ plot_regressions <- function(deggs_object,
       }
     })
   }
-
+  
   # Plot
   prefix <- ifelse(deggs_object[["use_qvalues"]], "Padj", "P")
   col <- viridis::viridis(n = category_length)
   x_adj <- (max(df[, 1], na.rm = TRUE) - min(df[, 1], na.rm = TRUE)) * 0.05
   new_x <- seq(min(df[, 1], na.rm = TRUE) - x_adj,
-    max(df[, 1], na.rm = TRUE) + x_adj,
-    length.out = 100
+               max(df[, 1], na.rm = TRUE) + x_adj,
+               length.out = 100
   )
-
+  
   # prediction of the fitted model
   preds <- lapply(fit, function(i) stats::predict(i,
-      newdata = data.frame(x = new_x),
-      interval = 'confidence'
-    )
+                                                  newdata = data.frame(x = new_x),
+                                                  interval = 'confidence'
   )
-
+  )
+  
   # here we computed the interaction p value for a single pair,
   # adjusted p values can be found in the deggs_object if use_qvalues was set
   # to TRUE 
@@ -144,21 +144,21 @@ plot_regressions <- function(deggs_object,
   } else {
     sig_interaction <- p_interaction
   }
-
+  
   op <- par(mar = c(5.2, 6, 3.3, 5), xpd = TRUE)
   plot(df[, 1], df[, 2],
-    type = 'n', bty = 'l', las = 1, cex.axis = 1.1,
-    font.main = 1, cex.lab = 1.3, xlab = colnames(df)[1],
-    ylab = colnames(df)[2]
+       type = 'n', bty = 'l', las = 1, cex.axis = 1.1,
+       font.main = 1, cex.lab = 1.3, xlab = colnames(df)[1],
+       ylab = colnames(df)[2]
   )
   op <- par(xpd = FALSE)
-
+  
   for (i in seq_along(categories)) {
     # plot confidence intervals
     polygon(c(rev(new_x), new_x), c(rev(preds[[i]][, 3]), preds[[i]][, 2]),
-      col = adjustcolor(col[i], alpha.f = 0.15), border = NA
+            col = adjustcolor(col[i], alpha.f = 0.15), border = NA
     )
-
+    
     # plot regression lines
     abline(fit[[i]], col = col[i], lwd = 1.5)
     
@@ -167,9 +167,9 @@ plot_regressions <- function(deggs_object,
     pch <- c(16:(16 + category_length - 1))[df[df[, "category"] ==
                                                  categories[i], 3]]
     row <- points(df[df[, "category"] == categories[i], 1], # x coordinates from gene_A 
-      df[df[, "category"] == categories[i], 2], # y coordinates from gene_B 
-      cex = 1.5,
-      pch = pch, col = adjustcolor(cols, alpha.f = 0.7)
+                  df[df[, "category"] == categories[i], 2], # y coordinates from gene_B 
+                  cex = 1.5,
+                  pch = pch, col = adjustcolor(cols, alpha.f = 0.7)
     )
   }
   mtext(
@@ -207,19 +207,26 @@ node_boxplot <- function(gene,
                          assayDataName = 1,
                          deggs_object) {
   
-  metadata <- metadata[colnames(deggs_object[["assayData"]][[assayDataName]])]
-  x <- metadata
+  title <- ifelse(is.numeric(assayDataName), 
+                  names(deggs_object[["diffNetworks"]])[assayDataName],
+                  assayDataName)
+  
+  # if the selected node is not in present in the first assayData matrix 
+  # show an empty plot with an informative message
+  if (!gene %in% rownames(deggs_object[["assayData"]][[assayDataName]])) {
+    plot(x = 0:10, y = 0:10, ann = F,bty = "n",type = "n",
+         xaxt = "n", yaxt = "n")
+    text(x = 5, y = 9, labels = paste(gene, "is not present \n in", title), 
+         font = 2, cex = 1.3)
+    return()
+  }
+  metadata <- deggs_object[["metadata"]]
+  x <- metadata[colnames(deggs_object[["assayData"]][[assayDataName]])]
   y <- as.numeric(deggs_object[["assayData"]][[assayDataName]][gene, ])
   col <- viridis::viridis(n = nlevels(metadata))
   cols <- col[metadata]
   
-  print(paste0("x: ", x))
-  print(paste0("y: ", y))
   op <- par(bty = 'l', mar = c(5.2, 6, 3.3, 5))
-  
-  title <- ifelse(is.numeric(assayDataName), 
-                  names(deggs_object[["diffNetworks"]])[assayDataName],
-                  assayDataName)
   
   boxplot(y ~ x,
           outline = FALSE, whisklty = 1, medlwd = 2, cex.axis = 1.1,
@@ -286,7 +293,7 @@ View_diffNetworks <- function(deggs_object,
       if (!is.data.frame(category_networks[[input$category]])) return(empty_df)
       if (nrow(category_networks[[input$category]]) == 0) return(empty_df)
       return(category_networks[[input$category]])
-      })
+    })
     
     nodes_selection <- shiny::reactiveValues(current_node = NULL)
     
@@ -294,47 +301,47 @@ View_diffNetworks <- function(deggs_object,
     edges <- shiny::reactive({
       if (is.data.frame(category_networks[[input$category]])) {
         if (nrow(category_networks[[input$category]]) != 0) {
-      edges <- category_networks[[input$category]]
-      edges <- edges[edges[, sig_var] < input$slider, ]
-      edges$id <- rownames(edges)
-      
-      if (deggs_object[["use_qvalues"]]) {
-        edges$`q value` <- formatC(edges$q.value, format = "e", digits = 3)
-        edges <- edges[order(edges$q.value), ]
-        edges <- edges[, which(colnames(edges) != "p.value")] 
-      } else {
-        edges$`p value` <- formatC(edges$p.value, format = "e", digits = 3)
-        edges <- edges[order(edges$p.value), ]
-      }
-      
-      if (length(input$current_edges_selection) == 0) (
-        DT::datatable(edges,
-                      options = list(
-                        lengthChange = FALSE, scrollX = TRUE,
-                        columnDefs = list(list(
-                          visible = FALSE,
-                          targets = c(which(names(edges) == "id") - 1,
-                                      which(names(edges) == sig_var) - 1)
-                        ))
-                      ),
-                      rownames = FALSE
-        )
-      ) else (
-        DT::datatable(
-          edges %>%
-            dplyr::filter(.data$id %in% input$current_edges_selection),
-          options = list(
-            lengthChange = FALSE, scrollX = TRUE,
-            columnDefs = list(list(
-              visible = FALSE,
-              targets = c(which(names(edges) == "id") - 1,
-                          which(names(edges) == sig_var) - 1)
-            ))
-          ),
-          rownames = FALSE
-        )
-      )
-    }
+          edges <- category_networks[[input$category]]
+          edges <- edges[edges[, sig_var] < input$slider, ]
+          edges$id <- rownames(edges)
+          
+          if (deggs_object[["use_qvalues"]]) {
+            edges$`q value` <- formatC(edges$q.value, format = "e", digits = 3)
+            edges <- edges[order(edges$q.value), ]
+            edges <- edges[, which(colnames(edges) != "p.value")] 
+          } else {
+            edges$`p value` <- formatC(edges$p.value, format = "e", digits = 3)
+            edges <- edges[order(edges$p.value), ]
+          }
+          
+          if (length(input$current_edges_selection) == 0) (
+            DT::datatable(edges,
+                          options = list(
+                            lengthChange = FALSE, scrollX = TRUE,
+                            columnDefs = list(list(
+                              visible = FALSE,
+                              targets = c(which(names(edges) == "id") - 1,
+                                          which(names(edges) == sig_var) - 1)
+                            ))
+                          ),
+                          rownames = FALSE
+            )
+          ) else (
+            DT::datatable(
+              edges %>%
+                dplyr::filter(.data$id %in% input$current_edges_selection),
+              options = list(
+                lengthChange = FALSE, scrollX = TRUE,
+                columnDefs = list(list(
+                  visible = FALSE,
+                  targets = c(which(names(edges) == "id") - 1,
+                              which(names(edges) == sig_var) - 1)
+                ))
+              ),
+              rownames = FALSE
+            )
+          )
+        }
       }
     })
     
@@ -448,7 +455,7 @@ View_diffNetworks <- function(deggs_object,
                                  as.character(edges[input$current_edges_selection,
                                                     "layer"]),
                                  1)
-          )
+        )
       } else {
         shiny::req(input$current_nodes_selection != "")
         node_boxplot(
@@ -545,4 +552,3 @@ View_diffNetworks <- function(deggs_object,
   shiny::shinyApp(ui = ui, server = server,
                   options = list(host = host, port = port))
 }
-
