@@ -646,6 +646,7 @@ calc_pvalues_network <- function(assayData,
       p_values <- lapply(df_list, function(df) {
         if (categories_length == 2) {
           if (regression_method == "lm") {
+            warning("using lm()")
             # gene_B ~ gene_A * category
             lmfit <- stats::lm(df[, 2] ~ df[, 1] * df[, 3])
             p_interaction <- stats::coef(summary(lmfit))[4, 4]
@@ -731,6 +732,7 @@ calc_pvalues_network2 <- function(assayData,
         
         if (categories_length == 2) {
           if (regression_method == "lm") {
+            warning("using .lm.fit()")
             binary.metadata <- as.numeric(metadata) - 1
             design.mat <- cbind(
               1,
