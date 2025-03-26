@@ -52,7 +52,7 @@
 get_diffNetworks <- function(assayData,
                              metadata,
                              category_variable = NULL,
-                             regression_method = 'rlm',
+                             regression_method = 'lm',
                              category_subset = NULL,
                              network = NULL,
                              percentile_vector = seq(0.35, 0.98, by = 0.05),
@@ -261,7 +261,7 @@ get_diffNetworks_singleOmic <- function(assayData,
     parallel::clusterExport(cl, c(
       "percentile_vector", "category_median_list", "contrasts", 
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
-      "assayData", "calc_pvalues_network", "metadata",
+      "assayData", "calc_pvalues_network2", "metadata",
       "sig_edges_count", "sig_var"
     ), envir = environment())
     
@@ -553,7 +553,7 @@ calc_pvalues_percentile <- function(assayData,
   
   # calculate interaction p values
   pvalues_list <- lapply(categories_network_list, function(category_network) {
-    return(calc_pvalues_network(
+    return(calc_pvalues_network2(
       category_network = category_network,
       assayData = assayData,
       metadata = metadata,
@@ -692,6 +692,101 @@ calc_pvalues_network <- function(assayData,
 }
 
 
+#' Calculate the pvalues for specific category network samples
+#'
+#' @inheritParams calc_pvalues_percentile
+#' @param category_network network table for a specific category
+#' @importFrom methods is
+#' @return a list of p values
+calc_pvalues_network2 <- function(assayData,
+                                 metadata,
+                                 sig_var,
+                                 categories_length,
+                                 regression_method = 'lm',
+                                 category_network) {
+  
+  if (!is.character(category_network)) {
+    if (nrow(category_network) > 0) {
+      p.value <- sapply(1:nrow(category_network), function(i){
+        gene_A <- category_network[i, 1]
+        gene_B <- category_network[i, 2]
+        
+        if (categories_length == 2) {
+          if (regression_method == "lm") {
+            binary.metadata <- as.numeric(metadata) - 1
+            design.mat <- cbind(
+              1,
+              as.numeric(assayData[gene_A, ]),
+              binary.metadata,
+              as.numeric(assayData[gene_A, ]) * binary.metadata
+              )
+            lmfit <- stats::.lm.fit(x = design.mat,
+                                    y = as.numeric(assayData[gene_B, ]))
+            dof <- length(lmfit$residuals) - length(lmfit$coefficients)
+            # Mean Squared Error
+            sigma_squared <- sum((lmfit$residuals)^2) / dof
+            # variance-covariance of coefficients
+            XtX_inv <- solve(t(design.mat) %*% design.mat)
+            var_covar_matrix <- sigma_squared * XtX_inv
+            se_coefficients <- sqrt(diag(var_covar_matrix))
+            # t-statics for the interaction term (4th coeff) 
+            t_stat <- (lmfit$coefficients[4]) / se_coefficients[4]
+            p_interaction <- 2 * (1 - pt(abs(t_stat), df = dof))
+          }
+          if (regression_method == "rlm") {
+            # gene_B ~ gene_A * category
+            robustfit <- suppressWarnings(
+              MASS::rlm(as.numeric(assayData[gene_B, ]) ~
+                          as.numeric(assayData[gene_A, ]) * metadata)
+              )
+            p_interaction <- try(
+              sfsmisc::f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+              )
+            if (class(p_interaction) == "try-error") (
+              p_interaction <- NA
+            )
+          }
+        }
+        if (categories_length >= 3) {
+          # one-way ANOVA
+          # gene_B ~ gene_A * category
+          res_aov <- stats::aov(as.numeric(assayData[gene_B, ]) ~
+                                  as.numeric(assayData[gene_A, ]) * metadata)
+          p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+        }
+        return(p_interaction)
+      })
+    } else {
+      p.value <- "No specific links for this category."
+    }
+  } else {
+    p.value <- "No specific links for this category."
+  }
+  
+  if (is.numeric(p.value)) {
+    category_network <- cbind(category_network, p.value)
+    
+    if (sig_var == "q.value") {
+      # adding Storey's q values
+      q.values <- try(qvalue::qvalue(category_network[, "p.value"])$qvalues,
+                      silent = TRUE)
+      if (is(q.values, "try-error")) {
+        if (nrow(category_network) > 1) (
+          q.values <- qvalue::qvalue(p = category_network[, "p.value"], pi0 = 1)$qvalues
+        ) else (
+          q.values <- NA
+        )
+      }
+      category_network$q.value <- q.values
+    }
+    rownames(category_network) <- paste(category_network$from,
+                                        category_network$to, sep = "-")
+  } else {
+    category_network <- p.value
+  }
+  return(category_network)
+}
+
 #' Get a table of all the significant interactions across categories
 #'
 #' @param deggs_object an object of class `deggs` generated by
@@ -804,7 +899,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
       
       # Add a source column to identify the omicDataset
       network$layer <- omicDataset
-      
+
       return(network)
     })
     
