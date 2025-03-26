@@ -23,7 +23,7 @@
 #' column name of `metadata` that contains the sample annotations to be used for
 #' differential analysis
 #' @param regression_method whether to use robust linear modelling to calculate
-#' link p values. Options are 'rlm' (default) or 'lm'.
+#' link p values. Options are 'lm' (default) or 'rlm'.
 #' @param category_subset optional character vector indicating a subset of 
 #' categories from the category variable. If not specified, all categories in
 #' `category_variable` will be used.
@@ -155,8 +155,8 @@ get_diffNetworks <- function(assayData,
 get_diffNetworks_singleOmic <- function(assayData,
                                         assayDataName,
                                         metadata,
-                                        old_lm,
                                         regression_method,
+                                        old_lm,
                                         network,
                                         percentile_vector, 
                                         use_qvalues,
@@ -486,13 +486,13 @@ tidy_metadata <- function(category_subset = NULL,
 #' for a specific percentile
 calc_pvalues_percentile <- function(assayData,
                                     metadata,
-                                    old_lm,
                                     categories_length,
                                     category_median_list,
                                     sig_var,
                                     percentile,
                                     contrasts,
-                                    regression_method = "rlm",
+                                    regression_method,
+                                    old_lm,
                                     edges,
                                     sig_edges_count) {
   # 1st filtering step: remove low expressed genes in each category
@@ -625,7 +625,7 @@ calc_pvalues_network <- function(assayData,
                                  metadata,
                                  sig_var,
                                  categories_length,
-                                 regression_method = 'rlm',
+                                 regression_method,
                                  category_network) {
   
   if (!is.character(category_network)) {
