@@ -53,6 +53,7 @@ get_diffNetworks <- function(assayData,
                              metadata,
                              category_variable = NULL,
                              regression_method = 'lm',
+                             old_lm = FALSE,
                              category_subset = NULL,
                              network = NULL,
                              percentile_vector = seq(0.35, 0.98, by = 0.05),
@@ -104,6 +105,7 @@ get_diffNetworks <- function(assayData,
                                     assayDataName, 
                                     metadata,
                                     regression_method,
+                                    old_lm,
                                     network,
                                     percentile_vector,
                                     use_qvalues,
@@ -153,14 +155,14 @@ get_diffNetworks <- function(assayData,
 get_diffNetworks_singleOmic <- function(assayData,
                                         assayDataName,
                                         metadata,
-                                        regression_method = 'rlm',
-                                        network = NULL,
-                                        percentile_vector = seq(0.55, 0.98,
-                                                                by = 0.05), 
-                                        use_qvalues = FALSE,
-                                        show_progressBar = TRUE,
-                                        verbose = TRUE, 
-                                        cores = parallel::detectCores() / 2) {
+                                        old_lm,
+                                        regression_method,
+                                        network,
+                                        percentile_vector, 
+                                        use_qvalues,
+                                        show_progressBar,
+                                        verbose, 
+                                        cores) {
   
   if (verbose) (
     message(paste0("\nGenerating ", assayDataName, " network layer..."))
@@ -259,7 +261,7 @@ get_diffNetworks_singleOmic <- function(assayData,
     cl <- parallel::makeCluster(cores)
     
     parallel::clusterExport(cl, c(
-      "percentile_vector", "category_median_list", "contrasts", 
+      "percentile_vector", "category_median_list", "contrasts", "old_lm",
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
       "assayData", "calc_pvalues_network2", "metadata",
       "sig_edges_count", "sig_var"
@@ -274,6 +276,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
+            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -291,6 +294,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
+            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -312,6 +316,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
+            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -330,6 +335,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
+            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -480,6 +486,7 @@ tidy_metadata <- function(category_subset = NULL,
 #' for a specific percentile
 calc_pvalues_percentile <- function(assayData,
                                     metadata,
+                                    old_lm,
                                     categories_length,
                                     category_median_list,
                                     sig_var,
@@ -553,14 +560,25 @@ calc_pvalues_percentile <- function(assayData,
   
   # calculate interaction p values
   pvalues_list <- lapply(categories_network_list, function(category_network) {
-    return(calc_pvalues_network2(
-      category_network = category_network,
-      assayData = assayData,
-      metadata = metadata,
-      regression_method = regression_method,
-      categories_length = categories_length,
-      sig_var = sig_var
-    ))
+    if(old_lm) (
+      return(calc_pvalues_network(
+        category_network = category_network,
+        assayData = assayData,
+        metadata = metadata,
+        regression_method = regression_method,
+        categories_length = categories_length,
+        sig_var = sig_var
+      ))
+    ) else (
+      return(calc_pvalues_network2(
+        category_network = category_network,
+        assayData = assayData,
+        metadata = metadata,
+        regression_method = regression_method,
+        categories_length = categories_length,
+        sig_var = sig_var
+      ))
+    )
   })
   # count significant p values
   if (tot_edges > sig_edges_count) {
