@@ -65,6 +65,9 @@ plot_regressions <- function(deggs_object,
   }
   
   category_length <- length(categories)
+  title <- ifelse(is.numeric(assayDataName), 
+                  names(deggs_object[["diffNetworks"]])[assayDataName],
+                  assayDataName)
   
   # prepare data frame
   # using both t() and as.vector to be compatible with both matrices and dfs
@@ -149,7 +152,8 @@ plot_regressions <- function(deggs_object,
   plot(df[, 1], df[, 2],
        type = 'n', bty = 'l', las = 1, cex.axis = 1.1,
        font.main = 1, cex.lab = 1.3, xlab = colnames(df)[1],
-       ylab = colnames(df)[2]
+       ylab = colnames(df)[2],
+       main = title
   )
   op <- par(xpd = FALSE)
   

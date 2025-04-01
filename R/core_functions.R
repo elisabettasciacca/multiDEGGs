@@ -53,7 +53,6 @@ get_diffNetworks <- function(assayData,
                              metadata,
                              category_variable = NULL,
                              regression_method = 'lm',
-                             old_lm = FALSE,
                              category_subset = NULL,
                              network = NULL,
                              percentile_vector = seq(0.35, 0.98, by = 0.05),
@@ -105,7 +104,6 @@ get_diffNetworks <- function(assayData,
                                     assayDataName, 
                                     metadata,
                                     regression_method,
-                                    old_lm,
                                     network,
                                     percentile_vector,
                                     use_qvalues,
@@ -156,7 +154,6 @@ get_diffNetworks_singleOmic <- function(assayData,
                                         assayDataName,
                                         metadata,
                                         regression_method,
-                                        old_lm,
                                         network,
                                         percentile_vector, 
                                         use_qvalues,
@@ -261,7 +258,7 @@ get_diffNetworks_singleOmic <- function(assayData,
     cl <- parallel::makeCluster(cores)
     
     parallel::clusterExport(cl, c(
-      "percentile_vector", "category_median_list", "contrasts", "old_lm",
+      "percentile_vector", "category_median_list", "contrasts",
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
       "assayData", "calc_pvalues_network2", "metadata",
       "sig_edges_count", "sig_var"
@@ -276,7 +273,6 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
-            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -294,7 +290,6 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
-            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -316,7 +311,6 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
-            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -335,7 +329,6 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
-            old_lm = old_lm,
             sig_var = sig_var,
             metadata = metadata,
             percentile = percentile,
@@ -492,7 +485,6 @@ calc_pvalues_percentile <- function(assayData,
                                     percentile,
                                     contrasts,
                                     regression_method,
-                                    old_lm,
                                     edges,
                                     sig_edges_count) {
   # 1st filtering step: remove low expressed genes in each category
@@ -560,25 +552,14 @@ calc_pvalues_percentile <- function(assayData,
   
   # calculate interaction p values
   pvalues_list <- lapply(categories_network_list, function(category_network) {
-    if(old_lm) (
-      return(calc_pvalues_network(
-        category_network = category_network,
-        assayData = assayData,
-        metadata = metadata,
-        regression_method = regression_method,
-        categories_length = categories_length,
-        sig_var = sig_var
-      ))
-    ) else (
-      return(calc_pvalues_network2(
-        category_network = category_network,
-        assayData = assayData,
-        metadata = metadata,
-        regression_method = regression_method,
-        categories_length = categories_length,
-        sig_var = sig_var
-      ))
-    )
+    return(calc_pvalues_network(
+      category_network = category_network,
+      assayData = assayData,
+      metadata = metadata,
+      regression_method = regression_method,
+      categories_length = categories_length,
+      sig_var = sig_var
+    ))
   })
   # count significant p values
   if (tot_edges > sig_edges_count) {
@@ -615,109 +596,14 @@ calc_pvalues_percentile <- function(assayData,
   }
 }
 
-#' Calculate the pvalues for specific category network samples
+
+#' Calculate the p values for specific category network samples
 #'
 #' @inheritParams calc_pvalues_percentile
 #' @param category_network network table for a specific category
 #' @importFrom methods is
 #' @return a list of p values
 calc_pvalues_network <- function(assayData,
-                                 metadata,
-                                 sig_var,
-                                 categories_length,
-                                 regression_method,
-                                 category_network) {
-  
-  if (!is.character(category_network)) {
-    if (nrow(category_network) > 0) {
-      # prepare data
-      df_list <- mapply(function(gene_B, gene_A) {
-        # using both t() and as.vector to be compatible with both matrices and dfs
-        df <- data.frame(as.vector(t(assayData[gene_A, ])),
-                         as.vector(t(assayData[gene_B, ])),
-                         metadata,
-                         check.names = FALSE)
-        colnames(df)[1:2] <- c(gene_A, gene_B)
-        return(df)
-      }, gene_A = category_network$from, gene_B = category_network$to,
-      SIMPLIFY = FALSE)
-      
-      # calculate regressions with interaction term
-      p_values <- lapply(df_list, function(df) {
-        if (categories_length == 2) {
-          if (regression_method == "lm") {
-            warning("using lm()")
-            # gene_B ~ gene_A * category
-            lmfit <- stats::lm(df[, 2] ~ df[, 1] * df[, 3])
-            p_interaction <- stats::coef(summary(lmfit))[4, 4]
-          }
-          if (regression_method == "rlm") {
-            # gene_B ~ gene_A * category
-            robustfit <- suppressWarnings(MASS::rlm(df[, 2] ~ df[, 1] * df[, 3]))
-            p_interaction <- try(sfsmisc::f.robftest(robustfit, var = 3)$p.value,
-                                 silent = TRUE)
-            if (class(p_interaction) == "try-error") (
-              p_interaction <- NA
-            )
-          }
-          output <- data.frame(
-            from = colnames(df)[1], to = colnames(df)[2],
-            p.value = p_interaction
-          )
-        }
-        if (categories_length >= 3) {
-          # one-way ANOVA
-          # gene_B ~ gene_A * category
-          res_aov <- stats::aov(df[, 2] ~ df[, 1] * df[, 3], data = df)
-          p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
-          output <- data.frame(
-            from = colnames(df)[1], to = colnames(df)[2],
-            p.value = p_interaction
-          )
-        }
-        return(output)
-      })
-    } else {
-      p_values <- "No specific links for this category."
-    }
-  } else {
-    p_values <- "No specific links for this category."
-  }
-  
-  if (is.list(p_values)) {
-    # make a data.frame with all values
-    p_values <- as.data.frame(do.call("rbind", p_values))
-    p_values$from <- as.character(p_values$from)
-    p_values$to <- as.character(p_values$to)
-    
-    if (sig_var == "q.value") {
-      # adding Storey's q values
-      q.values <- try(qvalue::qvalue(p_values[, "p.value"])$qvalues,
-                      silent = TRUE)
-      if (is(q.values, "try-error")) {
-        if (nrow(p_values) > 1) (
-          q.values <- qvalue::qvalue(p = p_values[, "p.value"], pi0 = 1)$qvalues
-        ) else (
-          q.values <- NA
-        )
-      }
-      p_values$q.value <- q.values
-    }
-  }
-  if (!is.character(p_values)) {
-    rownames(p_values) <- paste(p_values$from, p_values$to, sep = "-")
-  }
-  return(p_values)
-}
-
-
-#' Calculate the pvalues for specific category network samples
-#'
-#' @inheritParams calc_pvalues_percentile
-#' @param category_network network table for a specific category
-#' @importFrom methods is
-#' @return a list of p values
-calc_pvalues_network2 <- function(assayData,
                                  metadata,
                                  sig_var,
                                  categories_length,
@@ -732,7 +618,6 @@ calc_pvalues_network2 <- function(assayData,
         
         if (categories_length == 2) {
           if (regression_method == "lm") {
-            warning("using .lm.fit()")
             binary.metadata <- as.numeric(metadata) - 1
             design.mat <- cbind(
               1,
