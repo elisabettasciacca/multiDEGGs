@@ -8,13 +8,13 @@ get_diffNetworks_singleOmic(
   assayData,
   assayDataName,
   metadata,
-  regression_method = "rlm",
-  network = NULL,
-  percentile_vector = seq(0.55, 0.98, by = 0.05),
-  use_qvalues = FALSE,
-  show_progressBar = TRUE,
-  verbose = TRUE,
-  cores = parallel::detectCores()/2
+  regression_method,
+  network,
+  percentile_vector,
+  use_qvalues,
+  show_progressBar,
+  verbose,
+  cores
 )
 }
 \arguments{
@@ -29,7 +29,7 @@ sample IDs used in the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
 \item{regression_method}{whether to use robust linear modelling to calculate
-link p values. Options are 'rlm' (default) or 'lm'.}
+link p values. Options are 'lm' (default, faster) or 'rlm'.}
 
 \item{network}{network of biological interactions provided by the user. The
 network must be provided in the form of a table of class data.frame with only

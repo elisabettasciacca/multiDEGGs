@@ -8,7 +8,7 @@ get_diffNetworks(
   assayData,
   metadata,
   category_variable = NULL,
-  regression_method = "rlm",
+  regression_method = "lm",
   category_subset = NULL,
   network = NULL,
   percentile_vector = seq(0.35, 0.98, by = 0.05),
@@ -43,7 +43,8 @@ column name of \code{metadata} that contains the sample annotations to be used f
 differential analysis}
 
 \item{regression_method}{whether to use robust linear modelling to calculate
-link p values. Options are 'rlm' (default) or 'lm'.}
+link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
+is faster and lighter.}
 
 \item{category_subset}{optional character vector indicating a subset of
 categories from the category variable. If not specified, all categories in

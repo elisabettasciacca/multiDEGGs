@@ -2,14 +2,14 @@
 % Please edit documentation in R/core_functions.R
 \name{calc_pvalues_network}
 \alias{calc_pvalues_network}
-\title{Calculate the pvalues for specific category network samples}
+\title{Calculate the p values for specific category network samples}
 \usage{
 calc_pvalues_network(
   assayData,
   metadata,
   sig_var,
   categories_length,
-  regression_method = "rlm",
+  regression_method = "lm",
   category_network
 )
 }
@@ -48,5 +48,5 @@ p value of the interactions. Options are 'rlm' (default) or 'lm'}
 a list of p values
 }
 \description{
-Calculate the pvalues for specific category network samples
+Calculate the p values for specific category network samples
 }

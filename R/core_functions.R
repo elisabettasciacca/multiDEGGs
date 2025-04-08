@@ -23,7 +23,8 @@
 #' column name of `metadata` that contains the sample annotations to be used for
 #' differential analysis
 #' @param regression_method whether to use robust linear modelling to calculate
-#' link p values. Options are 'lm' (default) or 'rlm'.
+#' link p values. Options are 'lm' (default) or 'rlm'. The lm implementation 
+#' is faster and lighter.  
 #' @param category_subset optional character vector indicating a subset of 
 #' categories from the category variable. If not specified, all categories in
 #' `category_variable` will be used.
@@ -136,7 +137,7 @@ get_diffNetworks <- function(assayData,
 #' sample IDs used in the colnames of `assayData`.
 #' Continuous variables are not allowed.  
 #' @param regression_method whether to use robust linear modelling to calculate
-#' link p values. Options are 'rlm' (default) or 'lm'.
+#' link p values. Options are 'lm' (default, faster) or 'rlm'.
 #' @param network network of biological interactions provided by the user. The
 #' network must be provided in the form of a table of class data.frame with only 
 #' two columns named "from" and "to".
@@ -184,6 +185,7 @@ get_diffNetworks_singleOmic <- function(assayData,
   # were missing or because they were filtered out due to the category_subset)
   assayData <- assayData[, which(colnames(assayData) %in% names(metadata)),
                          drop = FALSE]
+  assayData <- assayData[, colSums(is.na(assayData)) < (nrow(assayData) - 1)]
   
   # check and remove metadata sample IDs that don't exist in assayData
   missing_metadataSamples <- names(metadata)[which(!(names(metadata) %in% 

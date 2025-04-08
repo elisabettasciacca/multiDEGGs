@@ -12,7 +12,7 @@ calc_pvalues_percentile(
   sig_var,
   percentile,
   contrasts,
-  regression_method = "rlm",
+  regression_method,
   edges,
   sig_edges_count
 )

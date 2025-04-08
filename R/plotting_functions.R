@@ -260,6 +260,9 @@ node_boxplot <- function(gene,
 #' @param legend.arrow.width width of the arrow used in the network legend. 
 #' Default is 0.35. As the number of assayData matrices increases this parameter
 #' must be accordingly increased to avoid graphical errors in the legend. 
+#' @param stepY_legend vertical space between legend arrows. It is used together 
+#' with `legend.arrow.width` to adjust the legend space in case of graphical
+#' errors. Default is 55. 
 #' @param host local IP address (character), to be used only to run the function
 #' in non-blocking mode (see vignette)
 #' @param port TCP port (character or numeric), to be used only to run the 
@@ -273,6 +276,7 @@ node_boxplot <- function(gene,
 #' @export
 View_diffNetworks <- function(deggs_object,
                               legend.arrow.width = 0.35,
+                              stepY_legend = 55,
                               host = NULL,
                               port = NULL) {
   
@@ -413,7 +417,7 @@ View_diffNetworks <- function(deggs_object,
                   font.align = "top",
                   font.size = 12
                 ),
-                stepY = 50,
+                stepY = stepY_legend,
                 width = legend.arrow.width,
                 zoom = TRUE
               ) %>%
@@ -448,7 +452,7 @@ View_diffNetworks <- function(deggs_object,
     # Side Plot
     output$edge_or_node_plot <- shiny::renderPlot({
       edges <- category_networks[[input$category]]
-      # try(
+      try(
       if (is.null(input$current_nodes_selection) &
           length(input$current_edges_selection) == 1) {
         plot_regressions(
@@ -468,7 +472,7 @@ View_diffNetworks <- function(deggs_object,
           assayDataName = 1
         )
       }
-      # ,silent = TRUE)
+      ,silent = TRUE)
     })
     
     # Highligh the searched node in the network
@@ -540,9 +544,7 @@ View_diffNetworks <- function(deggs_object,
         shiny::tags$div(shiny::plotOutput('edge_or_node_plot'))
       ),
       shiny::mainPanel(
-        visNetwork::visNetworkOutput("network",
-                                     height = "700px", width = "800px"
-        )
+        visNetwork::visNetworkOutput("network", height = "700px")
       )
     ),
     shiny::tags$script(shiny::HTML("$(function() {

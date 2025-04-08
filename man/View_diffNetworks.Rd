@@ -7,6 +7,7 @@
 View_diffNetworks(
   deggs_object,
   legend.arrow.width = 0.35,
+  stepY_legend = 55,
   host = NULL,
   port = NULL
 )
@@ -18,6 +19,10 @@ View_diffNetworks(
 \item{legend.arrow.width}{width of the arrow used in the network legend.
 Default is 0.35. As the number of assayData matrices increases this parameter
 must be accordingly increased to avoid graphical errors in the legend.}
+
+\item{stepY_legend}{vertical space between legend arrows. It is used together
+with \code{legend.arrow.width} to adjust the legend space in case of graphical
+errors. Default is 55.}
 
 \item{host}{local IP address (character), to be used only to run the function
 in non-blocking mode (see vignette)}
