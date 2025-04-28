@@ -9,6 +9,7 @@ plot_regressions(
   assayDataName = 1,
   gene_A,
   gene_B,
+  title = NULL,
   legend_position = "topright"
 )
 }
@@ -29,6 +30,9 @@ etc.)}
 
 \item{gene_B}{character. Name of the second target (gene, protein, metabolite,
 etc.)}
+
+\item{title}{plot title. If NULL (default), the name of the assayData will be
+used}
 
 \item{legend_position}{position of the legend in the plot. It can be
 specified by keyword or in any parameter accepted by \code{xy.coords} (defalut

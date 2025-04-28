@@ -15,6 +15,8 @@
 #' etc.)
 #' @param gene_B character. Name of the second target (gene, protein, metabolite,
 #' etc.)
+#' @param title plot title. If NULL (default), the name of the assayData will be 
+#' used. Use empty character "" for no title. 
 #' @param legend_position position of the legend in the plot. It can be
 #' specified by keyword or in any parameter accepted by `xy.coords` (defalut
 #' "topright")
@@ -29,6 +31,7 @@ plot_regressions <- function(deggs_object,
                              assayDataName = 1,
                              gene_A,
                              gene_B,
+                             title = NULL, 
                              legend_position = "topright") {
   
   if (!is(deggs_object, "deggs")) {
@@ -65,9 +68,11 @@ plot_regressions <- function(deggs_object,
   }
   
   category_length <- length(categories)
-  title <- ifelse(is.numeric(assayDataName), 
-                  names(deggs_object[["diffNetworks"]])[assayDataName],
-                  assayDataName)
+  if(is.null(title)) (
+    title <- ifelse(is.numeric(assayDataName), 
+                    names(deggs_object[["diffNetworks"]])[assayDataName],
+                    assayDataName)
+  )
   
   # prepare data frame
   # using both t() and as.vector to be compatible with both matrices and dfs
@@ -133,17 +138,20 @@ plot_regressions <- function(deggs_object,
   )
   )
   
-  # here we computed the interaction p value for a single pair,
+  # we have the interaction p value for a single pair,
   # adjusted p values can be found in the deggs_object if use_qvalues was set
-  # to TRUE 
+  # to TRUE:
   if (deggs_object[["use_qvalues"]]) {
     all_interactions <- do.call(rbind, 
                                 deggs_object[["diffNetworks"]][[assayDataName]])
-    sig_interaction <- all_interactions[
-      which(all_interactions$from == gene_A &
-              all_interactions$to == gene_B),
-      sig_var
-    ]
+    pair_index <- which(all_interactions$from == gene_A & 
+                          all_interactions$to == gene_B)
+    # if you don't find gene_A-gene_B, try gene_B-gene_A:
+    if(length(pair_index) == 0)(
+      pair_index <- which(all_interactions$from == gene_B & 
+                            all_interactions$to == gene_A)
+    )
+    sig_interaction <- all_interactions[pair_index, sig_var]
   } else {
     sig_interaction <- p_interaction
   }
@@ -228,7 +236,7 @@ node_boxplot <- function(gene,
   x <- metadata[colnames(deggs_object[["assayData"]][[assayDataName]])]
   y <- as.numeric(deggs_object[["assayData"]][[assayDataName]][gene, ])
   col <- viridis::viridis(n = nlevels(metadata))
-  cols <- col[metadata]
+  cols <- col[as.numeric(x)]
   
   op <- par(bty = 'l', mar = c(5.2, 6, 3.3, 5))
   
@@ -367,7 +375,7 @@ View_diffNetworks <- function(deggs_object,
           
           # Set up edges width
           # normalise p value between 0 and 1
-          edges$width <- edges[, sig_var] - min(edges[, sig_var]) /
+          edges$width <- (edges[, sig_var] - min(edges[, sig_var])) /
             (max(edges[, sig_var]) - min(edges[, sig_var]))
           # invert values (and multiply by 4 to increase width)
           edges$width <- (1 - edges$width) * 4
@@ -428,7 +436,7 @@ View_diffNetworks <- function(deggs_object,
                 Shiny.onInputChange('current_nodes_selection', data.nodes);
                 Shiny.onInputChange('current_edges_selection', data.edges);
                 }"
-              )
+              ) 
           }
         } else {
           network.title = "No differential interaction active for this category"
