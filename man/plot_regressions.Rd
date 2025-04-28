@@ -32,7 +32,7 @@ etc.)}
 etc.)}
 
 \item{title}{plot title. If NULL (default), the name of the assayData will be
-used}
+used. Use empty character "" for no title.}
 
 \item{legend_position}{position of the legend in the plot. It can be
 specified by keyword or in any parameter accepted by \code{xy.coords} (defalut
