@@ -1,5 +1,5 @@
-# DEGGs
-## Differentially Expressed Gene-Gene pairs
+# multiDEGGs
+## Differentially Expressed Gene-Gene pairs in multi omic data
 The multiDEGGs package test for differential gene-gene correlations across different groups of samples in multi omic data.  
 Specific gene-gene interactions can be explored and gene-gene pair regression plots can be interactively shown.   
 
