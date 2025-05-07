@@ -173,7 +173,8 @@ get_diffNetworks_singleOmic <- function(assayData,
   
   if(!any(colnames(assayData) %in% names(metadata))) (
     stop(paste0("Sample IDs in ", assayDataName, " don't match the IDs in 
-                metadata."))
+                metadata (the metadata names/rownames must match the sample IDs
+                used as column names of ", assayDataName, "."))
   )
   
   # align metadata and assayData
@@ -778,7 +779,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
   
   if (length(deggs_object[["assayData"]]) == 1) (
     stop("Only one omic dataset was provided. This function is used only in 
-         multi-omic scenarios.")
+         multi-omic scenarios. Use get_sig_deggs() instead.")
   )
   
   categories <- levels(deggs_object[["metadata"]])

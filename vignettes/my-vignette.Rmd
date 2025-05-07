@@ -1,0 +1,31 @@
+---
+title: "Differential Network Analysis with multiDEGGs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{multiDEGGs vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(multiDEGGs)
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                       metadata = metadata,
+                                       category_variable = "response",
+                                       percentile_vector = seq(0.25, 0.98, by = 0.05),
+                                       regression_method = "lm",
+                                       use_qvalues = TRUE, 
+                                       verbose = TRUE,
+                                       show_progressBar = T,
+                                       cores = 2)
+
+View_diffNetworks(deggs_object)
+get_multiOmics_diffNetworks(deggs_object)
+```
