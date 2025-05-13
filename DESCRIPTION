@@ -1,5 +1,5 @@
-Package: DEGGs
-Title: Differentially Expressed Gene-Gene pairs 
+Package: multiDEGGs
+Title: multi-omic Differentially Expressed Gene-Gene pairs 
 Version: 0.99.0
 Authors@R: 
     c(person(given = "Elisabetta",
@@ -12,21 +12,23 @@ Authors@R:
           role = c("aut"),
           email = "silluziogianmarco@gmail.com",
           comment = c(ORCID = "")),
-      person(given = "Alfredo",family = "Pulvirenti",
-          role = c("ctb"),
-          email = "alfredo.pulvirenti@unict.it",
-          comment = c(ORCID = "0000-0002-9764-0295")),
       person(given = "Myles",family = "Lewis",
           role = c("ctb"),
           email = "myles.lewis@qmul.ac.uk",
           comment = c(ORCID = "0000-0001-9365-5345")))
-Description: The DEGGs package enables the exploration of differential gene-gene
-    correlations across user-defined groups of samples.
-    Provided with normalised counts and a design/metadata matrix/vector,
-    DEGGs extracts networks of biological group-specific interactions that can be
-    interactively explored through a shiny user-friendly interface.
-    For each gene–gene link, differential statistical significance and differential
-    regression plots are provided through robust linear regression with interaction term.
+Description: The multiDEGGs package performs multi-omic differential network 
+      analysis by revealing differential interactions between molecular entities
+      (genes, proteins, miRNAs, or other biomolecules) across the omic datasets
+      provided. For each omic dataset, a differential network is constructed where
+      links represent statistically significant differential interactions between 
+      entities. These networks are then integrated into a comprehensive visualization
+      using distinct colors to distinguish interactions from different omic layers.
+      This unified display allows interactive exploration of cross-omic
+      patterns, such as differential interactions present at both transcript and
+      protein levels. For each link, users can access differential statistical 
+      significance metrics (p-values or adjusted p-values, calculated via robust or 
+      traditional linear regression with interaction term) and differential regression
+      plots. 
 License: GPL-3
 Encoding: UTF-8
 LazyData: false
@@ -38,15 +40,14 @@ biocViews: Sequencing, RNASeq, GeneExpression, Transcription,
     NetworkInference, BiomedicalInformatics, Transcriptomics, ShinyApps,
     FeatureExtraction, GraphAndNetwork, Visualization, Network
 Language: en-gb
-URL: https://github.com/elisabettasciacca/DEGGs
-BugReports: https://github.com/elisabettasciacca/DEGGs/issues
+URL: https://github.com/elisabettasciacca/multiDEGGs/
+BugReports: https://github.com/elisabettasciacca/multiDEGGs/issues
 Suggests: 
 Imports:
     dplyr,
     DT,
     grDevices, 
     graphics,
-    igraph,
     knitr,
     MASS,
     magrittr,
@@ -62,7 +63,6 @@ Imports:
     shinydashboard,
     stats,
     utils,
-    viridis,
     visNetwork
 Depends: 
      R (>= 4.2.0)

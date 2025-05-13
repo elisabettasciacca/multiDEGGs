@@ -1,0 +1,240 @@
+---
+title: "Differential Network Analysis with multiDEGGs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{multiDEGGs vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The multiDEGGs package performs multi-omic differential network 
+analysis by showing differential interactions between molecular entities
+(genes, proteins, miRNAs, or other biomolecules) across the omic datasets
+provided.  
+For each omic dataset, a differential network is constructed where
+links represent statistically significant differential interactions between 
+entities. These networks are then integrated into a comprehensive visualization
+using distinct colors to distinguish interactions from different omic layers.  
+  
+This unified visualisation allows interactive exploration of cross-omic
+patterns (e.g. differential interactions present at both transcript and
+protein level). For each link, users can access differential statistical 
+significance metrics (p-values or adjusted p values, calculated via robust or 
+traditional linear regression with interaction term) and differential regression
+plots.   
+  
+  
+# Get started
+Let's start by loading the package and sample data
+```{r}
+library(multiDEGGs)
+data("synthetic_metadata")
+data("synthetic_rnaseqData")
+data("synthetic_proteomicData")
+data("synthetic_OlinkData")
+```
+
+## Generate differential networks
+```{r setup}
+assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+                       "Proteomics" = synthetic_proteomicData,
+                       "Olink" = synthetic_OlinkData)
+
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 use_qvalues = TRUE, 
+                                 verbose = TRUE,
+                                 show_progressBar = TRUE,
+                                 cores = 2)
+```
+
+It is worth to comment on some of the parameters of `get_diffNetworks`:
+ - `assayData` accepts either a single normalised matrix/data frame (in case of single 
+omic differential analysis), or a list of matrices/data frames (for 
+multi-omic scenarios). For multi omic analysis, it is highly recommended to use 
+a named list of data. If unnamed, sequential names (assayData1, assayData2, 
+etc.) will be assigned to identify each matrix or data.frame.
+ - `metadata` can also be a named factor vector, with names matching the 
+patients IDs in columns names of the assay data matrices/data frames.
+In that case, the category_variable can stay unset (NULL by default). 
+- `category_subset`: this parameter can be used to restrict the analysis to a 
+certain subset of categories available in the metadata/vategory variable. v 
+ - `regression_method` is set to `"lm"` by default because it is faster and highly 
+recommended in machine learning scenarios, where the function might be repeatedly
+called many times. For basic differential anlyses, `"rlm"` can also be used and can perform 
+better in some case.  
+ - `percentile_vector`: by default, molecular targets (gene, proteins, ...)
+ whose expression level is below the 
+35th percentile of the entire data matrix are excluded from the analysis. 
+This threshold can be modified by specifying the percentile vector that is 
+internally 
+used for the percolation analysis. E.g., to remove only targets below the 25th 
+percentile the `percentile_vector` parameter must be set to: 
+`percentile_vector = seq(0.25, 0.98, by = 0.05)`
+  
+*NOTE*: it is expected that not all patient IDs are present across datasets. 
+It is ok to have different number of samples per omic. Only IDs whose data is 
+available in the colnames of the assayData will enter the process. Missing IDs 
+will be listed in a message similar to the following:  
+`The following samples IDs are missing in Proteomics: PT001, PT005, PT0030`
+
+## Visualisation
+The `deggs_object` will now contain the differential networks for each omic data
+in `assayData_list`. 
+These networks can be integrated into a comprehensive visualization
+where different colors will be used to distinguish links from different omic layers.
+
+```{r, eval=FALSE}
+View_diffNetworks(deggs_object)
+``` 
+  
+This will let you navigate the networks associated to each category of patients (1), 
+filter by link significance (2), and look for specific genes (3). 
+
+---- IMAGE TO BE ADDED HERE ---- 
+
+Thicker links correspond to higher significant p values. 
+The direction of the arrows shows the direction that is reported in literature 
+about the link, and it is not derived from the data. 
+  
+Additionally, the user can visualise differential regression plots by clicking 
+on a link:
+
+---- IMAGE TO BE ADDED HERE ---- 
+
+Single node differential expressions can also be visualised by clicking on 
+the nodes.  
+
+---- IMAGE TO BE ADDED HERE ---- 
+
+
+## List all differential interactions
+Outside of the interactive environment, the `get_multiOmics_diffNetworks` can be
+used to get a table of all the 
+differential interactions, ordered by p value or adjusted p: 
+```{r}
+get_multiOmics_diffNetworks(deggs_object)
+```
+  
+For single omic scenarios: 
+```{r}
+get_sig_deggs(deggs_object_single_omic)
+```
+  
+
+## Single regression plots 
+To plot the differential regression fits outside of the interactive environment, 
+`plot_regressions` must be used: 
+  
+```{r, fig.width = 6.5, fig.height = 4.5}
+plot_regressions(deggs_object,
+                 assayDataName = "RNAseq",
+                 gene_A = "geneA", 
+                 gene_B = "geneB",
+                 legend_position = "bottomright")
+```
+  
+In single omic analyses `assayDataName` can remain unset. 
+  
+# Differential network analysis with more than two groups 
+It is possible to compare the differential interactions among more than two 
+categorical groups. All the steps described above stay the same, the dropdown 
+menu of the interactive environment will show all the categories available: 
+
+---- IMAGE TO BE ADDED HERE ---- 
+
+and the regression plots associate to links will show fits for each category. 
+
+---- IMAGE TO BE ADDED HERE ---- 
+
+It is recommended to have at least 4 or 5 observations per group.  
+
+# Using multiDEGGs for feature selection in machine learning with nestedCV
+Detect differentially expressed interactions is useful to gain insightful 
+knowledge on molecular dyregulations affecting certain conditions.
+This information can also be exploited to train predictive models for the 
+category of interest. 
+
+
+```{r, eval = FALSE}
+library(nestedCV)
+
+# convert your metadata into a named factor vector containing only the category
+# variable you are interested in. 
+metadata_vector <- as.factor(metadata[, "response"])
+
+# make sure countData is matrix and transpose, so that features are in colums, 
+# as usual in machine learning 
+countData <- as.matrix(t(RNAseq))
+
+# NOTE: make sure your vector is ALIGNED with countData. 
+# The order of the annotations in the metadata_vector must match the 
+# samples in the columns of countData
+
+# remove zero variance columns from data
+countData <- countData[,apply(countData, 2, var, na.rm=TRUE) != 0] 
+
+DEGGs_modxy <- function(metadata, countData, ...) {
+  counts <- t(x)
+  names(metadata_vector) <- colnames(countData)
+  deggs_object <- multiDEGGs::get_diffNetworks(assayData = countData,
+                                          metadata = metadata_vector,
+                                          percentile_vector = seq(0.25, 0.98, by = 0.05),
+                                          use_qvalues = TRUE, 
+                                          show_progressBar = FALSE,
+                                          verbose = FALSE,
+                                          cores = 1)
+  
+  pairs <- multiDEGGs::get_sig_deggs(deggs_object, 1, 0.05)
+  # to make sure genes are taken 2 by 2 from top pairs to lower one
+  keep_DEGGs <- unique(unlist(lapply(1:nrow(pairs), function(i)(
+    row_n = c(pairs[i,1], pairs[i,2])
+  ))))
+  if (length(keep_DEGGs) > 10){
+    keep_DEGGs <- keep_DEGGs[1:10] # now these genes will be the top ones in pairs
+    pairs <- pairs[which(pairs$var1 %in% keep_DEGGs & pairs$var2 %in% keep_DEGGs), ]
+  }
+  out <- list(keep_DEGGs = keep_DEGGs, pairs = pairs)
+  class(out) <- "DEGGs_modxy"
+  return(out)
+}
+
+
+# Train a glmnet model
+fitted_model <- nestcv.glmnet(y = metadata, 
+                     x = countData,
+                     filterFUN = NULL,
+                     filter_options = list(nfilter = 20),
+                     family="binomial",
+                     alphaSet = seq(0.7, 1, 0.1),
+                     min_1se = 0,
+                     cv.cores = 1,
+                     modifyX_useY = TRUE,
+                     verbose = TRUE)
+
+# Train a random forest model
+fitted_model <- nestcv.train(y = metadata,
+                    x = countData,
+                    method = "rf",
+                    n_outer_folds = 8,
+                    modifyX = "DEGGs_ttest_modxy",
+                    filter_options = list(nfilter = 20),
+                    modifyX_useY = TRUE,
+                    cv.cores = 4, 
+                    verbose = TRUE)
+```
+
+ 
+# Session info
+```{r}
+sessionInfo()
+```

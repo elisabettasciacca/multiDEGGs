@@ -37,12 +37,13 @@
 #' (Alaimo et al., 2016).
 #' @param  percentile_vector a numeric vector specifying the percentiles to be
 #' used in the percolation analysis. By default, it is defined as 
-#' `seq(0.65, 0.98, by = 0.05)`, which generates a sequence of percentiles
-#' starting at 0.55, meaning that targets (genes/proteins...) whose expression 
-#' value is under the 65th percentile of the whole matrix will be excluded 
-#' automatically from the network. Selecting lower starting percentiles allows 
-#' more genes (and consequently more links) to be included, but it also 
-#' increases computational time.
+#' `seq(0.35, 0.98, by = 0.05)`, which generates a sequence of percentiles
+#' starting at 0.35, meaning that targets (genes/proteins...) whose expression 
+#' value is under the 35th percentile of the whole matrix will be excluded.
+#' This threshold can be modified by specifying a different starting point for 
+#' `seq`. For a more granular percolation analysis an higher optimisation of 
+#' the algorithm, `by = 0.05` can be modified in favour of lower values, but 
+#' this will increase the computatinal time.  
 #' @param use_qvalues whether to use Storey's q values for multiple test
 #' adjustment. If FALSE (default), unadjusted p values will be used and shown
 #' in the output.

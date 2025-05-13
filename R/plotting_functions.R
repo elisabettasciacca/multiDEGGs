@@ -1,3 +1,15 @@
+#' Internal function for colors 
+#'
+#' This function return a color palette with the number of colors specified by n
+#'
+#' @param n number of colors needed
+#' @return a vector with colors
+my_palette <- function(n) {
+  palette <- c("#3B4992", "#DF8F44", "#B24745", "#1B5E20", "#6B452B", "#8F7700",
+               "#808180", "#91D1C2","#FABFD2")
+  return(palette[1:n])
+}
+
 #' Plot differential regressions for a link
 #' 
 #' Plot differential regressions for any target-target pair in an omic dataset
@@ -124,7 +136,7 @@ plot_regressions <- function(deggs_object,
   
   # Plot
   prefix <- ifelse(deggs_object[["use_qvalues"]], "Padj", "P")
-  col <- viridis::viridis(n = category_length)
+  col <- my_palette(n = category_length)
   x_adj <- (max(df[, 1], na.rm = TRUE) - min(df[, 1], na.rm = TRUE)) * 0.05
   new_x <- seq(min(df[, 1], na.rm = TRUE) - x_adj,
                max(df[, 1], na.rm = TRUE) + x_adj,
@@ -235,7 +247,7 @@ node_boxplot <- function(gene,
   metadata <- deggs_object[["metadata"]]
   x <- metadata[colnames(deggs_object[["assayData"]][[assayDataName]])]
   y <- as.numeric(deggs_object[["assayData"]][[assayDataName]][gene, ])
-  col <- viridis::viridis(n = nlevels(metadata))
+  col <- my_palette(n = nlevels(metadata))
   cols <- col[as.numeric(x)]
   
   op <- par(bty = 'l', mar = c(5.2, 6, 3.3, 5))
@@ -275,7 +287,6 @@ node_boxplot <- function(gene,
 #' in non-blocking mode (see vignette)
 #' @param port TCP port (character or numeric), to be used only to run the 
 #' function in non-blocking mode (see vignette)
-#' @import igraph
 #' @import knitr
 #' @import rmarkdown
 #' @importFrom magrittr %>%
@@ -382,7 +393,7 @@ View_diffNetworks <- function(deggs_object,
           
           # Set up edges color
           if (multiOmic) {
-            col <- viridis::viridis(n = nlevels(edges$layer))
+            col <- my_palette(n = nlevels(edges$layer))
             edges$color <- col[edges$layer]  # edges$layer is factor
             legend <- levels(edges$layer)
           } else {

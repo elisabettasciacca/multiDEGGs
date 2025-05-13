@@ -1,19 +1,32 @@
-#' TCGA Breast Invasive Carcinoma sample data
+#' Synthetic clinical data
 #'
-#' A dataset containing sample data for 105 breast tissue biopsies from the
-#' TCGA-BRCA project
-#'
-#' @format A data frame with 105 rows and 1 variable (IDs are in rownames):
+#' A dataset containing sample clinical data for 100 patients with 40% 
+#' response rate
+#' 
+#' @format A data frame with 100 rows and 4 columns (IDs are in rownames):
 #' \describe{
-#'   \item{SUBTYPE}{The breast cancer subtype}
+#'   \item{response}{The response outcome, to be used for differential analysis}
 #' }
-"BRCA_metadata"
+"synthetic_metadata"
 
-#' TCGA Breast Invasive Carcinoma (BRCA) normalised gene expression data
+#' Synthetic RNA-seq count data
 #'
-#' A dataset containing the z scored gene expression data for 105 breast
-#' biopsies from the TCGA-BRCA project
+#' Synthetic RNA-seq data after log2 normalisation
 #'
-#' @format A data frame with 19737 rows representing normalised gene counts
-#' and 105 columns representing samples.
-"BRCA_normCounts"
+#' @format A data frame with xx rows (genes) xx columns (patients IDs, matching 
+#' the metadata rownames).
+"synthetic_rnaseqData"
+
+#' Synthetic RNA-seq count data
+#'
+#' Synthetic RNA-seq data after log2 normalisation
+#'
+#' @format A data frame with xx rows (proteins) xx columns (patients IDs).
+"synthetic_proteomicData"
+
+#' Synthetic RNA-seq count data
+#'
+#' Synthetic RNA-seq data after log2 normalisation
+#'
+#' @format A data frame with xx rows (proteins) xx columns (patients IDs).
+"synthetic_OlinkData"

@@ -391,7 +391,55 @@ rnaseq <- rnaseq_generation(metadata)
 proteomics <- proteomics_generation(metadata, rnaseq)
 olink <- olink_generation(metadata, rnaseq, proteomics)
 
-saveRDS(metadata, "data/synthetic_metadata.RDS")
-saveRDS(rnaseq, "data/synthetic_rnaseqData.RDS")
-saveRDS(proteomics, "data/synthetic_proteomicsData.RDS")
-saveRDS(olink, "data/synthetic_OlinkData.RDS")
+
+# Let's keep significant only links, to make the package as light as possible: 
+assayData_list <- list("RNAseq" = rnaseq,
+                       "Proteomics" = proteomics,
+                       "Olink" = olink)
+
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 use_qvalues = TRUE, 
+                                 verbose = TRUE,
+                                 show_progressBar = TRUE,
+                                 cores = 2)
+
+rnaseq_genes <- unique(c(res$`Non-responder`[res$`Non-responder`$layer == "RNAseq",
+                                    "from"],
+                         res$`Non-responder`[res$`Non-responder`$layer == "RNAseq",
+                                             "to"],
+                         res$`Responder`[res$`Responder`$layer == "RNAseq",
+                                             "from"],
+                         res$`Responder`[res$`Responder`$layer == "RNAseq",
+                                             "to"]))
+
+proteomics_genes <- unique(c(res$`Non-responder`[res$`Non-responder`$layer == "Proteomics",
+                                                 "from"],
+                             res$`Non-responder`[res$`Non-responder`$layer == "Proteomics",
+                                                 "to"],
+                             res$`Responder`[res$`Responder`$layer == "Proteomics",
+                                             "from"],
+                             res$`Responder`[res$`Responder`$layer == "Proteomics",
+                                             "to"]))
+
+olink_genes <- unique(c(res$`Non-responder`[res$`Non-responder`$layer == "Olink",
+                                            "from"],
+                        res$`Non-responder`[res$`Non-responder`$layer == "Olink",
+                                            "to"],
+                        res$`Responder`[res$`Responder`$layer == "Olink",
+                                        "from"],
+                        res$`Responder`[res$`Responder`$layer == "Olink",
+                                        "to"]))
+
+rnaseq <- rnaseq[rnaseq_genes, ]
+proteomics <- proteomics[proteomics_genes, ]
+olink <- olink[olink_genes, ]
+
+save(metadata, file = "data/synthetic_metadata.rda")
+save(rnaseq, file = "data/synthetic_rnaseqData.rda")
+save(proteomics, file = "data/synthetic_proteomicData.rda")
+save(olink, file = "data/synthetic_OlinkData.rda")
+
+
