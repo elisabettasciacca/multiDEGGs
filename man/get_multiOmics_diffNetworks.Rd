@@ -13,8 +13,8 @@ get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)
 \item{sig_threshold}{threshold for significance. Default 0.05.}
 }
 \value{
-a list of multilayer networks (in form of edge table), one per
-category in the data.
+a list of multilayer networks (as edge tables), one per
+category.
 }
 \description{
 Get a table of all significant interactions across categories

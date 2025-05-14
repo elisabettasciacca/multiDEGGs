@@ -16,7 +16,7 @@
 #' specified in `category_variable`. Rownames must match the sample IDs used in
 #' assayData. 
 #' If named vector, each element must correspond to a sample characteristic to 
-#' be used for differential andlysis, and names must match sample IDs used in
+#' be used for differential analysis, and names must match sample IDs used in
 #' the colnames of `assayData`.
 #' Continuous variables are not allowed.  
 #' @param category_variable when metadata is a matrix or data.frame this is the 
@@ -43,10 +43,12 @@
 #' This threshold can be modified by specifying a different starting point for 
 #' `seq`. For a more granular percolation analysis an higher optimisation of 
 #' the algorithm, `by = 0.05` can be modified in favour of lower values, but 
-#' this will increase the computatinal time.  
-#' @param use_qvalues whether to use Storey's q values for multiple test
-#' adjustment. If FALSE (default), unadjusted p values will be used and shown
-#' in the output.
+#' this will increase the computational time.  
+#' @param padj_method a character string indicating the p values correction 
+#' method for multiple test adjustment. It can be either one of the methods 
+#' provided by the `p.adjust` function from `stats` (bonferroni, BH, hochberg, 
+#' etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
+#' When using "q.value" the `qvalue` package must be installed first.
 #' @param cores number of cores to use for parallelisation.
 #' @return a `deggs` object containing differential networks incorporating
 #' p values or adjusted p values for each link.
@@ -58,12 +60,11 @@ get_diffNetworks <- function(assayData,
                              category_subset = NULL,
                              network = NULL,
                              percentile_vector = seq(0.35, 0.98, by = 0.05),
-                             use_qvalues = FALSE,
+                             padj_method = "bonferroni",
                              show_progressBar = TRUE,
                              verbose = TRUE, 
                              cores = parallel::detectCores() / 2) {
-  
-  
+
   if (!(is.list(assayData) || 
         is.matrix(assayData) || is.data.frame(assayData))) (
           stop("assayDataList is not a list or a matrix or data.frame")
@@ -108,7 +109,7 @@ get_diffNetworks <- function(assayData,
                                     regression_method,
                                     network,
                                     percentile_vector,
-                                    use_qvalues,
+                                    padj_method,
                                     show_progressBar,
                                     verbose, 
                                     cores)
@@ -122,7 +123,7 @@ get_diffNetworks <- function(assayData,
     metadata = metadata,
     regression_method = regression_method,
     category_subset = category_subset,
-    use_qvalues = use_qvalues
+    padj_method = padj_method
   )
   class(degg) <- "deggs"
   return(degg)
@@ -130,27 +131,8 @@ get_diffNetworks <- function(assayData,
 
 #' Generate differential networks for single onimc analysis 
 #' 
-#' @param assayData a matrix or data.frame with normalised assay data.
-#' Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
+#' @inheritParams get_diffNetworks
 #' @param assayDataName name of the assayData, to identify which omic is. 
-#' @param metadata a named vector, each element must correspond to a sample 
-#' characteristic to be used for differential analysis, and names must match 
-#' sample IDs used in the colnames of `assayData`.
-#' Continuous variables are not allowed.  
-#' @param regression_method whether to use robust linear modelling to calculate
-#' link p values. Options are 'lm' (default, faster) or 'rlm'.
-#' @param network network of biological interactions provided by the user. The
-#' network must be provided in the form of a table of class data.frame with only 
-#' two columns named "from" and "to".
-#' If NULL (default) a network of 10,537 molecular interactions obtained from
-#' KEGG, mirTARbase, miRecords and transmiR will be used.
-#' This has been obtained via the `exportgraph` function of the MITHrIL tool
-#' (Alaimo et al., 2016).
-#' @param use_qvalues whether to use Storey's q values for multiple test
-#' adjustment. If FALSE (default), unadjusted p values will be used and shown
-#' in the output.
-#' @param cores number of cores to use for parallelisation.
-#' @importFrom rlang .data
 #' @return a list of differential networks, one per category
 get_diffNetworks_singleOmic <- function(assayData,
                                         assayDataName,
@@ -158,7 +140,7 @@ get_diffNetworks_singleOmic <- function(assayData,
                                         regression_method,
                                         network,
                                         percentile_vector, 
-                                        use_qvalues,
+                                        padj_method,
                                         show_progressBar,
                                         verbose, 
                                         cores) {
@@ -166,7 +148,6 @@ get_diffNetworks_singleOmic <- function(assayData,
   if (verbose) (
     message(paste0("\nGenerating ", assayDataName, " network layer..."))
   )
-  sig_var <- ifelse(use_qvalues, "q.value", "p.value")
   
   if (!(is.matrix(assayData) || is.data.frame(assayData))) (
     stop(paste0(assayDataName, " is not a matrix or data.frame"))
@@ -213,8 +194,8 @@ get_diffNetworks_singleOmic <- function(assayData,
   )
   
   edges <- network_to_use %>%
-    dplyr::filter(.data$from %in% rownames(assayData)) %>%
-    dplyr::filter(.data$to %in% rownames(assayData))  
+    subset(from %in% rownames(assayData)) %>%
+    subset(to %in% rownames(assayData)) 
   
   if (nrow(edges) == 0) (
     stop(paste0("Rownames of ", assayDataName, " don't match any link of the 
@@ -265,7 +246,7 @@ get_diffNetworks_singleOmic <- function(assayData,
       "percentile_vector", "category_median_list", "contrasts",
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
       "assayData", "calc_pvalues_network2", "metadata",
-      "sig_edges_count", "sig_var"
+      "sig_edges_count", "padj_method"
     ), envir = environment())
     
     parallel::clusterEvalQ(cl, {
@@ -277,7 +258,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
-            sig_var = sig_var,
+            padj_method = padj_method,
             metadata = metadata,
             percentile = percentile,
             category_median_list = category_median_list,
@@ -294,7 +275,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) {
           calc_pvalues_percentile(
             assayData = assayData,
-            sig_var = sig_var,
+            padj_method = padj_method,
             metadata = metadata,
             percentile = percentile,
             category_median_list = category_median_list,
@@ -315,7 +296,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
-            sig_var = sig_var,
+            padj_method = padj_method,
             metadata = metadata,
             percentile = percentile,
             category_median_list = category_median_list,
@@ -333,7 +314,7 @@ get_diffNetworks_singleOmic <- function(assayData,
         function(percentile) (
           calc_pvalues_percentile(
             assayData = assayData,
-            sig_var = sig_var,
+            padj_method = padj_method,
             metadata = metadata,
             percentile = percentile,
             category_median_list = category_median_list,
@@ -380,11 +361,20 @@ get_diffNetworks_singleOmic <- function(assayData,
 #' @param category_subset optional character vector indicating which categories
 #' are used for comparison. If not specified, all categories in
 #' `category_variable` will be used.
-#' @param metadata a data.frame, matrix, or named vector of annotations.
+#' @param metadata a named vector, matrix, or data.frame containing sample 
+#' annotations or categories. If matrix or data.frame, each row should
+#' correspond to a sample, with columns representing different sample 
+#' characteristics (e.g., treatment group, condition, time point). The colname 
+#' of the sample characteristic to be used for differential analysis must be 
+#' specified in `category_variable`. Rownames must match the sample IDs used in
+#' assayData. 
+#' If named vector, each element must correspond to a sample characteristic to 
+#' be used for differential analysis, and names must match sample IDs used in
+#' the colnames of `assayData`.
+#' Continuous variables are not allowed.  
 #' @param category_variable column name in `metadata` (if data.frame or matrix)
 #' or NULL if `metadata` is already a named vector containing category 
 #' information.
-#' @param verbose logical; whether to print messages about processing steps.
 #' @return a tidy named factor vector of sample annotations.
 tidy_metadata <- function(category_subset = NULL,
                           metadata,
@@ -467,30 +457,25 @@ tidy_metadata <- function(category_subset = NULL,
 #' @inheritParams get_diffNetworks
 #' @param categories_length integer number indicating the number of categories
 #' @param category_median_list list of category data.frames
-#' @param sig_var Inherited from `get_diffNetworks`. It can be
-#' `q.value` or `p.value` depending on how `use_qvalues` was set in the
-#' `get_diffNetworks` function (default `FALSE`).
 #' @param percentile a float number indicating the percentile to use.
 #' @param contrasts data.frame containing the categories contrasts in rows
-#' @param regression_method whether to use robust linear modelling to obtain
-#' p value of the interactions. Options are 'rlm' (default) or 'lm'
 #' @param edges network of biological interactions in the form of a table of
 #' class data.frame with two columns: "from" and "to".
 #' @param sig_edges_count number of significant edges (p < 0.05)
 #' @importFrom magrittr %>%
-#' @importFrom rlang .data
-#' @return The list of float numbers of the significant pvalues
-#' for a specific percentile
+#' @return The list of float numbers of the significant pvalues for a single
+#' percentile
 calc_pvalues_percentile <- function(assayData,
                                     metadata,
                                     categories_length,
                                     category_median_list,
-                                    sig_var,
+                                    padj_method,
                                     percentile,
                                     contrasts,
                                     regression_method,
                                     edges,
                                     sig_edges_count) {
+  
   # 1st filtering step: remove low expressed genes in each category
   # (genes under the percentile threshold)
   cut_off <- stats::quantile(as.matrix(assayData), prob = percentile, na.rm = T)
@@ -509,8 +494,8 @@ calc_pvalues_percentile <- function(assayData,
   networks_to_string <- lapply(category_median_list, function(category_vec) {
     if (!is.character(category_vec)) {
       categoryEdges <- edges %>%
-        dplyr::filter(.data$from %in% names(category_vec)) %>%
-        dplyr::filter(.data$to %in% names(category_vec))
+        subset(from %in% names(category_vec)) %>%
+        subset(to %in% names(category_vec))
       network_to_string <- do.call(paste, categoryEdges)
     } else {
       # assign error message for empty vectors
@@ -562,22 +547,23 @@ calc_pvalues_percentile <- function(assayData,
       metadata = metadata,
       regression_method = regression_method,
       categories_length = categories_length,
-      sig_var = sig_var
+      padj_method = padj_method
     ))
   })
   # count significant p values
+  sig_var <- ifelse(padj_method == "none", "p.value", "p.adj")
   if (tot_edges > sig_edges_count) {
     # num tot edges greater than previous sig edges count
     p_values_sig_count <- unlist(lapply(pvalues_list, function(category_network) {
       if (!is.null(dim(category_network))) {
         num_sig_links <- sum(category_network[, sig_var] < 0.05, na.rm = TRUE)
-        # return the number of links with significant pvalues or qvalues
+        # return the number of links with significant p values or adj p
         if (!is.na(num_sig_links)) {
           return(num_sig_links)
         } else {return(0)}
       } else {return(0)}
     }))
-    num_sig_pvalues <- sum(p_values_sig_count) # these are pvalues or qvalues
+    num_sig_pvalues <- sum(p_values_sig_count) # these are p values or adj p
     
     # The <<- operator here is used only for efficiency reasons in a controlled 
     # fashion.
@@ -606,10 +592,12 @@ calc_pvalues_percentile <- function(assayData,
 #' @inheritParams calc_pvalues_percentile
 #' @param category_network network table for a specific category
 #' @importFrom methods is
+#' @importFrom MASS rlm
+#' @importFrom sfsmisc f.robftest  
 #' @return a list of p values
 calc_pvalues_network <- function(assayData,
                                  metadata,
-                                 sig_var,
+                                 padj_method,
                                  categories_length,
                                  regression_method = 'lm',
                                  category_network) {
@@ -645,11 +633,11 @@ calc_pvalues_network <- function(assayData,
           if (regression_method == "rlm") {
             # gene_B ~ gene_A * category
             robustfit <- suppressWarnings(
-              MASS::rlm(as.numeric(assayData[gene_B, ]) ~
+              rlm(as.numeric(assayData[gene_B, ]) ~
                           as.numeric(assayData[gene_A, ]) * metadata)
               )
             p_interaction <- try(
-              sfsmisc::f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+              f.robftest(robustfit, var = 3)$p.value, silent = TRUE
               )
             if (class(p_interaction) == "try-error") (
               p_interaction <- NA
@@ -675,19 +663,30 @@ calc_pvalues_network <- function(assayData,
   if (is.numeric(p.value)) {
     category_network <- cbind(category_network, p.value)
     
-    if (sig_var == "q.value") {
+    if (padj_method == "q.value") {
       # adding Storey's q values
-      q.values <- try(qvalue::qvalue(category_network[, "p.value"])$qvalues,
+      p.adj <- try(qvalue::qvalue(category_network[, "p.value"])$qvalues,
                       silent = TRUE)
-      if (is(q.values, "try-error")) {
+      if (is(p.adj, "try-error")) {
         if (nrow(category_network) > 1) (
-          q.values <- qvalue::qvalue(p = category_network[, "p.value"], pi0 = 1)$qvalues
+          p.adj <- qvalue::qvalue(p = category_network[, "p.value"], pi0 = 1)$qvalues
         ) else (
-          q.values <- NA
+          p.adj <- NA
         )
       }
-      category_network$q.value <- q.values
+      category_network$p.adj <- p.adj
     }
+    
+    if (!(padj_method %in% c("q.value", "none"))) {
+      # adjust p values
+      p.adj <- try(stats::p.adjust(category_network[, "p.value"],
+                                      method = padj_method))
+      if (is(p.adj, "try-error")) {
+          p.adj <- NA
+      }
+      category_network$p.adj <- p.adj
+    }
+    
     rownames(category_network) <- paste(category_network$from,
                                         category_network$to, sep = "-")
   } else {
@@ -701,16 +700,16 @@ calc_pvalues_network <- function(assayData,
 #' @param deggs_object an object of class `deggs` generated by
 #' `get_diffNetworks`
 #' @param assayDataName name of the assayData of interest. If an unnamed list of 
-#' data was given to `get_diffNetworks`, the assayDataName here will be the 
-#' number indicating the position of the data in the assayDataList provided
-#' before (i.e. if transcriptomic data was second in the list, a list of 
-#' all its differential interactions can be obtained with assayDataName = 2, 
+#' data was given to `get_diffNetworks`, `assayDataName` here will be the 
+#' number corresponding to the position of the data in the `assayDataList`
+#' provided before (i.e. if transcriptomic data was second in the list, a list 
+#' of all its differential interactions can be obtained with assayDataName = 2, 
 #' if only one data table was provided assayDataName must be 1). Default 1.
 #' @param sig_threshold threshold for significance. Default 0.05.
 #' @return a `data.frame` listing all the significant differential interactions
 #' found across categories for that particular omic data.
 #' This list can also be used to substitute or integrate feature selection in 
-#' machine learning models for the prediction of the categories.
+#' machine learning models for the prediction of the categories (see vignette).
 #' @export
 get_sig_deggs <- function(deggs_object, 
                           assayDataName = 1, 
@@ -720,7 +719,7 @@ get_sig_deggs <- function(deggs_object,
     stop("Input must be a 'deggs' object")
   )
   
-  sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
+  sig_var <- ifelse(deggs_object[["padj_method"]] == "none", "p.value", "p.adj")
   
   # Extract diffNetworks (=those that are lists) and exlude sig_pvalues_count
   is_list <- vapply(deggs_object[["diffNetworks"]][[assayDataName]],
@@ -728,7 +727,7 @@ get_sig_deggs <- function(deggs_object,
   diffNetworks_list <- deggs_object[["diffNetworks"]][[assayDataName]][is_list]
 
   if (length(diffNetworks_list) == 0) {
-    warning("No valid network found")
+    warning("No valid network found\n")
     return(data.frame())
   }
   
@@ -752,7 +751,7 @@ get_sig_deggs <- function(deggs_object,
   sig_edges_list <- sig_edges_list[!sapply(sig_edges_list, is.null)]
   
   if (length(sig_edges_list) == 0) {
-    warning("No significant interactions found with ",
+    warning("No significant interactions found with ", 
             sig_var, " < ", sig_threshold)
     return(data.frame())
   }
@@ -768,8 +767,8 @@ get_sig_deggs <- function(deggs_object,
 #' @param deggs_object an object of class `deggs` generated by
 #' `get_diffNetworks`
 #' @param sig_threshold threshold for significance. Default 0.05.
-#' @return a list of multilayer networks (in form of edge table), one per 
-#' category in the data. 
+#' @return a list of multilayer networks (as edge tables), one per 
+#' category. 
 #' @export
 get_multiOmics_diffNetworks <- function(deggs_object,
                                         sig_threshold = 0.05) {
@@ -785,14 +784,14 @@ get_multiOmics_diffNetworks <- function(deggs_object,
   
   categories <- levels(deggs_object[["metadata"]])
   omicDatasets <- names(deggs_object[["assayData"]])
-  sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
+  sig_var <- ifelse(deggs_object[["padj_method"]] == "none", "p.value", "p.adj")
   
   multiLayer_networks <- lapply(categories, function(category) {
     # Collect networks for this category from all omic datasets
     category_networks <- lapply(omicDatasets, function(omicDataset) {
       # Check if the omicDataset entry exists and is a list
       if (!is.list(deggs_object[["diffNetworks"]][[omicDataset]])) {
-        warning(paste("Dataset", omicDataset, "is not a list. Skipping."))
+        warning(paste("Dataset", omicDataset, "is empty. Skipping.\n"))
         return(data.frame())
       }
       
@@ -802,7 +801,7 @@ get_multiOmics_diffNetworks <- function(deggs_object,
       # Check if the network is a valid data frame
       if (!is.data.frame(network)) {
         warning(paste("Category", category, "in dataset", omicDataset, 
-                      "is not a data frame. Skipping."))
+                      "is empty. Skipping.\n"))
         return(data.frame())
       }
       
@@ -825,7 +824,8 @@ get_multiOmics_diffNetworks <- function(deggs_object,
                                                sig_threshold), ]
       return(merged_network)
     } else {
-      warning(paste("No valid category_networks found for category:", category))
+      warning(paste0("No valid category_networks found for category: ",
+                     category, ".\n"))
       return(data.frame())
     }
   })

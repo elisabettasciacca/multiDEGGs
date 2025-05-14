@@ -18,13 +18,21 @@ tidy_metadata(
 are used for comparison. If not specified, all categories in
 \code{category_variable} will be used.}
 
-\item{metadata}{a data.frame, matrix, or named vector of annotations.}
+\item{metadata}{a named vector, matrix, or data.frame containing sample
+annotations or categories. If matrix or data.frame, each row should
+correspond to a sample, with columns representing different sample
+characteristics (e.g., treatment group, condition, time point). The colname
+of the sample characteristic to be used for differential analysis must be
+specified in \code{category_variable}. Rownames must match the sample IDs used in
+assayData.
+If named vector, each element must correspond to a sample characteristic to
+be used for differential analysis, and names must match sample IDs used in
+the colnames of \code{assayData}.
+Continuous variables are not allowed.}
 
 \item{category_variable}{column name in \code{metadata} (if data.frame or matrix)
 or NULL if \code{metadata} is already a named vector containing category
 information.}
-
-\item{verbose}{logical; whether to print messages about processing steps.}
 }
 \value{
 a tidy named factor vector of sample annotations.

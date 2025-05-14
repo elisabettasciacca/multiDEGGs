@@ -9,7 +9,7 @@ calc_pvalues_percentile(
   metadata,
   categories_length,
   category_median_list,
-  sig_var,
+  padj_method,
   percentile,
   contrasts,
   regression_method,
@@ -33,7 +33,7 @@ of the sample characteristic to be used for differential analysis must be
 specified in \code{category_variable}. Rownames must match the sample IDs used in
 assayData.
 If named vector, each element must correspond to a sample characteristic to
-be used for differential andlysis, and names must match sample IDs used in
+be used for differential analysis, and names must match sample IDs used in
 the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
@@ -41,16 +41,19 @@ Continuous variables are not allowed.}
 
 \item{category_median_list}{list of category data.frames}
 
-\item{sig_var}{Inherited from \code{get_diffNetworks}. It can be
-\code{q.value} or \code{p.value} depending on how \code{use_qvalues} was set in the
-\code{get_diffNetworks} function (default \code{FALSE}).}
+\item{padj_method}{a character string indicating the p values correction
+method for multiple test adjustment. It can be either one of the methods
+provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hochberg,
+etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
+When using "q.value" the \code{qvalue} package must be installed first.}
 
 \item{percentile}{a float number indicating the percentile to use.}
 
 \item{contrasts}{data.frame containing the categories contrasts in rows}
 
-\item{regression_method}{whether to use robust linear modelling to obtain
-p value of the interactions. Options are 'rlm' (default) or 'lm'}
+\item{regression_method}{whether to use robust linear modelling to calculate
+link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
+is faster and lighter.}
 
 \item{edges}{network of biological interactions in the form of a table of
 class data.frame with two columns: "from" and "to".}
@@ -58,8 +61,8 @@ class data.frame with two columns: "from" and "to".}
 \item{sig_edges_count}{number of significant edges (p < 0.05)}
 }
 \value{
-The list of float numbers of the significant pvalues
-for a specific percentile
+The list of float numbers of the significant pvalues for a single
+percentile
 }
 \description{
 Compute interaction p values for a single percentile value

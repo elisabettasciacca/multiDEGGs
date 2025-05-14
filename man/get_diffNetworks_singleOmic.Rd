@@ -11,25 +11,37 @@ get_diffNetworks_singleOmic(
   regression_method,
   network,
   percentile_vector,
-  use_qvalues,
+  padj_method,
   show_progressBar,
   verbose,
   cores
 )
 }
 \arguments{
-\item{assayData}{a matrix or data.frame with normalised assay data.
-Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.}
+\item{assayData}{a matrix or data.frame (or list of matrices or data.frames
+for multi-omic analysis) containing normalised assay data.
+Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
+For multi omic analysis, it is highly recommended to use a named list of data.
+If unnamed, sequential names (assayData1, assayData2, etc.) will be
+assigned to identify each matrix or data.frame.}
 
 \item{assayDataName}{name of the assayData, to identify which omic is.}
 
-\item{metadata}{a named vector, each element must correspond to a sample
-characteristic to be used for differential analysis, and names must match
-sample IDs used in the colnames of \code{assayData}.
+\item{metadata}{a named vector, matrix, or data.frame containing sample
+annotations or categories. If matrix or data.frame, each row should
+correspond to a sample, with columns representing different sample
+characteristics (e.g., treatment group, condition, time point). The colname
+of the sample characteristic to be used for differential analysis must be
+specified in \code{category_variable}. Rownames must match the sample IDs used in
+assayData.
+If named vector, each element must correspond to a sample characteristic to
+be used for differential analysis, and names must match sample IDs used in
+the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
 \item{regression_method}{whether to use robust linear modelling to calculate
-link p values. Options are 'lm' (default, faster) or 'rlm'.}
+link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
+is faster and lighter.}
 
 \item{network}{network of biological interactions provided by the user. The
 network must be provided in the form of a table of class data.frame with only
@@ -39,9 +51,21 @@ KEGG, mirTARbase, miRecords and transmiR will be used.
 This has been obtained via the \code{exportgraph} function of the MITHrIL tool
 (Alaimo et al., 2016).}
 
-\item{use_qvalues}{whether to use Storey's q values for multiple test
-adjustment. If FALSE (default), unadjusted p values will be used and shown
-in the output.}
+\item{percentile_vector}{a numeric vector specifying the percentiles to be
+used in the percolation analysis. By default, it is defined as
+\code{seq(0.35, 0.98, by = 0.05)}, which generates a sequence of percentiles
+starting at 0.35, meaning that targets (genes/proteins...) whose expression
+value is under the 35th percentile of the whole matrix will be excluded.
+This threshold can be modified by specifying a different starting point for
+\code{seq}. For a more granular percolation analysis an higher optimisation of
+the algorithm, \code{by = 0.05} can be modified in favour of lower values, but
+this will increase the computational time.}
+
+\item{padj_method}{a character string indicating the p values correction
+method for multiple test adjustment. It can be either one of the methods
+provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hochberg,
+etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
+When using "q.value" the \code{qvalue} package must be installed first.}
 
 \item{cores}{number of cores to use for parallelisation.}
 }

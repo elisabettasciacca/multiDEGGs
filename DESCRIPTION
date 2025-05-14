@@ -42,9 +42,8 @@ biocViews: Sequencing, RNASeq, GeneExpression, Transcription,
 Language: en-gb
 URL: https://github.com/elisabettasciacca/multiDEGGs/
 BugReports: https://github.com/elisabettasciacca/multiDEGGs/issues
-Suggests: 
+Suggests: qvalue
 Imports:
-    dplyr,
     DT,
     grDevices, 
     graphics,
@@ -55,8 +54,6 @@ Imports:
     parallel,
     pbapply,
     pbmcapply,
-    qvalue,
-    rlang,
     rmarkdown,
     sfsmisc,
     shiny,

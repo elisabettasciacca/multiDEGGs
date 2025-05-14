@@ -54,7 +54,7 @@ plot_regressions <- function(deggs_object,
     stop("Both GeneA and GeneB must be character.")
   }
   
-  sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
+  sig_var <- ifelse(deggs_object[["padj_method"]] == "none", "p.value", "p.adj")
   metadata <- deggs_object[["metadata"]]
   assayData <- deggs_object[["assayData"]][[assayDataName]]
   categories <- deggs_object[["category_subset"]]
@@ -135,7 +135,7 @@ plot_regressions <- function(deggs_object,
   }
   
   # Plot
-  prefix <- ifelse(deggs_object[["use_qvalues"]], "Padj", "P")
+  prefix <- ifelse(deggs_object[["padj_method"]] == "none", "P", "Padj")
   col <- my_palette(n = category_length)
   x_adj <- (max(df[, 1], na.rm = TRUE) - min(df[, 1], na.rm = TRUE)) * 0.05
   new_x <- seq(min(df[, 1], na.rm = TRUE) - x_adj,
@@ -151,9 +151,9 @@ plot_regressions <- function(deggs_object,
   )
   
   # we have the interaction p value for a single pair,
-  # adjusted p values can be found in the deggs_object if use_qvalues was set
-  # to TRUE:
-  if (deggs_object[["use_qvalues"]]) {
+  # adjusted p values can be found in the deggs_object if padj_method was NOT
+  # set to none
+  if (deggs_object[["padj_method"]] != "none") {
     all_interactions <- do.call(rbind, 
                                 deggs_object[["diffNetworks"]][[assayDataName]])
     pair_index <- which(all_interactions$from == gene_A & 
@@ -290,7 +290,6 @@ node_boxplot <- function(gene,
 #' @import knitr
 #' @import rmarkdown
 #' @importFrom magrittr %>%
-#' @importFrom rlang .data
 #' @return a shiny interface showing networks with selectable nodes and links
 #' @export
 View_diffNetworks <- function(deggs_object,
@@ -301,7 +300,7 @@ View_diffNetworks <- function(deggs_object,
   
   if (!is(deggs_object, "deggs")) stop("deggs_object must be of class deggs")
   
-  sig_var <- ifelse(deggs_object[["use_qvalues"]], "q.value", "p.value")
+  sig_var <- ifelse(deggs_object[["padj_method"]] == "none", "p.value", "p.adj")
   multiOmic <- ifelse(length(deggs_object[["assayData"]]) > 1, TRUE, FALSE)
   
   if (multiOmic) {
@@ -332,9 +331,9 @@ View_diffNetworks <- function(deggs_object,
           edges <- edges[edges[, sig_var] < input$slider, ]
           edges$id <- rownames(edges)
           
-          if (deggs_object[["use_qvalues"]]) {
-            edges$`q value` <- formatC(edges$q.value, format = "e", digits = 3)
-            edges <- edges[order(edges$q.value), ]
+          if (deggs_object[["padj_method"]] != "none") {
+            edges$`p adj` <- formatC(edges$p.adj, format = "e", digits = 3)
+            edges <- edges[order(edges$p.adj), ]
             edges <- edges[, which(colnames(edges) != "p.value")] 
           } else {
             edges$`p value` <- formatC(edges$p.value, format = "e", digits = 3)
@@ -356,7 +355,7 @@ View_diffNetworks <- function(deggs_object,
           ) else (
             DT::datatable(
               edges %>%
-                dplyr::filter(.data$id %in% input$current_edges_selection),
+                subset(id %in% input$current_edges_selection),
               options = list(
                 lengthChange = FALSE, scrollX = TRUE,
                 columnDefs = list(list(
@@ -380,7 +379,8 @@ View_diffNetworks <- function(deggs_object,
           edges$id <- rownames(edges)
           
           # Set up tooltip
-          prefix <- ifelse(deggs_object[["use_qvalues"]], "Padj=", "P=")
+          prefix <- ifelse(deggs_object[["padj_method"]] == "none", 
+                           "P=", "Padj=")
           edges$title <- paste0(prefix, formatC(edges[, sig_var], format = "e", 
                                                 digits = 2))
           
@@ -542,8 +542,8 @@ View_diffNetworks <- function(deggs_object,
         
         # Slider
         shiny::sliderInput("slider",
-                           label = ifelse(deggs_object[["use_qvalues"]],
-                                          "q values", "p values"),
+                           label = ifelse(deggs_object[["padj_method"]] == "none",
+                                          "P values", "Adjusted P values"),
                            min = 0.01,
                            max = 10, # fake, it will be updated by updateSliderInput
                            value = 0.05, step = 0.01

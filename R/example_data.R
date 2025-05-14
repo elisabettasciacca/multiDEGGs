@@ -7,7 +7,7 @@
 #' \describe{
 #'   \item{response}{The response outcome, to be used for differential analysis}
 #' }
-"synthetic_metadata"
+"metadata"
 
 #' Synthetic RNA-seq count data
 #'
@@ -15,18 +15,18 @@
 #'
 #' @format A data frame with xx rows (genes) xx columns (patients IDs, matching 
 #' the metadata rownames).
-"synthetic_rnaseqData"
+"rnaseq"
 
 #' Synthetic RNA-seq count data
 #'
 #' Synthetic RNA-seq data after log2 normalisation
 #'
 #' @format A data frame with xx rows (proteins) xx columns (patients IDs).
-"synthetic_proteomicData"
+"proteomics"
 
 #' Synthetic RNA-seq count data
 #'
 #' Synthetic RNA-seq data after log2 normalisation
 #'
 #' @format A data frame with xx rows (proteins) xx columns (patients IDs).
-"synthetic_OlinkData"
+"olink"

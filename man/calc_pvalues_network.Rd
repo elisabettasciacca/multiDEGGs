@@ -7,7 +7,7 @@
 calc_pvalues_network(
   assayData,
   metadata,
-  sig_var,
+  padj_method,
   categories_length,
   regression_method = "lm",
   category_network
@@ -29,18 +29,21 @@ of the sample characteristic to be used for differential analysis must be
 specified in \code{category_variable}. Rownames must match the sample IDs used in
 assayData.
 If named vector, each element must correspond to a sample characteristic to
-be used for differential andlysis, and names must match sample IDs used in
+be used for differential analysis, and names must match sample IDs used in
 the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
-\item{sig_var}{Inherited from \code{get_diffNetworks}. It can be
-\code{q.value} or \code{p.value} depending on how \code{use_qvalues} was set in the
-\code{get_diffNetworks} function (default \code{FALSE}).}
+\item{padj_method}{a character string indicating the p values correction
+method for multiple test adjustment. It can be either one of the methods
+provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hochberg,
+etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
+When using "q.value" the \code{qvalue} package must be installed first.}
 
 \item{categories_length}{integer number indicating the number of categories}
 
-\item{regression_method}{whether to use robust linear modelling to obtain
-p value of the interactions. Options are 'rlm' (default) or 'lm'}
+\item{regression_method}{whether to use robust linear modelling to calculate
+link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
+is faster and lighter.}
 
 \item{category_network}{network table for a specific category}
 }

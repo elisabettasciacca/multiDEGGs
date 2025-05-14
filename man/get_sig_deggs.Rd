@@ -11,10 +11,10 @@ get_sig_deggs(deggs_object, assayDataName = 1, sig_threshold = 0.05)
 \code{get_diffNetworks}}
 
 \item{assayDataName}{name of the assayData of interest. If an unnamed list of
-data was given to \code{get_diffNetworks}, the assayDataName here will be the
-number indicating the position of the data in the assayDataList provided
-before (i.e. if transcriptomic data was second in the list, a list of
-all its differential interactions can be obtained with assayDataName = 2,
+data was given to \code{get_diffNetworks}, \code{assayDataName} here will be the
+number corresponding to the position of the data in the \code{assayDataList}
+provided before (i.e. if transcriptomic data was second in the list, a list
+of all its differential interactions can be obtained with assayDataName = 2,
 if only one data table was provided assayDataName must be 1). Default 1.}
 
 \item{sig_threshold}{threshold for significance. Default 0.05.}
@@ -23,7 +23,7 @@ if only one data table was provided assayDataName must be 1). Default 1.}
 a \code{data.frame} listing all the significant differential interactions
 found across categories for that particular omic data.
 This list can also be used to substitute or integrate feature selection in
-machine learning models for the prediction of the categories.
+machine learning models for the prediction of the categories (see vignette).
 }
 \description{
 Get a table of all the significant interactions across categories

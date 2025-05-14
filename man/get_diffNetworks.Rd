@@ -12,7 +12,7 @@ get_diffNetworks(
   category_subset = NULL,
   network = NULL,
   percentile_vector = seq(0.35, 0.98, by = 0.05),
-  use_qvalues = FALSE,
+  padj_method = "bonferroni",
   show_progressBar = TRUE,
   verbose = TRUE,
   cores = parallel::detectCores()/2
@@ -34,7 +34,7 @@ of the sample characteristic to be used for differential analysis must be
 specified in \code{category_variable}. Rownames must match the sample IDs used in
 assayData.
 If named vector, each element must correspond to a sample characteristic to
-be used for differential andlysis, and names must match sample IDs used in
+be used for differential analysis, and names must match sample IDs used in
 the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
@@ -66,11 +66,13 @@ value is under the 35th percentile of the whole matrix will be excluded.
 This threshold can be modified by specifying a different starting point for
 \code{seq}. For a more granular percolation analysis an higher optimisation of
 the algorithm, \code{by = 0.05} can be modified in favour of lower values, but
-this will increase the computatinal time.}
+this will increase the computational time.}
 
-\item{use_qvalues}{whether to use Storey's q values for multiple test
-adjustment. If FALSE (default), unadjusted p values will be used and shown
-in the output.}
+\item{padj_method}{a character string indicating the p values correction
+method for multiple test adjustment. It can be either one of the methods
+provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hochberg,
+etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
+When using "q.value" the \code{qvalue} package must be installed first.}
 
 \item{cores}{number of cores to use for parallelisation.}
 }
