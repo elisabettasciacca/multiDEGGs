@@ -19,3 +19,17 @@ category.
 \description{
 Get a table of all significant interactions across categories
 }
+\examples{
+data("synthetic_metadata")
+data("synthetic_rnaseqData")
+data("synthetic_proteomicData")
+data("synthetic_OlinkData")
+assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+                       "Proteomics" = synthetic_proteomicData,
+                       "Olink" = synthetic_OlinkData)
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 cores = 2)
+get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)
+}

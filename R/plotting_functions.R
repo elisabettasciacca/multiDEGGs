@@ -7,7 +7,7 @@
 my_palette <- function(n) {
   palette <- c("#3B4992", "#DF8F44", "#B24745", "#1B5E20", "#6B452B", "#8F7700",
                "#808180", "#91D1C2","#FABFD2")
-  return(palette[1:n])
+  return(palette[seq_len(n)])
 }
 
 #' Plot differential regressions for a link
@@ -38,6 +38,25 @@ my_palette <- function(n) {
 #' @return base graphics plot showing differential regressions across 
 #' categories. The p value of the interaction term of
 #' gene A ~ gene B \* category is reported on top.
+#' @examples
+#' data("synthetic_metadata")
+#' data("synthetic_rnaseqData")
+#' data("synthetic_proteomicData")
+#' data("synthetic_OlinkData")
+#' assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+#'                        "Proteomics" = synthetic_proteomicData,
+#'                        "Olink" = synthetic_OlinkData)
+#' deggs_object <- get_diffNetworks(assayData = assayData_list,
+#'                                  metadata = synthetic_metadata,
+#'                                  category_variable = "response",
+#'                                  regression_method = "lm",
+#'                                  padj_method = "bonferroni",
+#'                                  cores = 2)
+#' plot_regressions(deggs_object,
+#'                  assayDataName = "RNAseq",
+#'                  gene_A = "MTOR", 
+#'                  gene_B = "AKT2",
+#'                  legend_position = "bottomright")
 #' @export
 plot_regressions <- function(deggs_object,
                              assayDataName = 1,
@@ -61,18 +80,18 @@ plot_regressions <- function(deggs_object,
   regression_method <- deggs_object[["regression_method"]]
   
   if (!gene_A %in% rownames(assayData)) (
-    stop(paste0("gene_A is not in rownames(", assayDataName, ")"))
+    stop("gene_A is not in rownames(", assayDataName, ")")
   )
   
   if (!gene_B %in% rownames(assayData)) (
-    stop(paste0("gene_B is not in rownames(", assayDataName, ")"))
+    stop("gene_B is not in rownames(", assayDataName, ")")
   )
   
   metadata <- metadata[colnames(assayData)]
   
   if(length(unique(metadata)) == 1) (
-    stop(paste0("All sample IDs in ", assayDataName, " belong to one 
-                  category. No differential analysis is possible."))
+    stop("All sample IDs in ", assayDataName, " belong to one category. 
+         No differential analysis is possible.")
   )
   
   if (is.null(categories)) {
@@ -144,11 +163,11 @@ plot_regressions <- function(deggs_object,
   )
   
   # prediction of the fitted model
-  preds <- lapply(fit, function(i) stats::predict(i,
-                                                  newdata = data.frame(x = new_x),
-                                                  interval = 'confidence'
-  )
-  )
+  preds <- lapply(fit, 
+                  function(i) stats::predict(i,
+                                             newdata = data.frame(x = new_x),
+                                             interval = 'confidence')
+                  )
   
   # we have the interaction p value for a single pair,
   # adjusted p values can be found in the deggs_object if padj_method was NOT
@@ -238,7 +257,7 @@ node_boxplot <- function(gene,
   # if the selected node is not in present in the first assayData matrix 
   # show an empty plot with an informative message
   if (!gene %in% rownames(deggs_object[["assayData"]][[assayDataName]])) {
-    plot(x = 0:10, y = 0:10, ann = F,bty = "n",type = "n",
+    plot(x = 0:10, y = 0:10, ann = FALSE,bty = "n",type = "n",
          xaxt = "n", yaxt = "n")
     text(x = 5, y = 9, labels = paste(gene, "is not present \n in", title), 
          font = 2, cex = 1.3)
@@ -262,8 +281,8 @@ node_boxplot <- function(gene,
          pch = 20, col = adjustcolor(cols, alpha.f = 0.7), cex = 2)
   
   xtick <- levels(x)
-  axis(1, 1:length(xtick), labels = FALSE)
-  text(x = 1:length(xtick),
+  axis(1, seq_along(xtick), labels = FALSE)
+  text(x = seq_along(xtick),
        y = par()$usr[3] - 0.04 * (par()$usr[4] - par()$usr[3]),
        labels = xtick, srt = 30, adj = 1, xpd = NA, cex = 1.2)
   par(op)
@@ -291,6 +310,19 @@ node_boxplot <- function(gene,
 #' @import rmarkdown
 #' @importFrom magrittr %>%
 #' @return a shiny interface showing networks with selectable nodes and links
+#' @examples 
+#' data("synthetic_metadata")
+#' data("synthetic_rnaseqData")
+#' data("synthetic_proteomicData")
+#' data("synthetic_OlinkData")
+#' assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+#'                        "Proteomics" = synthetic_proteomicData,
+#'                        "Olink" = synthetic_OlinkData)
+#' deggs_object <- get_diffNetworks(assayData = assayData_list,
+#'                                  metadata = synthetic_metadata,
+#'                                  category_variable = "response",
+#'                                  cores = 2)
+#' View_diffNetworks(deggs_object)                               
 #' @export
 View_diffNetworks <- function(deggs_object,
                               legend.arrow.width = 0.35,
@@ -315,7 +347,7 @@ View_diffNetworks <- function(deggs_object,
                            "layer" = NA)
     
     # check if the category_network has data 
-    outVar = shiny::reactive({
+    outVar <- shiny::reactive({
       if (!is.data.frame(category_networks[[input$category]])) return(empty_df)
       if (nrow(category_networks[[input$category]]) == 0) return(empty_df)
       return(category_networks[[input$category]])
@@ -354,8 +386,7 @@ View_diffNetworks <- function(deggs_object,
             )
           ) else (
             DT::datatable(
-              edges %>%
-                subset(id %in% input$current_edges_selection),
+              edges[edges$id %in% input$current_edges_selection, ],
               options = list(
                 lengthChange = FALSE, scrollX = TRUE,
                 columnDefs = list(list(
@@ -407,8 +438,9 @@ View_diffNetworks <- function(deggs_object,
           if (nrow(edges) == 0) {
             nodes <- data.frame()
             edges <- data.frame()
-            network.title <- paste0("No differential interaction with ", sig_var,
-                                    "<", input$slider, ".<br> Try to increase the ",
+            network.title <- paste0("No differential interaction with ", 
+                                    sig_var, "<", input$slider, 
+                                    ".<br> Try to increase the ",
                                     sig_var, " threshold.")
             visNetwork::visNetwork(nodes, edges, main = network.title)
           } else {
@@ -450,13 +482,13 @@ View_diffNetworks <- function(deggs_object,
               ) 
           }
         } else {
-          network.title = "No differential interaction active for this category"
+          network.title <- "No differential interaction active for this category"
           nodes <- data.frame()
           edges <- data.frame()
           visNetwork::visNetwork(nodes, edges, main = network.title)
         }
       } else {
-        network.title = "No differential interaction active for this category"
+        network.title <- "No differential interaction active for this category"
         nodes <- data.frame()
         edges <- data.frame()
         visNetwork::visNetwork(nodes, edges, main = network.title)
@@ -472,26 +504,25 @@ View_diffNetworks <- function(deggs_object,
     output$edge_or_node_plot <- shiny::renderPlot({
       edges <- category_networks[[input$category]]
       try(
-      if (is.null(input$current_nodes_selection) &
-          length(input$current_edges_selection) == 1) {
-        plot_regressions(
-          deggs_object = deggs_object,
-          gene_A = edges[input$current_edges_selection, "from"],
-          gene_B = edges[input$current_edges_selection, "to"],
-          assayDataName = ifelse(multiOmic, 
-                                 as.character(edges[input$current_edges_selection,
-                                                    "layer"]),
-                                 1)
-        )
-      } else {
-        shiny::req(input$current_nodes_selection != "")
-        node_boxplot(
-          deggs_object = deggs_object,
-          gene = input$current_nodes_selection,
-          assayDataName = 1
-        )
-      }
-      ,silent = TRUE)
+        if (is.null(input$current_nodes_selection) &
+            length(input$current_edges_selection) == 1) {
+          plot_regressions(
+            deggs_object = deggs_object,
+            gene_A = edges[input$current_edges_selection, "from"],
+            gene_B = edges[input$current_edges_selection, "to"],
+            assayDataName = ifelse(multiOmic, 
+                   as.character(edges[input$current_edges_selection, "layer"]),
+                   1)
+          )
+        } else {
+          shiny::req(input$current_nodes_selection != "")
+          node_boxplot(
+            deggs_object = deggs_object,
+            gene = input$current_nodes_selection,
+            assayDataName = 1
+          )
+        }
+        ,silent = TRUE)
     })
     
     # Highligh the searched node in the network
@@ -542,8 +573,10 @@ View_diffNetworks <- function(deggs_object,
         
         # Slider
         shiny::sliderInput("slider",
-                           label = ifelse(deggs_object[["padj_method"]] == "none",
-                                          "P values", "Adjusted P values"),
+                           label = ifelse(
+                             deggs_object[["padj_method"]] == "none",
+                             "P values",
+                             "Adjusted P values"),
                            min = 0.01,
                            max = 10, # fake, it will be updated by updateSliderInput
                            value = 0.05, step = 0.01

@@ -21,7 +21,8 @@ get_diffNetworks_singleOmic(
 \item{assayData}{a matrix or data.frame (or list of matrices or data.frames
 for multi-omic analysis) containing normalised assay data.
 Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of data.
+For multi omic analysis, it is highly recommended to use a named list of
+data.
 If unnamed, sequential names (assayData1, assayData2, etc.) will be
 assigned to identify each matrix or data.frame.}
 
@@ -66,6 +67,12 @@ method for multiple test adjustment. It can be either one of the methods
 provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hochberg,
 etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
 When using "q.value" the \code{qvalue} package must be installed first.}
+
+\item{show_progressBar}{logical. Whether to display a progress bar during
+execution. Default is TRUE.}
+
+\item{verbose}{logical. Whether to print detailed output messages during
+processing. Default is TRUE}
 
 \item{cores}{number of cores to use for parallelisation.}
 }

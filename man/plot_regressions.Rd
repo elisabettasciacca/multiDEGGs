@@ -46,3 +46,23 @@ gene A ~ gene B \* category is reported on top.
 \description{
 Plot differential regressions for any target-target pair in an omic dataset
 }
+\examples{
+data("synthetic_metadata")
+data("synthetic_rnaseqData")
+data("synthetic_proteomicData")
+data("synthetic_OlinkData")
+assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+                       "Proteomics" = synthetic_proteomicData,
+                       "Olink" = synthetic_OlinkData)
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 padj_method = "bonferroni",
+                                 cores = 2)
+plot_regressions(deggs_object,
+                 assayDataName = "RNAseq",
+                 gene_A = "MTOR", 
+                 gene_B = "AKT2",
+                 legend_position = "bottomright")
+}

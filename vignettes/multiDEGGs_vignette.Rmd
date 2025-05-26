@@ -1,6 +1,13 @@
 ---
 title: "Differential Network Analysis with multiDEGGs"
-output: rmarkdown::html_vignette
+author: "Elisabetta Sciacca, Myles Lewis"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 2
+    number_sections: false
 vignette: >
   %\VignetteIndexEntry{multiDEGGs vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -14,26 +21,34 @@ knitr::opts_chunk$set(
 )
 ```
 
-The multiDEGGs package performs multi-omic differential network 
-analysis by showing differential interactions between molecular entities
-(genes, proteins, miRNAs, or other biomolecules) across the omic datasets
-provided.  
-For each omic dataset, a differential network is constructed where
-links represent statistically significant differential interactions between 
-entities. These networks are then integrated into a comprehensive visualization
-using distinct colors to distinguish interactions from different omic layers.  
-  
-This unified visualisation allows interactive exploration of cross-omic
-patterns (e.g. differential interactions present at both transcript and
-protein level). For each link, users can access differential statistical 
-significance metrics (p-values or adjusted p values, calculated via robust or 
-traditional linear regression with interaction term) and differential regression
-plots.   
-  
-  
-# Get started
-Let's start by loading the package and sample data
-```{r}
+<p>The multiDEGGs package performs multi-omic differential network analysis by 
+showing differential interactions between molecular entities (genes, proteins, 
+miRNAs, or other biomolecules) across the omic datasets provided.</p>
+
+<p>For each omic dataset, a differential network is constructed, where links 
+represent statistically significant differential interactions between entities. 
+These networks are then integrated into a comprehensive visualization using 
+distinct colors to distinguish interactions from different omic layers.</p>
+
+<p>This unified visualization allows interactive exploration of cross-omic patterns 
+(e.g., differential interactions present at both transcript and protein level). 
+For each link, users can access differential statistical significance metrics 
+(p-values or adjusted p-values, calculated via robust or traditional linear 
+regression with interaction term), and differential regression plots.</p>
+
+## Installation
+
+multiDEGGs can be installed from GitHub using devtools:
+
+```r
+devtools::install_github("elisabettasciacca/multiDEGGs")
+```
+
+## Getting Started
+
+Let's start by loading the package and sample data:
+
+```{r load_data}
 library(multiDEGGs)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
@@ -41,205 +56,357 @@ data("synthetic_proteomicData")
 data("synthetic_OlinkData")
 ```
 
-## Generate differential networks
-```{r setup}
-assayData_list <- list("RNAseq" = rnaseq,
-                       "Proteomics" = proteomics,
-                       "Olink" = olink)
+## Generate Differential Networks
+
+```{r}
+assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+                       "Proteomics" = synthetic_proteomicData,
+                       "Olink" = synthetic_OlinkData)
 
 deggs_object <- get_diffNetworks(assayData = assayData_list,
-                                 metadata = metadata,
+                                 metadata = synthetic_metadata,
                                  category_variable = "response",
                                  regression_method = "lm",
-                                 # padj_method = "qvalue", 
+                                 padj_method = "bonferroni",
                                  verbose = FALSE,
                                  show_progressBar = FALSE,
                                  cores = 2)
 ```
 
-It is worth to comment on some of the parameters of `get_diffNetworks`:
- - `assayData` accepts either a single normalised matrix/data frame (in case of single 
-omic differential analysis), or a list of matrices/data frames (for 
-multi-omic scenarios). For multi omic analysis, it is highly recommended to use 
-a named list of data. If unnamed, sequential names (assayData1, assayData2, 
-etc.) will be assigned to identify each matrix or data.frame.
- - `metadata` can also be a named factor vector, with names matching the 
-patients IDs in columns names of the assay data matrices/data frames.
-In that case, the category_variable can stay unset (NULL by default). 
-- `category_subset`: this parameter can be used to restrict the analysis to a 
-certain subset of categories available in the metadata/vategory variable. v 
- - `regression_method` is set to `"lm"` by default because it is faster and highly 
-recommended in machine learning scenarios, where the function might be repeatedly
-called many times. For basic differential anlyses, `"rlm"` can also be used and can perform 
-better in some case.  
- - `percentile_vector`: by default, molecular targets (gene, proteins, ...)
- whose expression level is below the 
-35th percentile of the entire data matrix are excluded from the analysis. 
-This threshold can be modified by specifying the percentile vector that is 
-internally 
-used for the percolation analysis. E.g., to remove only targets below the 25th 
-percentile the `percentile_vector` parameter must be set to: 
-`percentile_vector = seq(0.25, 0.98, by = 0.05)`
- - `padj_method`: the default method is bonferroni, Storeys's q values often 
- give more generous results but the `qvalue` package needs to be installed first.
- 
-*NOTE*: it is expected that not all patient IDs are present across datasets. 
-It is ok to have different number of samples per omic. Only IDs whose data is 
-available in the colnames of the assayData will enter the process. Missing IDs 
-will be listed in a message similar to the following:  
+### Key Parameters of `get_diffNetworks`
+
+It's worth explaining some of the important parameters of `get_diffNetworks`:
+
+* `assayData`: accepts either a single normalized matrix/data frame (for single 
+  omic differential analysis), or a list of matrices/data frames (for multi-omic 
+  scenarios). For multi-omic analysis, it's highly recommended to use a named 
+  list of data. If unnamed, sequential names (assayData1, assayData2, etc.) will 
+  be assigned to identify each matrix or data frame.
+
+* `metadata`: can also be a named factor vector, with names matching the patient 
+  IDs in column names of the assay data matrices/data frames. In that case, the 
+  category_variable can remain unset (NULL by default).
+
+* `category_subset`: this parameter can restrict the analysis to a certain 
+  subset of categories available in the metadata/category vector.
+
+* `regression_method`: set to `"lm"` by default because it is faster and highly 
+  recommended in machine learning scenarios, where the function might be 
+  repeatedly called many times. For basic differential analyses, `"rlm"` can 
+  also be used and may perform better in some cases.
+
+* `percentile_vector`: by default, molecular targets (genes, proteins, etc.) 
+  whose expression level is below the 35th percentile of the entire data matrix 
+  are excluded from the analysis. This threshold can be modified by specifying 
+  the percentile vector that is internally used for the percolation analysis. 
+  For example, to remove only targets below the 25th percentile, set 
+  `percentile_vector = seq(0.25, 0.98, by = 0.05)`.
+
+* `padj_method`: the default method is Bonferroni. Storey's q values often give 
+  more generous results but the `qvalue` package needs to be installed first.
+
+**NOTE**: Not all patient IDs need to be present across datasets. Different 
+numbers of samples per omic are acceptable. Only IDs whose data is available in 
+the colnames of the assayData will be included in the analysis. Missing IDs will 
+be listed in a message similar to:
+
 `The following samples IDs are missing in Proteomics: PT001, PT005, PT0030`
 
-## Visualisation
-The `deggs_object` will now contain the differential networks for each omic data
-in `assayData_list`. 
-These networks can be integrated into a comprehensive visualization
-where different colors will be used to distinguish links from different omic layers.
+## Visualization
+
+The `deggs_object` now contains the differential networks for each omic data
+in `assayData_list`. These networks can be integrated into a comprehensive 
+visualization where different colors distinguish links from different omic 
+layers.
 
 ```{r, eval=FALSE}
 View_diffNetworks(deggs_object)
 ``` 
-  
-This will let you navigate the networks associated to each category of patients (1), 
-filter by link significance (2), and look for specific genes (3). 
 
----- IMAGE TO BE ADDED HERE ---- 
+This visualization interface allows you to:
 
-Thicker links correspond to higher significant p values. 
-The direction of the arrows shows the direction that is reported in literature 
-about the link, and it is not derived from the data. 
-  
-Additionally, the user can visualise differential regression plots by clicking 
-on a link:
+1. Navigate the networks associated with each patient category
+2. Filter by link significance
+3. Search for specific genes inside the network
 
----- IMAGE TO BE ADDED HERE ---- 
+<p>&nbsp;</p>
+![](multiDEGGs_1.png){width=60%}
+<p>&nbsp;</p> 
 
-Single node differential expressions can also be visualised by clicking on 
-the nodes.  
+Thicker links correspond to higher significant p-values.  
+The direction of the 
+arrows shows the relationship direction reported in literature, not derived from 
+the data.
 
----- IMAGE TO BE ADDED HERE ---- 
+The user can visualize differential regression plots by clicking on a link:
 
-NOTE: for multi-omic scenarios, the data of the first matrix of the list given 
-passed to `assayData` will be used for this plot. 
+<p>&nbsp;</p>
+![](multiDEGGs_2.png){width=50%}
+<p>&nbsp;</p> 
 
+Single node differential expressions can also be visualized by clicking on the 
+nodes:
 
-## List all differential interactions
-Outside of the interactive environment, the `get_multiOmics_diffNetworks` can be
-used to get a table of all the 
-differential interactions, ordered by p value or adjusted p: 
-```{r}
-get_multiOmics_diffNetworks(deggs_object)
+<p>&nbsp;</p>
+![](multiDEGGs_3.png){width=50%}
+<p>&nbsp;</p> 
+
+**NOTE**: For multi-omic scenarios, the data from the first matrix in the list 
+passed to `assayData` will be used for this boxplot.
+
+## List All Differential Interactions
+
+Outside of the interactive environment, the `get_multiOmics_diffNetworks()` 
+function can be used to get a table of all differential interactions, ordered by 
+p-value or adjusted p-value:
+
+```{r, warning=FALSE}
+get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)
 ```
   
-For single omic scenarios: 
-```{r}
-get_sig_deggs(deggs_object_single_omic)
-```
-  
+For single omic scenarios, use the `get_sig_deggs()` function:
 
-## Differential regression plots 
+```{r}
+deggs_object_oneOmic <- get_diffNetworks(assayData = synthetic_rnaseqData,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 padj_method = "bonferroni",
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 2)
+
+get_sig_deggs(deggs_object_oneOmic, sig_threshold = 0.05)
+```
+
+## Differential Regression Plots 
+
 To plot the differential regression fits outside of the interactive environment, 
-`plot_regressions` must be used: 
+use `plot_regressions()` specifying the omic data to be used and the two targets:
   
-```{r, fig.width = 6.5, fig.height = 4.5}
+```{r, fig.width = 5, fig.height = 3.5}
 plot_regressions(deggs_object,
                  assayDataName = "RNAseq",
-                 gene_A = "geneA", 
-                 gene_B = "geneB",
+                 gene_A = "MTOR", 
+                 gene_B = "AKT2",
                  legend_position = "bottomright")
 ```
   
-In single omic analyses `assayDataName` can remain unset. 
-  
-# Differential network analysis with more than two groups 
-It is possible to compare the differential interactions among more than two 
-categorical groups. All the steps described above stay the same, the dropdown 
-menu of the interactive environment will show all the categories available: 
+In single omic analyses, the `assayDataName` parameter can remain unset.
 
----- IMAGE TO BE ADDED HERE ---- 
+## Differential Network Analysis with More Than Two Groups 
 
-and the regression plots associate to links will show fits for each category. 
+It's possible to compare differential interactions among more than two 
+categorical groups. All steps described above stay the same;  
+the dropdown 
+menu of the interactive environment will show all available categories:
 
----- IMAGE TO BE ADDED HERE ---- 
+<table>
+  <tr>
+    <td><img src="multiDEGGs_4.png" width="100%"/></td>
+  </tr>
+</table>
 
-It is recommended to have at least 4 or 5 observations per group.  
+while regressions and boxplots will show all categories:  
 
-# Using multiDEGGs for feature selection in machine learning with nestedCV
-Detect differentially expressed interactions is useful to gain insightful 
-knowledge on molecular dyregulations affecting certain conditions.
-This information can also be exploited to train predictive models for the 
-category of interest. 
+<table>
+  <tr>
+    <td><img src="multiDEGGs_5.png" width="100%"/></td>
+    <td><img src="multiDEGGs_6.png" width="100%"/></td>
+  </tr>
+</table>
 
+The statistical significance of the interaction term is calculated via one-way 
+ANOVA in this case.  
+We highly recommend to have at least 4 or 5 observations per group.
 
-```{r, eval = FALSE}
-library(nestedCV)
+## Using multiDEGGs for Feature Selection in Machine Learning with nestedCV
 
-# convert your metadata into a named factor vector containing only the category
-# variable you are interested in. 
-metadata_vector <- as.factor(metadata[, "response"])
+Detecting differentially expressed interactions is useful for gaining insights 
+into molecular dysregulations affecting certain conditions. This information can 
+also be leveraged to train predictive models for the category of interest.
 
-# make sure countData is matrix and transpose, so that features are in colums, 
-# as usual in machine learning 
-countData <- as.matrix(t(RNAseq))
+While some models, such as glmnet, allow for sparsity and have built-in variable
+selection, many models fail to fit when given massive numbers of predictors, or 
+perform poorly due to overfitting. In medicine, one of the common goals of 
+predictive modeling is the development of diagnostic or biomarker tests, for 
+which reducing the number of predictors is typically a practical necessity.  
+<b> The 
+differential molecular interactions found with multiDEGGs can be used to filter 
+down the number of predictors. </b>
 
-# NOTE: make sure your vector is ALIGNED with countData. 
+However, filtering predictors on the whole dataset creates information leakage 
+about the test set, leading to overly optimistic performance assessments 
+(Vabalas et al., 2019).  
+Feature selection should be considered an integral part 
+of a model, with selection performed only on training data. Then the selected 
+features and accompanying model can be tested on hold-out test data without 
+bias.
+
+While most machine learning pipelines involve splitting data into training and 
+testing cohorts (typically 2/3 and 1/3 respectively), medical datasets may be 
+too small for this approach, resulting in accuracy determination problems, due
+tosmall test sets. Nested cross-validation (CV) provides a way to address this by 
+maximizing use of the whole dataset for testing overall accuracy, while 
+maintaining the split between training and testing.
+
+As mentioned earlier, <b> it is important that any filtering of predictors is 
+performed within the CV loops to prevent test data information leakage. </b> 
+For this 
+reason, we demonstrate how to use multiDEGGs in combination with the nestedCV 
+package, where filtering can be applied to each outer CV training fold (see also 
+the `nestedCV` vignette).
+
+### Modification of Predictors 
+
+The core idea behind multiDEGGs is that the interaction between two molecular 
+entities can provide additional information beyond the expression of individual 
+molecular entities. In machine learning terms, this suggests that combinations 
+of certain predictors may carry more information than individual predictor data.
+
+Therefore, we propose using multiDEGGs not only to select predictors involved in 
+differential interactions but also to create new predictors based on 
+combinations of the original ones. These relationships can be modeled by adding 
+new predictors as combinations of pairs of original predictors (e.g., 
+multiplication, ratio, etc.).
+
+To evaluate the performance of the resulting trained model, these combined 
+predictors must also be added to the test set. The nestedCV package allows 
+integration of predictor modification into the CV loop, enabling modification of 
+both training and test sets separately, avoiding data leakage.
+
+The first step is to define a custom filtering function that extracts the 
+differential nodes and links from the selected fold:
+    
+```{r}
+# Convert metadata into a named factor vector containing only the labels to 
+# predict (to ensure compatibility with the nestedCV functions)
+metadata_vector <- as.factor(synthetic_metadata[, "response"])
+
+# Make sure the assay data you want to use for prediction is a matrix and
+# transpose it, so features are in columns 
+# (standard format for machine learning)
+assayData <- as.matrix(t(synthetic_rnaseqData))
+
+# NOTE: Make sure your vector is ALIGNED with assayData. 
 # The order of the annotations in the metadata_vector must match the 
-# samples in the columns of countData
+# samples in the rows of assayData
 
-# remove zero variance columns from data
-countData <- countData[,apply(countData, 2, var, na.rm=TRUE) != 0] 
+# Remove zero variance columns from data
+assayData <- assayData[,apply(assayData, 2, var, na.rm=TRUE) != 0] 
 
-DEGGs_modxy <- function(metadata, countData, ...) {
-  counts <- t(x)
-  names(metadata_vector) <- colnames(countData)
-  deggs_object <- multiDEGGs::get_diffNetworks(assayData = countData,
-                                          metadata = metadata_vector,
-                                          percentile_vector = seq(0.25, 0.98, by = 0.05),
-                                          use_qvalues = TRUE, 
-                                          show_progressBar = FALSE,
-                                          verbose = FALSE,
-                                          cores = 1)
+# define a filtering function that extracts differential nodes and links
+# using multiDEGGs:
+DEGGs_modxy <- function(metadata, assayData, ...) {
+  counts <- t(assayData)
+  names(metadata_vector) <- rownames(assayData)
+  
+  deggs_object <- multiDEGGs::get_diffNetworks(
+    assayData = counts,
+    metadata = metadata_vector,
+    percentile_vector = seq(0.25, 0.98, by = 0.05),
+    use_qvalues = TRUE, 
+    show_progressBar = FALSE,
+    verbose = FALSE,
+    cores = 1
+  )
   
   pairs <- multiDEGGs::get_sig_deggs(deggs_object, 1, 0.05)
-  # to make sure genes are taken 2 by 2 from top pairs to lower one
-  keep_DEGGs <- unique(unlist(lapply(1:nrow(pairs), function(i)(
+  
+  # Take genes 2 by 2 from top pairs to lower ones
+  keep_DEGGs <- unique(unlist(lapply(1:nrow(pairs), function(i) {
     row_n = c(pairs[i,1], pairs[i,2])
-  ))))
-  if (length(keep_DEGGs) > 10){
-    keep_DEGGs <- keep_DEGGs[1:10] # now these genes will be the top ones in pairs
-    pairs <- pairs[which(pairs$var1 %in% keep_DEGGs & pairs$var2 %in% keep_DEGGs), ]
-  }
+  })))
+  
+  # The following could be added if you want to set a maximum number of 
+  # predictors to be selected: 
+  # if (length(keep_DEGGs) > 50) {    # take only top 50 predictors 
+  #   keep_DEGGs <- keep_DEGGs[1:50]
+  #   pairs <- pairs[which(pairs$var1 %in% keep_DEGGs & 
+  #                        pairs$var2 %in% keep_DEGGs), ]
+  # }
+  
   out <- list(keep_DEGGs = keep_DEGGs, pairs = pairs)
   class(out) <- "DEGGs_modxy"
   return(out)
 }
-
-
-# Train a glmnet model
-fitted_model <- nestcv.glmnet(y = metadata, 
-                     x = countData,
-                     filterFUN = NULL,
-                     filter_options = list(nfilter = 20),
-                     family="binomial",
-                     alphaSet = seq(0.7, 1, 0.1),
-                     min_1se = 0,
-                     cv.cores = 1,
-                     modifyX_useY = TRUE,
-                     verbose = TRUE)
-
-# Train a random forest model
-fitted_model <- nestcv.train(y = metadata,
-                    x = countData,
-                    method = "rf",
-                    n_outer_folds = 8,
-                    modifyX = "DEGGs_ttest_modxy",
-                    filter_options = list(nfilter = 20),
-                    modifyX_useY = TRUE,
-                    cv.cores = 4, 
-                    verbose = TRUE)
 ```
 
- 
-# Session info
+Next, define a predict function that specifies how to modify the train and test 
+set predictors based on the filtering:
+  
+```{r}
+# This custom predict function will add new columns to x (can be train or test)
+predict.DEGGs_modxy <- function(DEGGs.object, newdata, filter = TRUE, 
+                                interaction.type = "ratio",
+                                sep = ":", ...) {
+  if (length(DEGGs.object$keep) != 0) {
+    pairs <- DEGGs.object$pairs
+    x2a <- newdata[, pairs[, 1], drop = FALSE]
+    x2b <- newdata[, pairs[, 2], drop = FALSE]
+    
+    if (interaction.type == "ratio") {
+      x2 <- x2a/x2b
+    } else {
+      x2 <- x2a*x2b
+    }
+    
+    colnames(x2) <- paste(colnames(x2a), colnames(x2b), sep = sep)
+    
+    if (filter) {
+      keep <- DEGGs.object$keep[!is.na(DEGGs.object$keep)]
+      x1 <- newdata[, keep]
+      return(cbind(x1, x2))
+    } else {
+      return(cbind(newdata, x2))
+    }
+  }
+  return(newdata)
+}
+```
+
+Now you're ready to train your model with glmnet or any other model available 
+in the `caret` package:
+
+```r
+library(nestedCV)
+
+# Train a glmnet model
+fitted_model <- nestcv.glmnet(
+  y = metadata_vector, 
+  x = assayData,
+  filterFUN = NULL,
+  filter_options = list(nfilter = 20),
+  family = "binomial",
+  alphaSet = seq(0.7, 1, 0.1),
+  min_1se = 0,
+  cv.cores = 1,
+  modifyX_useY = TRUE,
+  verbose = TRUE
+)
+
+# Train a random forest model
+fitted_model <- nestcv.train(
+  y = metadata_vector,
+  x = assayData,
+  method = "rf",
+  n_outer_folds = 8,
+  modifyX = "DEGGs_ttest_modxy",
+  filter_options = list(nfilter = 20),
+  modifyX_useY = TRUE,
+  cv.cores = 4, 
+  verbose = TRUE
+)
+```
+
+The ROC curve can be easily plotted: 
+
+```r
+plot(fitted_model$roc, col = 'red')
+```
+
+## Session Info
+
 ```{r}
 sessionInfo()
 ```

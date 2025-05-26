@@ -21,7 +21,8 @@ calc_pvalues_percentile(
 \item{assayData}{a matrix or data.frame (or list of matrices or data.frames
 for multi-omic analysis) containing normalised assay data.
 Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of data.
+For multi omic analysis, it is highly recommended to use a named list of
+data.
 If unnamed, sequential names (assayData1, assayData2, etc.) will be
 assigned to identify each matrix or data.frame.}
 

@@ -31,7 +31,7 @@ Description: The multiDEGGs package performs multi-omic differential network
       plots. 
 License: GPL-3
 Encoding: UTF-8
-LazyData: false
+LazyData: true
 LazyDataCompression: gzip
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
@@ -42,7 +42,9 @@ biocViews: Sequencing, RNASeq, GeneExpression, Transcription,
 Language: en-gb
 URL: https://github.com/elisabettasciacca/multiDEGGs/
 BugReports: https://github.com/elisabettasciacca/multiDEGGs/issues
-Suggests: qvalue
+Suggests: 
+    qvalue,
+    testthat (>= 3.0.0)
 Imports:
     DT,
     grDevices, 
@@ -62,5 +64,6 @@ Imports:
     utils,
     visNetwork
 Depends: 
-     R (>= 4.2.0)
+     R (>= 4.4.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3

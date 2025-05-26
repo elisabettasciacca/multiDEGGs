@@ -33,6 +33,9 @@ Continuous variables are not allowed.}
 \item{category_variable}{column name in \code{metadata} (if data.frame or matrix)
 or NULL if \code{metadata} is already a named vector containing category
 information.}
+
+\item{verbose}{Logical. Whether to print detailed output messages
+during processing. Default is FALSE.}
 }
 \value{
 a tidy named factor vector of sample annotations.

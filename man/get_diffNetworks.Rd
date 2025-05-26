@@ -22,7 +22,8 @@ get_diffNetworks(
 \item{assayData}{a matrix or data.frame (or list of matrices or data.frames
 for multi-omic analysis) containing normalised assay data.
 Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of data.
+For multi omic analysis, it is highly recommended to use a named list of
+data.
 If unnamed, sequential names (assayData1, assayData2, etc.) will be
 assigned to identify each matrix or data.frame.}
 
@@ -74,6 +75,12 @@ provided by the \code{p.adjust} function from \code{stats} (bonferroni, BH, hoch
 etc.) or "q.value" for Storey's q values, or "none" for unadjusted p values.
 When using "q.value" the \code{qvalue} package must be installed first.}
 
+\item{show_progressBar}{logical. Whether to display a progress bar during
+execution. Default is TRUE.}
+
+\item{verbose}{logical. Whether to print detailed output messages during
+processing. Default is TRUE}
+
 \item{cores}{number of cores to use for parallelisation.}
 }
 \value{
@@ -82,4 +89,53 @@ p values or adjusted p values for each link.
 }
 \description{
 Generate a multi-layer differential network with interaction p values
+}
+\examples{
+# Single omic analysis:
+data("synthetic_metadata")
+data("synthetic_rnaseqData")
+deggs_object <- get_diffNetworks(assayData = synthetic_rnaseqData,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 padj_method = "bonferroni",
+                                 cores = 2)
+
+# multi-omic analysis: 
+data("synthetic_metadata")
+data("synthetic_rnaseqData")
+data("synthetic_proteomicData")
+data("synthetic_OlinkData")
+assayData_list <- list("RNAseq" = synthetic_rnaseqData,
+                       "Proteomics" = synthetic_proteomicData,
+                       "Olink" = synthetic_OlinkData)
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 regression_method = "lm",
+                                 padj_method = "bonferroni",
+                                 cores = 2)
+
+# to use only certain categories for comparison: 
+# let's randomly add another level of response to the example metadata
+indices <- sample(1:nrow(synthetic_metadata), 20, replace = FALSE) 
+synthetic_metadata$response[indices] <- "Moderate response"
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 category_subset = c("Responder", 
+                                                     "Non-responder"),
+                                 regression_method = "lm",
+                                 cores = 2)
+
+# to be more generous on the targets to be excluded, and lower the expression 
+# level threshold to the 25th percentile (or lower): 
+deggs_object <- get_diffNetworks(assayData = assayData_list,
+                                 metadata = synthetic_metadata,
+                                 category_variable = "response",
+                                 category_subset = c("Responder", 
+                                                     "Non-responder"),
+                                 regression_method = "lm",
+                                 percentile_vector = seq(0.25, 0.98, by = 0.05),
+                                 cores = 2)
 }
