@@ -99,8 +99,10 @@ deggs_object <- get_diffNetworks(assayData = synthetic_rnaseqData,
                                  category_variable = "response",
                                  regression_method = "lm",
                                  padj_method = "bonferroni",
-                                 cores = 4)
-
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 1)
+ 
 # multi-omic analysis: 
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
@@ -114,8 +116,10 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  category_variable = "response",
                                  regression_method = "lm",
                                  padj_method = "bonferroni",
-                                 cores = 4)
-
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 1)
+                                 
 # to use only certain categories for comparison: 
 # let's randomly add another level of response to the example metadata
 indices <- sample(1:nrow(synthetic_metadata), 20, replace = FALSE) 
@@ -126,8 +130,10 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  category_subset = c("Responder", 
                                                      "Non-responder"),
                                  regression_method = "lm",
-                                 cores = 4)
-
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 1)
+                                 
 # to be more generous on the targets to be excluded, and lower the expression 
 # level threshold to the 25th percentile (or lower): 
 deggs_object <- get_diffNetworks(assayData = assayData_list,
@@ -137,5 +143,7 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                                      "Non-responder"),
                                  regression_method = "lm",
                                  percentile_vector = seq(0.25, 0.98, by = 0.05),
-                                 cores = 4)
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 1)                                  
 }

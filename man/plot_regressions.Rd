@@ -59,7 +59,9 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  category_variable = "response",
                                  regression_method = "lm",
                                  padj_method = "bonferroni",
-                                 cores = 2)
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
+                                 cores = 1)
 plot_regressions(deggs_object,
                  assayDataName = "RNAseq",
                  gene_A = "MTOR", 

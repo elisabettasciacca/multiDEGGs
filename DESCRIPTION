@@ -23,7 +23,8 @@ Description: The multiDEGGs package performs multi-omic differential network
       protein levels. For each link, users can access differential statistical 
       significance metrics (p-values or adjusted p-values, calculated via robust or 
       traditional linear regression with interaction term) and differential regression
-      plots. 
+      plots.
+Maintainer: Elisabetta Sciacca <e.sciacca@qmul.ac.uk>
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

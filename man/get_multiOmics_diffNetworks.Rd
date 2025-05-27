@@ -30,6 +30,8 @@ assayData_list <- list("RNAseq" = synthetic_rnaseqData,
 deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  metadata = synthetic_metadata,
                                  category_variable = "response",
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
                                  cores = 2)
 get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)
 }

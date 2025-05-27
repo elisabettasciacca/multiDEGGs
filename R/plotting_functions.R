@@ -51,7 +51,9 @@ my_palette <- function(n) {
 #'                                  category_variable = "response",
 #'                                  regression_method = "lm",
 #'                                  padj_method = "bonferroni",
-#'                                  cores = 2)
+#'                                  verbose = FALSE,
+#'                                  show_progressBar = FALSE,
+#'                                  cores = 1)
 #' plot_regressions(deggs_object,
 #'                  assayDataName = "RNAseq",
 #'                  gene_A = "MTOR", 
@@ -302,10 +304,6 @@ node_boxplot <- function(gene,
 #' @param stepY_legend vertical space between legend arrows. It is used together 
 #' with `legend.arrow.width` to adjust the legend space in case of graphical
 #' errors. Default is 55. 
-#' @param host local IP address (character), to be used only to run the function
-#' in non-blocking mode (see vignette)
-#' @param port TCP port (character or numeric), to be used only to run the 
-#' function in non-blocking mode (see vignette)
 #' @import knitr
 #' @import rmarkdown
 #' @importFrom magrittr %>%
@@ -321,14 +319,17 @@ node_boxplot <- function(gene,
 #' deggs_object <- get_diffNetworks(assayData = assayData_list,
 #'                                  metadata = synthetic_metadata,
 #'                                  category_variable = "response",
-#'                                  cores = 2)
-#' View_diffNetworks(deggs_object)                               
+#'                                  regression_method = "lm",
+#'                                  verbose = FALSE,
+#'                                  show_progressBar = FALSE,
+#'                                  cores = 1)
+#' \dontrun{
+#' View_diffNetworks(deggs_object)  
+#' }
 #' @export
 View_diffNetworks <- function(deggs_object,
                               legend.arrow.width = 0.35,
-                              stepY_legend = 55,
-                              host = NULL,
-                              port = NULL) {
+                              stepY_legend = 55) {
   
   if (!is(deggs_object, "deggs")) stop("deggs_object must be of class deggs")
   
@@ -607,6 +608,5 @@ View_diffNetworks <- function(deggs_object,
               });
     });"))
   )
-  shiny::shinyApp(ui = ui, server = server,
-                  options = list(host = host, port = port))
+  shiny::shinyApp(ui = ui, server = server)
 }

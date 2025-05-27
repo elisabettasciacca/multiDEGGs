@@ -34,6 +34,8 @@ data("synthetic_rnaseqData")
 deggs_object <- get_diffNetworks(assayData = synthetic_rnaseqData,
                                  metadata = synthetic_metadata,
                                  category_variable = "response",
+                                 verbose = FALSE,
+                                 show_progressBar = FALSE,
                                  cores = 2)
-get_sig_deggs(deggs_object_single_omic, sig_threshold = 0.05)                                 
+get_sig_deggs(deggs_object, sig_threshold = 0.05) 
 }
