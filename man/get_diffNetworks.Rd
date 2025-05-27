@@ -99,7 +99,7 @@ deggs_object <- get_diffNetworks(assayData = synthetic_rnaseqData,
                                  category_variable = "response",
                                  regression_method = "lm",
                                  padj_method = "bonferroni",
-                                 cores = 2)
+                                 cores = 4)
 
 # multi-omic analysis: 
 data("synthetic_metadata")
@@ -114,7 +114,7 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  category_variable = "response",
                                  regression_method = "lm",
                                  padj_method = "bonferroni",
-                                 cores = 2)
+                                 cores = 4)
 
 # to use only certain categories for comparison: 
 # let's randomly add another level of response to the example metadata
@@ -126,7 +126,7 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  category_subset = c("Responder", 
                                                      "Non-responder"),
                                  regression_method = "lm",
-                                 cores = 2)
+                                 cores = 4)
 
 # to be more generous on the targets to be excluded, and lower the expression 
 # level threshold to the 25th percentile (or lower): 
@@ -137,5 +137,5 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                                      "Non-responder"),
                                  regression_method = "lm",
                                  percentile_vector = seq(0.25, 0.98, by = 0.05),
-                                 cores = 2)
+                                 cores = 4)
 }
