@@ -305,7 +305,7 @@ get_diffNetworks_singleOmic <- function(assayData,
     parallel::clusterExport(cl, c(
       "percentile_vector", "category_median_list", "contrasts",
       "regression_method", "edges", "categories", "calc_pvalues_percentile",
-      "assayData", "calc_pvalues_network2", "metadata",
+      "assayData", "metadata",
       "sig_edges_count", "padj_method"
     ), envir = environment())
     

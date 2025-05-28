@@ -1,6 +1,6 @@
 Package: multiDEGGs
-Title: multi-omic Differentially Expressed Gene-Gene pairs 
-Version: 0.99.0
+Title: Multi-Omic Differentially Expressed Gene-Gene Pairs 
+Version: 1.0.0
 Authors@R: 
     c(person(given = "Elisabetta",
           family = "Sciacca",
@@ -11,6 +11,7 @@ Authors@R:
           role = c("ctb"),
           email = "myles.lewis@qmul.ac.uk",
           comment = c(ORCID = "0000-0001-9365-5345")))
+Maintainer: Elisabetta Sciacca <e.sciacca@qmul.ac.uk>
 Description: The multiDEGGs package performs multi-omic differential network 
       analysis by revealing differential interactions between molecular entities
       (genes, proteins, miRNAs, or other biomolecules) across the omic datasets
@@ -24,7 +25,6 @@ Description: The multiDEGGs package performs multi-omic differential network
       significance metrics (p-values or adjusted p-values, calculated via robust or 
       traditional linear regression with interaction term) and differential regression
       plots.
-Maintainer: Elisabetta Sciacca <e.sciacca@qmul.ac.uk>
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

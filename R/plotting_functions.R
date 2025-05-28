@@ -323,7 +323,8 @@ node_boxplot <- function(gene,
 #'                                  verbose = FALSE,
 #'                                  show_progressBar = FALSE,
 #'                                  cores = 1)
-#' \dontrun{
+#' # the below function runs a shiny app, so can't be run during R CMD check                                  
+#' if(interactive()){
 #' View_diffNetworks(deggs_object)  
 #' }
 #' @export
