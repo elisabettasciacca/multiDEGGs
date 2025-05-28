@@ -910,8 +910,6 @@ get_multiOmics_diffNetworks <- function(deggs_object,
     if (length(category_networks) > 0) {
       merged_network <- do.call(rbind, category_networks)
       merged_network$layer <- as.factor(merged_network$layer)
-      rownames(merged_network) <- paste0(rownames(merged_network), "_", 
-                                         merged_network$layer)
       merged_network <- merged_network[which(merged_network[, sig_var] < 
                                                sig_threshold), ]
       return(merged_network)
