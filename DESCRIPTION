@@ -11,7 +11,6 @@ Authors@R:
           role = c("ctb"),
           email = "myles.lewis@qmul.ac.uk",
           comment = c(ORCID = "0000-0001-9365-5345")))
-Maintainer: Elisabetta Sciacca <e.sciacca@qmul.ac.uk>
 Description: The multiDEGGs package performs multi-omic differential network 
       analysis by revealing differential interactions between molecular entities
       (genes, proteins, miRNAs, or other biomolecules) across the omic datasets
