@@ -1,0 +1,13 @@
+bibentry(
+  bibtype = "Article",
+  title = "DEGGs: An R package with shiny app for the identification of differentially expressed gene-gene interactions in high-Throughput sequencing data",
+  author = c(
+    person("Elisabetta", "Sciacca"),
+    person("et al.")
+  ),
+  journal = "Bioinformatics",
+  year = "2023",
+  volume = "39",
+  pages = "btad192",
+  doi = "10.1093/bioinformatics/btad192"
+)

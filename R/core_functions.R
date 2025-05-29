@@ -190,7 +190,7 @@ get_diffNetworks <- function(assayData,
   return(degg)
 }
 
-#' Generate differential networks for single onimc analysis 
+#' Generate differential networks for single omic analysis 
 #' 
 #' @inheritParams get_diffNetworks
 #' @param assayDataName name of the assayData, to identify which omic is. 
@@ -910,8 +910,8 @@ get_multiOmics_diffNetworks <- function(deggs_object,
     if (length(category_networks) > 0) {
       merged_network <- do.call(rbind, category_networks)
       merged_network$layer <- as.factor(merged_network$layer)
-      # merged_network <- merged_network[which(merged_network[, sig_var] < 
-      #                                          sig_threshold), ]
+      merged_network <- merged_network[which(merged_network[, sig_var] <
+                                               sig_threshold), ]
       return(merged_network)
     } else {
       message("No valid category_networks found for category: ", category, ".")

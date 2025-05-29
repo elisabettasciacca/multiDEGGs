@@ -246,7 +246,7 @@ bias.
 While most machine learning pipelines involve splitting data into training and 
 testing cohorts (typically 2/3 and 1/3 respectively), medical datasets may be 
 too small for this approach, resulting in accuracy determination problems, due
-tosmall test sets. Nested cross-validation (CV) provides a way to address this by 
+to small test sets. Nested cross-validation (CV) provides a way to address this by 
 maximizing use of the whole dataset for testing overall accuracy, while 
 maintaining the split between training and testing.
 
@@ -409,4 +409,9 @@ plot(fitted_model$roc, col = 'red')
 
 ```{r}
 sessionInfo()
+```
+  
+## Citation
+```{r}
+citation("multiDEGGs")
 ```

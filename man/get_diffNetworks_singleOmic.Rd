@@ -2,7 +2,7 @@
 % Please edit documentation in R/core_functions.R
 \name{get_diffNetworks_singleOmic}
 \alias{get_diffNetworks_singleOmic}
-\title{Generate differential networks for single onimc analysis}
+\title{Generate differential networks for single omic analysis}
 \usage{
 get_diffNetworks_singleOmic(
   assayData,
@@ -80,5 +80,5 @@ processing. Default is TRUE}
 a list of differential networks, one per category
 }
 \description{
-Generate differential networks for single onimc analysis
+Generate differential networks for single omic analysis
 }

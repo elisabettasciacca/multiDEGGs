@@ -4,36 +4,36 @@ Version: 1.0.0
 Authors@R: 
     c(person(given = "Elisabetta",
           family = "Sciacca",
-          role = c("aut", "cre"),
+          role = c("aut", "cre", "cph"),
           email = "e.sciacca@qmul.ac.uk",
           comment = c(ORCID = "0000-0001-7525-1558")),
       person(given = "Myles",family = "Lewis",
           role = c("ctb"),
           email = "myles.lewis@qmul.ac.uk",
           comment = c(ORCID = "0000-0001-9365-5345")))
-Description: The multiDEGGs package performs multi-omic differential network 
+Maintainer: Elisabetta Sciacca <e.sciacca@qmul.ac.uk>
+Description: Performs multi-omic differential network 
       analysis by revealing differential interactions between molecular entities
-      (genes, proteins, miRNAs, or other biomolecules) across the omic datasets
-      provided. For each omic dataset, a differential network is constructed where
+      (genes, proteins, transcription factors, or other biomolecules) across the
+      omic datasets provided. 
+      For each omic dataset, a differential network is constructed where
       links represent statistically significant differential interactions between 
       entities. These networks are then integrated into a comprehensive visualization
       using distinct colors to distinguish interactions from different omic layers.
       This unified display allows interactive exploration of cross-omic
       patterns, such as differential interactions present at both transcript and
       protein levels. For each link, users can access differential statistical 
-      significance metrics (p-values or adjusted p-values, calculated via robust or 
+      significance metrics (p values or adjusted p values, calculated via robust or 
       traditional linear regression with interaction term) and differential regression
-      plots.
+      plots.  
+      The methods implemented in this package are described in Sciacca et al. (2023)
+      <doi:10.1093/bioinformatics/btad192>.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: gzip
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-biocViews: Sequencing, RNASeq, GeneExpression, Transcription, 
-    DifferentialExpression, Regression, ImmunoOncology, NetworkEnrichment,
-    NetworkInference, BiomedicalInformatics, Transcriptomics, ShinyApps,
-    FeatureExtraction, GraphAndNetwork, Visualization, Network
 Language: en-gb
 URL: https://github.com/elisabettasciacca/multiDEGGs/
 BugReports: https://github.com/elisabettasciacca/multiDEGGs/issues
