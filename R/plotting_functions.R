@@ -34,7 +34,7 @@ my_palette <- function(n) {
 #' "topright")
 #' @importFrom methods is
 #' @importFrom grDevices adjustcolor
-#' @importFrom graphics abline axis boxplot legend mtext par points polygon text
+#' @importFrom graphics abline axis boxplot legend mtext points polygon text
 #' @return base graphics plot showing differential regressions across 
 #' categories. The p value of the interaction term of
 #' gene A ~ gene B \* category is reported on top.
@@ -189,14 +189,12 @@ plot_regressions <- function(deggs_object,
     sig_interaction <- p_interaction
   }
   
-  op <- par(mar = c(5.2, 6, 3.3, 5), xpd = TRUE)
   plot(df[, 1], df[, 2],
        type = 'n', bty = 'l', las = 1, cex.axis = 1.1,
        font.main = 1, cex.lab = 1.3, xlab = colnames(df)[1],
        ylab = colnames(df)[2],
        main = title
   )
-  op <- par(xpd = FALSE)
   
   for (i in seq_along(categories)) {
     # plot confidence intervals
@@ -230,7 +228,6 @@ plot_regressions <- function(deggs_object,
     bty = "o", box.lty = 0,
     cex = 0.8
   )
-  on.exit(par(op))
 }
 
 #' Boxplots of single nodes (genes,proteins, etc.)
@@ -271,8 +268,6 @@ node_boxplot <- function(gene,
   col <- my_palette(n = nlevels(metadata))
   cols <- col[as.numeric(x)]
   
-  op <- par(bty = 'l', mar = c(5.2, 6, 3.3, 5))
-  
   boxplot(y ~ x,
           outline = FALSE, whisklty = 1, medlwd = 2, cex.axis = 1.1,
           col = NA, cex.lab = 1.3, ylab = gene, las = 2, boxwex = .5,
@@ -283,11 +278,7 @@ node_boxplot <- function(gene,
          pch = 20, col = adjustcolor(cols, alpha.f = 0.7), cex = 2)
   
   xtick <- levels(x)
-  axis(1, seq_along(xtick), labels = FALSE)
-  text(x = seq_along(xtick),
-       y = par()$usr[3] - 0.04 * (par()$usr[4] - par()$usr[3]),
-       labels = xtick, srt = 30, adj = 1, xpd = NA, cex = 1.2)
-  par(op)
+  axis(1, at = seq_along(xtick), labels = xtick, cex.axis = 1.2)
 }
 
 
@@ -611,3 +602,4 @@ View_diffNetworks <- function(deggs_object,
   )
   shiny::shinyApp(ui = ui, server = server)
 }
+

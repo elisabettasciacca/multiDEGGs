@@ -634,8 +634,11 @@ calc_pvalues_percentile <- function(assayData,
     }) %>% unlist()
     num_sig_pvalues <- sum(p_values_sig_count) # these are p values or adj p
     
-    # The <<- operator here is used only for efficiency reasons in a controlled 
-    # fashion.
+    # The <<- operator here is used only for efficiency reasons and does not
+    # alter the .GlobalEnv as the variable sig_edges_count is defined in the 
+    # parent environment of the get_diffNetworks_singleOmic() parent function 
+    # (see
+    # https://contributor.r-project.org/cran-cookbook/code_issues.html#writing-to-the-.globalenv).  
     # <<- represents the only way to implement early stopping of the loop 
     # when the total number of edges left in the network for a given 
     # percentile is smaller that the maximum number of significant edges found 

@@ -22,11 +22,11 @@ test_that("test get_multiOmics_diffNetworks multi_omics", {
                    gene_B = "AKT2",
                    legend_position = "bottomright"))
   
-  expect_null(plot_regressions(deggs_object,
+  expect_type(plot_regressions(deggs_object,
                                  assayDataName = "RNAseq",
                                  gene_A = "MTOR", 
                                  gene_B = "AKT2",
-                                 legend_position = "bottomright"))
+                                 legend_position = "bottomright"), "list")
   
   expect_no_warning(plot_regressions(deggs_object,
                                  assayDataName = "RNAseq",
