@@ -108,7 +108,7 @@ plot_regressions <- function(deggs_object,
   )
   
   # prepare data frame
-  # using both t() and as.vector to be compatible with both matrices and dfs
+  # using both t() and as.vector() to be compatible with both matrices and dfs
   df <- data.frame(as.vector(t(assayData[gene_A, ])),
                    as.vector(t(assayData[gene_B, ])),
                    metadata,
@@ -336,7 +336,7 @@ View_diffNetworks <- function(deggs_object,
   
   ################# server ########################
   server <- function(input, output, session) {
-    empty_df <- data.frame("from" = NA, "to" = NA, "p.value" = 1, "q.value" = 1, 
+    empty_df <- data.frame("from" = NA, "to" = NA, "p.value" = 1, "p.adj" = 1, 
                            "layer" = NA)
     
     # check if the category_network has data 
@@ -359,7 +359,7 @@ View_diffNetworks <- function(deggs_object,
           if (deggs_object[["padj_method"]] != "none") {
             edges$`p adj` <- formatC(edges$p.adj, format = "e", digits = 3)
             edges <- edges[order(edges$p.adj), ]
-            edges <- edges[, which(colnames(edges) != "p.value")] 
+            edges <- edges[, which(colnames(edges) != "p.value")]
           } else {
             edges$`p value` <- formatC(edges$p.value, format = "e", digits = 3)
             edges <- edges[order(edges$p.value), ]
@@ -401,20 +401,20 @@ View_diffNetworks <- function(deggs_object,
         if (nrow(category_networks[[input$category]]) != 0) {
           edges <- category_networks[[input$category]]
           edges$id <- rownames(edges)
-          
+
           # Set up tooltip
-          prefix <- ifelse(deggs_object[["padj_method"]] == "none", 
+          prefix <- ifelse(deggs_object[["padj_method"]] == "none",
                            "P=", "Padj=")
-          edges$title <- paste0(prefix, formatC(edges[, sig_var], format = "e", 
+          edges$title <- paste0(prefix, formatC(edges[, sig_var], format = "e",
                                                 digits = 2))
-          
+
           # Set up edges width
           # normalise p value between 0 and 1
           edges$width <- (edges[, sig_var] - min(edges[, sig_var])) /
             (max(edges[, sig_var]) - min(edges[, sig_var]))
           # invert values (and multiply by 4 to increase width)
           edges$width <- (1 - edges$width) * 4
-          
+
           # Set up edges color
           if (multiOmic) {
             col <- my_palette(n = nlevels(edges$layer))
@@ -425,14 +425,14 @@ View_diffNetworks <- function(deggs_object,
             edges$color <- ifelse(edges[, sig_var] < 0.05, "#00008B", "#9A9A9A")
             legend <- c("significant", " not significant")
           }
-          
+
           # Slider
           edges <- edges[edges[, sig_var] < input$slider, ]
           if (nrow(edges) == 0) {
             nodes <- data.frame()
             edges <- data.frame()
-            network.title <- paste0("No differential interaction with ", 
-                                    sig_var, "<", input$slider, 
+            network.title <- paste0("No differential interaction with ",
+                                    sig_var, "<", input$slider,
                                     ".<br> Try to increase the ",
                                     sig_var, " threshold.")
             visNetwork::visNetwork(nodes, edges, main = network.title)
@@ -442,7 +442,7 @@ View_diffNetworks <- function(deggs_object,
               "label" = unique(c(edges$from, edges$to)),
               "title" = unique(c(edges$from, edges$to))
             )
-            
+
             visNetwork::visNetwork(nodes, edges) %>%
               visNetwork::visIgraphLayout(physics = TRUE,
                                           smooth = TRUE,
@@ -472,7 +472,7 @@ View_diffNetworks <- function(deggs_object,
                 Shiny.onInputChange('current_nodes_selection', data.nodes);
                 Shiny.onInputChange('current_edges_selection', data.edges);
                 }"
-              ) 
+              )
           }
         } else {
           network.title <- "No differential interaction active for this category"
@@ -487,7 +487,7 @@ View_diffNetworks <- function(deggs_object,
         visNetwork::visNetwork(nodes, edges, main = network.title)
       }
     })
-    
+
     # Table
     output$tbl <- DT::renderDT({
       edges()
@@ -499,6 +499,7 @@ View_diffNetworks <- function(deggs_object,
       try(
         if (is.null(input$current_nodes_selection) &
             length(input$current_edges_selection) == 1) {
+
           plot_regressions(
             deggs_object = deggs_object,
             gene_A = edges[input$current_edges_selection, "from"],
@@ -544,7 +545,7 @@ View_diffNetworks <- function(deggs_object,
     shiny::observe({
       shiny::updateSliderInput(session,
                                inputId = "slider",
-                               max = max(round(outVar()[, sig_var]+ 0.001, 
+                               max = max(round(outVar()[, sig_var]+ 0.001,
                                                digits = 3))
       )
     })
@@ -602,4 +603,5 @@ View_diffNetworks <- function(deggs_object,
   )
   shiny::shinyApp(ui = ui, server = server)
 }
+
 
