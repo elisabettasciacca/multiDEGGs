@@ -175,8 +175,10 @@ plot_regressions <- function(deggs_object,
   # adjusted p values can be found in the deggs_object if padj_method was NOT
   # set to none
   if (deggs_object[["padj_method"]] != "none") {
+    print(deggs_object[["diffNetworks"]][[assayDataName]][categories])
+    print(class(deggs_object[["diffNetworks"]][[assayDataName]][categories]))
     all_interactions <- do.call(rbind, 
-                                deggs_object[["diffNetworks"]][[assayDataName]])
+                                deggs_object[["diffNetworks"]][[assayDataName]][categories])
     pair_index <- which(all_interactions$from == gene_A & 
                           all_interactions$to == gene_B)
     # if you don't find gene_A-gene_B, try gene_B-gene_A:
