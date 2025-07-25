@@ -352,7 +352,7 @@ multiDEGGs_combined_filter <- function(y,
 #' and combined predictors based on the filtering results of a
 #' multiDEGGs_filter model.
 #'
-#' @param filter_res A model object of class `multiDEGGs_filter` containing
+#' @param object A fitted object of class `multiDEGGs_filter` containing
 #'  filtering results with:
 #'   \describe{
 #'     \item{keep}{Character vector of variable names to keep as single 
@@ -361,8 +361,8 @@ multiDEGGs_combined_filter <- function(y,
 #'     of variables to combine}
 #'   }
 #' @param newdata A data frame containing the new data for prediction. 
-#' Must contain all variables specified in \code{filter_res$keep} and
-#' \code{filter_res$pairs}.
+#' Must contain all variables specified in \code{object$keep} and
+#' \code{object$pairs}.
 #' @param interaction.type Character string specifying how to combine the 
 #' paired predictors.
 #'   Options are:
@@ -378,7 +378,7 @@ multiDEGGs_combined_filter <- function(y,
 #'
 #' @return A data frame containing:
 #'   \itemize{
-#'     \item Single predictors (if any are specified in \code{filter_res$keep})
+#'     \item Single predictors (if any are specified in \code{object$keep})
 #'     \item Combined predictors based on variable pairs and interaction type
 #'   }
 #'
@@ -386,17 +386,17 @@ multiDEGGs_combined_filter <- function(y,
 #' The function processes the filtering results in two steps:
 #' \enumerate{
 #'   \item Selects single predictors from \code{newdata} based on variables 
-#'   listed in \code{filter_res$keep}
+#'   listed in \code{object$keep}
 #'   \item Adds combined predictors from paired variables in
-#'    \code{filter_res$pairs}
+#'    \code{object$pairs}
 #' }
 #' @export
-predict.multiDEGGs_filter <- function(filter_res,
+predict.multiDEGGs_filter <- function(object,
                                       newdata,
                                       interaction.type = "ratio",
                                       sep = ":") {
   result_data <- NULL
-  keep <- filter_res$keep
+  keep <- object$keep
   
   # Add single predictors if present
   if(length(keep) > 0){
@@ -405,8 +405,8 @@ predict.multiDEGGs_filter <- function(filter_res,
   }
   
   # Add combined predictors if present
-  if (nrow(filter_res$pairs) > 0) {
-    pairs <- filter_res$pairs
+  if (nrow(object$pairs) > 0) {
+    pairs <- object$pairs
     a <- newdata[, pairs[, 1], drop = FALSE]
     b <- newdata[, pairs[, 2], drop = FALSE]
     
@@ -437,7 +437,7 @@ predict.multiDEGGs_filter <- function(filter_res,
 #' and combined predictors based on the filtering results of a
 #' multiDEGGs_filter model.
 #'
-#' @param filter_res A model object of class `multiDEGGs_filter` containing
+#' @param object A model object of class `multiDEGGs_filter` containing
 #'  filtering results with:
 #'   \describe{
 #'     \item{keep}{Character vector of variable names to keep as single 
@@ -446,8 +446,8 @@ predict.multiDEGGs_filter <- function(filter_res,
 #'     of variables to combine}
 #'   }
 #' @param newdata A data frame containing the new data for prediction. 
-#' Must contain all variables specified in \code{filter_res$keep} and
-#' \code{filter_res$pairs}.
+#' Must contain all variables specified in \code{object$keep} and
+#' \code{object$pairs}.
 #' @param interaction.type Character string specifying how to combine the 
 #' paired predictors.
 #'   Options are:
@@ -463,7 +463,7 @@ predict.multiDEGGs_filter <- function(filter_res,
 #'
 #' @return A data frame containing:
 #'   \itemize{
-#'     \item Single predictors (if any are specified in \code{filter_res$keep})
+#'     \item Single predictors (if any are specified in \code{object$keep})
 #'     \item Combined predictors based on variable pairs and interaction type
 #'   }
 #'
@@ -471,9 +471,9 @@ predict.multiDEGGs_filter <- function(filter_res,
 #' The function processes the filtering results in two steps:
 #' \enumerate{
 #'   \item Selects single predictors from \code{newdata} based on variables 
-#'   listed in \code{filter_res$keep}
+#'   listed in \code{object$keep}
 #'   \item Adds combined predictors from paired variables in
-#'    \code{filter_res$pairs}
+#'    \code{object$pairs}
 #' }
 #' @export
 predict.multiDEGGs_combined_filter <- predict.multiDEGGs_filter

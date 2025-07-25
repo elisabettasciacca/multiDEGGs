@@ -4,10 +4,10 @@
 \alias{predict.multiDEGGs_filter}
 \title{Predict method for multiDEGGs_filter objects}
 \usage{
-\method{predict}{multiDEGGs_filter}(filter_res, newdata, interaction.type = "ratio", sep = ":")
+\method{predict}{multiDEGGs_filter}(object, newdata, interaction.type = "ratio", sep = ":")
 }
 \arguments{
-\item{filter_res}{A model object of class \code{multiDEGGs_filter} containing
+\item{object}{A fitted object of class \code{multiDEGGs_filter} containing
 filtering results with:
 \describe{
 \item{keep}{Character vector of variable names to keep as single
@@ -17,8 +17,8 @@ of variables to combine}
 }}
 
 \item{newdata}{A data frame containing the new data for prediction.
-Must contain all variables specified in \code{filter_res$keep} and
-\code{filter_res$pairs}.}
+Must contain all variables specified in \code{object$keep} and
+\code{object$pairs}.}
 
 \item{interaction.type}{Character string specifying how to combine the
 paired predictors.
@@ -37,7 +37,7 @@ combined predictors. Default is ":".}
 \value{
 A data frame containing:
 \itemize{
-\item Single predictors (if any are specified in \code{filter_res$keep})
+\item Single predictors (if any are specified in \code{object$keep})
 \item Combined predictors based on variable pairs and interaction type
 }
 }
@@ -50,8 +50,8 @@ multiDEGGs_filter model.
 The function processes the filtering results in two steps:
 \enumerate{
 \item Selects single predictors from \code{newdata} based on variables
-listed in \code{filter_res$keep}
+listed in \code{object$keep}
 \item Adds combined predictors from paired variables in
-\code{filter_res$pairs}
+\code{object$pairs}
 }
 }
