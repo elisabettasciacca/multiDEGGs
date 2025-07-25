@@ -28,7 +28,7 @@ all_genes <- unique(c(metapathway_gene_symbols$from, metapathway_gene_symbols$to
 metadata_generation <- function() {
   patient_ids <- paste0("PT", sprintf("%03d", 1:n_patients))
   
-  response <- sample(c("Responder", "Non-responder"), 
+  response <- sample(c("Responder", "Non_responder"), 
                      size = n_patients, 
                      replace = TRUE, 
                      prob = c(response_rate, 1-response_rate))
@@ -387,6 +387,7 @@ olink_generation <- function(metadata, rnaseq_matrix, proteomics_matrix) {
 
 metadata <- metadata_generation()
 rownames(metadata) <- metadata$patient_id
+metadata$response <- as.factor(metadata$response)
 rnaseq <- rnaseq_generation(metadata)
 proteomics <- proteomics_generation(metadata, rnaseq)
 olink <- olink_generation(metadata, rnaseq, proteomics)

@@ -38,7 +38,12 @@ Language: en-gb
 URL: https://github.com/elisabettasciacca/multiDEGGs/
 BugReports: https://github.com/elisabettasciacca/multiDEGGs/issues
 Suggests: 
+    kernlab,
+    nestedcv,
+    pls,
     qvalue,
+    randomForest,
+    ranger,
     testthat (>= 3.0.0)
 Imports:
     DT,

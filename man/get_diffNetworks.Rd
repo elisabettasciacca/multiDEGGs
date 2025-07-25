@@ -122,13 +122,14 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  
 # to use only certain categories for comparison: 
 # let's randomly add another level of response to the example metadata
+synthetic_metadata$response <- as.character(synthetic_metadata$response)
 indices <- sample(1:nrow(synthetic_metadata), 20, replace = FALSE) 
 synthetic_metadata$response[indices] <- "Moderate response"
 deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  metadata = synthetic_metadata,
                                  category_variable = "response",
                                  category_subset = c("Responder", 
-                                                     "Non-responder"),
+                                                     "Non_responder"),
                                  regression_method = "lm",
                                  verbose = FALSE,
                                  show_progressBar = FALSE,
@@ -140,7 +141,7 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  metadata = synthetic_metadata,
                                  category_variable = "response",
                                  category_subset = c("Responder", 
-                                                     "Non-responder"),
+                                                     "Non_responder"),
                                  regression_method = "lm",
                                  percentile_vector = seq(0.25, 0.98, by = 0.05),
                                  verbose = FALSE,

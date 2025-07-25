@@ -38,16 +38,16 @@ test_that("test get_diffNetworks multi_omics", {
                3)
   expect_equal(deggs_object[["diffNetworks"]][["Proteomics"]][["Responder"]],
                "No specific links for this category.")
-  expect_equal(ncol(deggs_object[["diffNetworks"]][["Olink"]][["Non-responder"]]),
+  expect_equal(ncol(deggs_object[["diffNetworks"]][["Olink"]][["Non_responder"]]),
                4)
   expect_equal(deggs_object[["diffNetworks"]][["Olink"]][["Responder"]],
                "No specific links for this category.")
   
   # even more granular check on the differential links found 
   expect_true("TNF" %in% 
-        deggs_object[["diffNetworks"]][["RNAseq"]][["Non-responder"]][["from"]])
+        deggs_object[["diffNetworks"]][["RNAseq"]][["Non_responder"]][["from"]])
   expect_true("TNFRSF1A" %in% 
-         deggs_object[["diffNetworks"]][["RNAseq"]][["Non-responder"]][["to"]])
+         deggs_object[["diffNetworks"]][["RNAseq"]][["Non_responder"]][["to"]])
 })
 
 
@@ -76,14 +76,14 @@ expect_type(res, "list")
 
 # check the content hasn't changed 
 expect_equal(length(res), 2)
-expect_equal(ncol(res$`Non-responder`), 5)
+expect_equal(ncol(res$`Non_responder`), 5)
 expect_equal(colnames(res$Responder), c("from", "to", "p.value", "p.adj",
                                         "layer"))
 expect_equal(nrow(res$Responder), 3)
 
 # even more granular check on the differential links found 
-expect_true("AKT2" %in% res$`Non-responder`$from)
-expect_true("MTOR" %in% res$`Non-responder`$to)
+expect_true("AKT2" %in% res$`Non_responder`$from)
+expect_true("MTOR" %in% res$`Non_responder`$to)
 
 expect_true("FANCD2" %in% res$Responder$from)
 expect_true("FAN1" %in% res$Responder$to)
