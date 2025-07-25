@@ -58,7 +58,8 @@
 <div class="section level2">
 <h2 id="differentially-expressed-gene-gene-pairs-in-multi-omic-data">Differentially Expressed Gene-Gene pairs in multi omic data<a class="anchor" aria-label="anchor" href="#differentially-expressed-gene-gene-pairs-in-multi-omic-data"></a>
 </h2>
-<p><a href="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> The multiDEGGs package test for differential gene-gene correlations across different groups of samples in multi omic data.<br>
+<p><a href="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
+<p>The multiDEGGs package test for differential gene-gene correlations across different groups of samples in multi omic data.<br>
 Specific gene-gene interactions can be explored and gene-gene pair regression plots can be interactively shown.</p>
 <div class="section level3">
 <h3 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -69,10 +70,8 @@ Specific gene-gene interactions can be explored and gene-gene pair regression pl
 <div class="section level3">
 <h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
-<p>Load package and sample data<br><code>library(multiDEGGs) data("synthetic_metadata") data("synthetic_rnaseqData") data("synthetic_proteomicData") data("synthetic_OlinkData")</code></p>
-<p>Generate differential networks<br>
-`assayData_list &lt;- list(“RNAseq” = synthetic_rnaseqData, “Proteomics” = synthetic_proteomicData, “Olink” = synthetic_OlinkData)</p>
-<p>deggs_object &lt;- get_diffNetworks(assayData = assayData_list, metadata = synthetic_metadata, category_variable = “response”, regression_method = “lm”, padj_method = “bonferroni”, verbose = FALSE, show_progressBar = FALSE, cores = 2)`</p>
+<p>Load package and sample data<br><code><a href="https://github.com/elisabettasciacca/multiDEGGs/" class="external-link">library(multiDEGGs)</a></code> <code>data("synthetic_metadata")</code> <code>data("synthetic_rnaseqData")</code> <code>data("synthetic_proteomicData")</code> <code>data("synthetic_OlinkData")</code></p>
+<p>Generate differential networks:<br></p>
 <p>Visualise interactively (will open a shiny interface)<br><code>View_diffNetworks(deggs_object)</code></p>
 <p>Get a table listing all the significant interactions found in each category<br><code>get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)</code></p>
 <p>Plot differential regression fits for a single interaction<br><code>plot_regressions(deggs_object,                  assayDataName = "RNAseq",                  gene_A = "MTOR",                   gene_B = "AKT2",                  legend_position = "bottomright")</code></p>
