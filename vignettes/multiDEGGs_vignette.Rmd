@@ -193,13 +193,16 @@ get_sig_deggs(deggs_object_oneOmic, sig_threshold = 0.05)
 To plot the differential regression fits outside of the interactive environment, 
 use `plot_regressions()` specifying the omic data to be used and the two targets:
   
-```{r, fig.width = 4.5, fig.height = 4}
+```{r, fig.width = 4.5, fig.height = 4, eval=FALSE}
 plot_regressions(deggs_object,
                  assayDataName = "RNAseq",
                  gene_A = "MTOR", 
                  gene_B = "AKT2",
                  legend_position = "bottomright")
 ```
+  
+<p>&nbsp;</p>
+![](plot_regressions.png){width=50%}
   
 In single omic analyses, the `assayDataName` parameter can remain unset.
 
