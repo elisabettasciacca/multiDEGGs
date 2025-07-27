@@ -65,5 +65,5 @@ Imports:
     visNetwork
 Depends: 
      R (>= 4.4.0)
-VignetteBuilder: knitr
+VignetteBuilder: rmarkdown
 Config/testthat/edition: 3

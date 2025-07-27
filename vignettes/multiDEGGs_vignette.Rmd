@@ -10,7 +10,7 @@ output:
     number_sections: false
 vignette: >
   %\VignetteIndexEntry{multiDEGGs vignette}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{rmarkdown::render}
   %\VignetteEncoding{UTF-8}
 ---
 
