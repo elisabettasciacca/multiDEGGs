@@ -391,10 +391,10 @@ multiDEGGs_combined_filter <- function(y,
 #'    \code{object$pairs}
 #' }
 #' @export
-predict.multiDEGGs_filter <- function(object,
-                                      newdata,
-                                      interaction.type = "ratio",
-                                      sep = ":") {
+.predict_multiDEGGs <- function(object,
+                                newdata,
+                                interaction.type = "ratio",
+                                sep = ":") {
   result_data <- NULL
   keep <- object$keep
   
@@ -431,52 +431,44 @@ predict.multiDEGGs_filter <- function(object,
   return(result_data)
 }
 
-#' Predict method for multiDEGGs_filter objects
+
+#' Wrapper of .predict_multiDEGGs for multiDEGGs_filter()
 #'
 #' This function generates predictions by creating a dataset with single 
 #' and combined predictors based on the filtering results of a
 #' multiDEGGs_filter model.
 #'
-#' @param object A model object of class `multiDEGGs_filter` containing
-#'  filtering results with:
-#'   \describe{
-#'     \item{keep}{Character vector of variable names to keep as single 
-#'     predictors}
-#'     \item{pairs}{Data frame or matrix with two columns specifying pairs 
-#'     of variables to combine}
-#'   }
-#' @param newdata A data frame containing the new data for prediction. 
-#' Must contain all variables specified in \code{object$keep} and
-#' \code{object$pairs}.
-#' @param interaction.type Character string specifying how to combine the 
-#' paired predictors.
-#'   Options are:
-#'   \describe{
-#'     \item{"ratio"}{Combine paired predictors by dividing the first variable
-#'      by the second (a/b)}
-#'     \item{other}{Combine paired predictors by multiplying the variables (a*b)
-#'     }
-#'   }
-#'   Default is "ratio".
-#' @param sep Character string used as separator when creating column names for
-#'   combined predictors. Default is ":".
-#'
-#' @return A data frame containing:
-#'   \itemize{
-#'     \item Single predictors (if any are specified in \code{object$keep})
-#'     \item Combined predictors based on variable pairs and interaction type
-#'   }
-#'
-#' @details
-#' The function processes the filtering results in two steps:
-#' \enumerate{
-#'   \item Selects single predictors from \code{newdata} based on variables 
-#'   listed in \code{object$keep}
-#'   \item Adds combined predictors from paired variables in
-#'    \code{object$pairs}
-#' }
+#' @inherit .predict_multiDEGGs
 #' @export
-predict.multiDEGGs_combined_filter <- predict.multiDEGGs_filter
+predict.multiDEGGs_filter <- function(object,
+                                      newdata,
+                                      interaction.type = "ratio",
+                                      sep = ":") {
+  .predict_multiDEGGs(object,
+                      newdata,
+                      interaction.type = "ratio",
+                      sep = ":")
+}
+
+
+#' Wrapper of .predict_multiDEGGs for multiDEGGs_filter_combined()
+#'
+#' This function generates predictions by creating a dataset with single 
+#' and combined predictors based on the filtering results of a
+#' multiDEGGs_filter model.
+#'
+#' @inherit .predict_multiDEGGs
+#' @export
+predict.multiDEGGs_filter_combined <- function(object,
+                                               newdata,
+                                               interaction.type = "ratio",
+                                               sep = ":") {
+  .predict_multiDEGGs(object,
+                      newdata,
+                      interaction.type = "ratio",
+                      sep = ":")
+}
+
 
 #' cat_parallel (from nestedcv)
 #' 
