@@ -79,16 +79,40 @@ Specific gene-gene interactions can be explored and gene-gene pair regression pl
 <div class="section level3">
 <h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h3>
-<p>Load package and sample data<br><code><a href="https://github.com/elisabettasciacca/multiDEGGs/" class="external-link">library(multiDEGGs)</a></code> <code>data("synthetic_metadata")</code> <code>data("synthetic_rnaseqData")</code> <code>data("synthetic_proteomicData")</code> <code>data("synthetic_OlinkData")</code></p>
-<p>Generate differential networks:<br></p>
-<p>Visualise interactively (will open a shiny interface)<br><code>View_diffNetworks(deggs_object)</code></p>
-<p>Get a table listing all the significant interactions found in each category<br><code>get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)</code></p>
+<p>Load package and sample data</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/elisabettasciacca/multiDEGGs/" class="external-link">multiDEGGs</a></span><span class="op">)</span>  </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_metadata"</span><span class="op">)</span>  </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_rnaseqData"</span><span class="op">)</span>  </span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_proteomicData"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_OlinkData"</span><span class="op">)</span>   </span></code></pre></div>
+<p>Generate differential networks:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">assayData_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"RNAseq"</span> <span class="op">=</span> <span class="va">synthetic_rnaseqData</span>,</span>
+<span>                       <span class="st">"Proteomics"</span> <span class="op">=</span> <span class="va">synthetic_proteomicData</span>,</span>
+<span>                       <span class="st">"Olink"</span> <span class="op">=</span> <span class="va">synthetic_OlinkData</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">deggs_object</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_diffNetworks.html">get_diffNetworks</a></span><span class="op">(</span>assayData <span class="op">=</span> <span class="va">assayData_list</span>,</span>
+<span>                                 metadata <span class="op">=</span> <span class="va">synthetic_metadata</span>,</span>
+<span>                                 category_variable <span class="op">=</span> <span class="st">"response"</span>,</span>
+<span>                                 regression_method <span class="op">=</span> <span class="st">"lm"</span>,</span>
+<span>                                 padj_method <span class="op">=</span> <span class="st">"bonferroni"</span>,</span>
+<span>                                 verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                 show_progressBar <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                                 cores <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<p>Visualise interactively (will open a shiny interface)</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/View_diffNetworks.html">View_diffNetworks</a></span><span class="op">(</span><span class="va">deggs_object</span><span class="op">)</span></span></code></pre></div>
+<p>Get a table listing all the significant interactions found in each category</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/get_multiOmics_diffNetworks.html">get_multiOmics_diffNetworks</a></span><span class="op">(</span><span class="va">deggs_object</span>, sig_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
 <p>Plot differential regression fits for a single interaction<br><code>plot_regressions(deggs_object,                  assayDataName = "RNAseq",                  gene_A = "MTOR",                   gene_B = "AKT2",                  legend_position = "bottomright")</code></p>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p><code>{r} citation("multiDEGGs")</code></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"multiDEGGs"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 
