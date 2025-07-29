@@ -13,6 +13,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multi-Omic Differentially Expressed Gene-Gene Pairs">
 <meta name="description" content="Performs multi-omic differential network analysis by revealing differential interactions between molecular entities (genes, proteins, transcription factors, or other biomolecules) across the omic datasets provided. For each omic dataset, a differential network is constructed where links represent statistically significant differential interactions between entities. These networks are then integrated into a comprehensive visualization using distinct colors to distinguish interactions from different omic layers. This unified display allows interactive exploration of cross-omic patterns, such as differential interactions present at both transcript and protein levels. For each link, users can access differential statistical significance metrics (p values or adjusted p values, calculated via robust or traditional linear regression with interaction term) and differential regression plots. The methods implemented in this package are described in Sciacca et al. (2023) &lt;doi:10.1093/bioinformatics/btad192&gt;.">
 <meta property="og:description" content="Performs multi-omic differential network analysis by revealing differential interactions between molecular entities (genes, proteins, transcription factors, or other biomolecules) across the omic datasets provided. For each omic dataset, a differential network is constructed where links represent statistically significant differential interactions between entities. These networks are then integrated into a comprehensive visualization using distinct colors to distinguish interactions from different omic layers. This unified display allows interactive exploration of cross-omic patterns, such as differential interactions present at both transcript and protein levels. For each link, users can access differential statistical significance metrics (p values or adjusted p values, calculated via robust or traditional linear regression with interaction term) and differential regression plots. The methods implemented in this package are described in Sciacca et al. (2023) &lt;doi:10.1093/bioinformatics/btad192&gt;.">
+<meta property="og:image" content="https://elisabettasciacca.github.io/multiDEGGs/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -53,12 +54,20 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="multideggs">multiDEGGs<a class="anchor" aria-label="anchor" href="#multideggs"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="multideggs">multiDEGGs<a class="anchor" aria-label="anchor" href="#multideggs"></a>
+</h1>
+</div>
 <div class="section level2">
 <h2 id="differentially-expressed-gene-gene-pairs-in-multi-omic-data">Differentially Expressed Gene-Gene pairs in multi omic data<a class="anchor" aria-label="anchor" href="#differentially-expressed-gene-gene-pairs-in-multi-omic-data"></a>
 </h2>
-<p><a href="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></p>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a> <a href="https://www.gnu.org/licenses/gpl-3.0.html" class="external-link"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" alt="License: GPL v3"></a> <a href="https://CRAN.R-project.org/package=multiDEGGs" class="external-link"><img src="https://www.r-pkg.org/badges/version/multiDEGGs" alt="CRAN status"></a> <a href="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a><br><a href="https://cran.r-project.org/package=multiDEGGs" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/multiDEGGs" alt="downloads"></a> <a href="https://github.com/elisabettasciacca/multiDEGGs/commits/master" class="external-link"><img src="https://img.shields.io/github/last-commit/elisabettasciacca/multiDEGGs.svg" alt="last commit"></a></p>
+</div>
+</div>
+<div class="section level1">
+<h1 id="multideggs-">multiDEGGs 
+<a class="anchor" aria-label="anchor" href="#multideggs-"></a>
+</h1>
 <p>The multiDEGGs package test for differential gene-gene correlations across different groups of samples in multi omic data.<br>
 Specific gene-gene interactions can be explored and gene-gene pair regression plots can be interactively shown.</p>
 <div class="section level3">
@@ -76,13 +85,13 @@ Specific gene-gene interactions can be explored and gene-gene pair regression pl
 <p>Get a table listing all the significant interactions found in each category<br><code>get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)</code></p>
 <p>Plot differential regression fits for a single interaction<br><code>plot_regressions(deggs_object,                  assayDataName = "RNAseq",                  gene_A = "MTOR",                   gene_B = "AKT2",                  legend_position = "bottomright")</code></p>
 </div>
-</div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p><code>{r} citation("multiDEGGs")</code></p>
 </div>
 </div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
