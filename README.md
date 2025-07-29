@@ -21,14 +21,16 @@ Install from Github:
 
 ### Example  
 Load package and sample data   
-`library(multiDEGGs)  `
-`data("synthetic_metadata")  `
-`data("synthetic_rnaseqData")  `
-`data("synthetic_proteomicData")  `
-`data("synthetic_OlinkData")`   
-
+```r
+library(multiDEGGs)  
+data("synthetic_metadata")  
+data("synthetic_rnaseqData")  
+data("synthetic_proteomicData")
+data("synthetic_OlinkData")   
+```
+  
 Generate differential networks:   
-\code{
+```r
 assayData_list <- list("RNAseq" = synthetic_rnaseqData,
                        "Proteomics" = synthetic_proteomicData,
                        "Olink" = synthetic_OlinkData)
@@ -41,13 +43,17 @@ deggs_object <- get_diffNetworks(assayData = assayData_list,
                                  verbose = FALSE,
                                  show_progressBar = FALSE,
                                  cores = 2)
-                                 }
+```
   
 Visualise interactively (will open a shiny interface)   
-`View_diffNetworks(deggs_object)`  
+```r
+View_diffNetworks(deggs_object)
+```  
   
 Get a table listing all the significant interactions found in each category  
-`get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)`  
+```r
+get_multiOmics_diffNetworks(deggs_object, sig_threshold = 0.05)
+```
    
 Plot differential regression fits for a single interaction  
 `plot_regressions(deggs_object,
@@ -57,6 +63,6 @@ Plot differential regression fits for a single interaction
                  legend_position = "bottomright")`
                   
 ## Citation
-```{r}
+```r
 citation("multiDEGGs")
 ```
