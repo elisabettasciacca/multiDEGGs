@@ -244,12 +244,12 @@ multiDEGGs_filter <- function(y,
 #'   method = "rf",
 #'   modifyX = "multiDEGGs_combined_filter",
 #'   modifyX_options = list(filter_method = "ttest", 
-#'                          nfilter = 20,
+#'                          nfilter = 10,
 #'                          dynamic_nfilter = TRUE, 
 #'                          keep_single_genes = FALSE),
 #'   modifyX_useY = TRUE,
-#'   n_outer_folds = 5,
-#'   n_inner_folds = 6
+#'   n_outer_folds = 3,
+#'   n_inner_folds = 2
 #' )
 #' 
 #' fit.rf$summary
