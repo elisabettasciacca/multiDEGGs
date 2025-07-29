@@ -443,7 +443,8 @@ multiDEGGs_combined_filter <- function(y,
 predict.multiDEGGs_filter <- function(object,
                                       newdata,
                                       interaction.type = "ratio",
-                                      sep = ":") {
+                                      sep = ":", 
+                                      ...) {
   .predict_multiDEGGs(object,
                       newdata,
                       interaction.type = "ratio",
@@ -462,7 +463,8 @@ predict.multiDEGGs_filter <- function(object,
 predict.multiDEGGs_filter_combined <- function(object,
                                                newdata,
                                                interaction.type = "ratio",
-                                               sep = ":") {
+                                               sep = ":", 
+                                               ...) {
   .predict_multiDEGGs(object,
                       newdata,
                       interaction.type = "ratio",
