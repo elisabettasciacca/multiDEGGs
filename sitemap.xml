@@ -10,6 +10,7 @@
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/calc_pvalues_network.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/calc_pvalues_percentile.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/cat_parallel.html</loc></url>
+<url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/dot-predict_multiDEGGs.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/get_diffNetworks.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/get_diffNetworks_singleOmic.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/get_multiOmics_diffNetworks.html</loc></url>
@@ -20,8 +21,8 @@
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/my_palette.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/node_boxplot.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/plot_regressions.html</loc></url>
-<url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/predict.multiDEGGs_combined_filter.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/predict.multiDEGGs_filter.html</loc></url>
+<url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/predict.multiDEGGs_filter_combined.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/synthetic_OlinkData.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/synthetic_metadata.html</loc></url>
 <url><loc>https://elisabettasciacca.github.io/multiDEGGs/reference/synthetic_proteomicData.html</loc></url>

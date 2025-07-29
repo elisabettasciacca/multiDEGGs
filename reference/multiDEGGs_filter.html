@@ -126,26 +126,26 @@ the function will print a '0' and switch to t-test for that fold.</b></p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Inner loop:  6-fold CV</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 100 observations, 14 predictors</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        alpha lambda n.filter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 1   0.1 0.1487        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 2   0.1 0.1416        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 3   0.1 0.2031        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 4   0.1 0.1387        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 5   0.1 0.1609        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        alpha  lambda n.filter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 1   0.1 0.09686        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 2   0.1 0.12757        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 3   0.1 0.15570        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 4   0.1 0.10091        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 5   0.1 0.15698        7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Final parameters:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  lambda    alpha  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.06468  0.10000  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.07099  0.10000  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Final coefficients:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1.81668     -0.19091     -0.11686      0.05109     -0.03538     -0.03220 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.808953    -0.188626    -0.113628     0.050012    -0.034766    -0.030783 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> MAP2K2:MAPK3  FANCD2:FAN1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     -0.02099     -0.00872 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.020656    -0.008568 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Result:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        RMSE     R.squared   Pearson.r^2           MAE   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.4679        0.1013        0.1023        0.4393   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.47925       0.05714       0.07489       0.44620   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># fit a random forest model:</span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.train.html" class="external-link">nestcv.train</a></span><span class="op">(</span></span></span>
@@ -160,16 +160,16 @@ the function will print a '0' and switch to t-test for that fold.</b></p></li>
 <span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">6</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting final model using CV on whole data</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 3.022257 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 3.020885 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span><span class="op">$</span><span class="va">summary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predicted       Non_responder Responder</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            57         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 1        41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            58         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 0        41</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               AUC            Accuracy   Balanced accuracy   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            0.9938              0.9800              0.9795   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            0.9992              0.9900              0.9881   </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
