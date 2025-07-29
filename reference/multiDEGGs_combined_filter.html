@@ -152,6 +152,7 @@ single genes</p></li>
 <span class="r-in"><span><span class="co"># fit a regularized linear model</span></span></span>
 <span class="r-in"><span><span class="co"># note that nfilter, n_outer_folds, n_inner_folds are set low to keep the</span></span></span>
 <span class="r-in"><span><span class="co"># example lightweight. Adjust these values as needed for your use case.</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">fit.glmnet</span> <span class="op">&lt;-</span> <span class="fu">nestedcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html" class="external-link">nestcv.glmnet</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>x <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_rnaseqData</span><span class="op">)</span>,</span></span>
@@ -165,35 +166,10 @@ single genes</p></li>
 <span class="r-in"><span>n_inner_folds <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit.glmnet</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Nested cross-validation with glmnet</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> No filter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Modifier:  multiDEGGs_combined_filter </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outer loop:  4-fold CV</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Inner loop:  4-fold CV</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 100 observations, 14 predictors</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        alpha  lambda n.filter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 1   0.1 0.12698       12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 2   1.0 0.01734       12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 3   0.4 0.03497       11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 4   0.2 0.07292       12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Final parameters:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  lambda    alpha  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.03867  0.20000  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Final coefficients:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept)       TGFBR1        TGFB3        MAPK3       MAP2K2          TNF </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.715993    -0.046926    -0.035168     0.028991     0.026580    -0.023171 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    AKT2:MTOR TGFB3:TGFBR1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.016277     0.009475 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Result:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        RMSE     R.squared   Pearson.r^2           MAE   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      0.1508        0.9067        0.9096        0.1159   </span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># fit a random forest model</span></span></span>
-<span class="r-in"><span><span class="co"># note that nfilter, n_outer_folds, n_inner_folds are set low to keep the</span></span></span>
+<span class="r-in"><span><span class="co"># NOTE: nfilter, n_outer_folds, n_inner_folds are set low to keep the</span></span></span>
 <span class="r-in"><span><span class="co"># example lightweight. Adjust these values as needed for your use case.</span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span> <span class="op">&lt;-</span> <span class="fu">nestedcv</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.train.html" class="external-link">nestcv.train</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  y <span class="op">=</span> <span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span>,</span></span>
@@ -205,22 +181,22 @@ single genes</p></li>
 <span class="r-in"><span>                         dynamic_nfilter <span class="op">=</span> <span class="cn">TRUE</span>, </span></span>
 <span class="r-in"><span>                         keep_single_genes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  modifyX_useY <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">3</span>,</span></span>
+<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting final model using CV on whole data</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: ggplot2</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Loading required package: lattice</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 1.031629 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 0.7966306 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span><span class="op">$</span><span class="va">summary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predicted       Non_responder Responder</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            56         3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 2        39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            57         2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 1        40</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               AUC            Accuracy   Balanced accuracy   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            0.9887              0.9500              0.9470   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            0.9963              0.9700              0.9676   </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
