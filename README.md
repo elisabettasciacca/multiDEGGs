@@ -1,6 +1,13 @@
 # multiDEGGs
 ## Differentially Expressed Gene-Gene pairs in multi omic data
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![CRAN status](https://www.r-pkg.org/badges/version/multiDEGGs)](https://CRAN.R-project.org/package=multiDEGGs)
 [![R-CMD-check](https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/elisabettasciacca/multiDEGGs/actions/workflows/R-CMD-check.yaml)  
+[![downloads](https://cranlogs.r-pkg.org/badges/grand-total/multiDEGGs)](https://cran.r-project.org/package=multiDEGGs)
+[![last commit](https://img.shields.io/github/last-commit/elisabettasciacca/multiDEGGs.svg)](https://github.com/elisabettasciacca/multiDEGGs/commits/master)
+
+# multiDEGGs <a href="https://elisabettasciacca.github.io/multiDEGGs/"><img src="man/figures/logo.png" align="right" height="137" alt="multiDEGGs website" /></a>
 
 The multiDEGGs package test for differential gene-gene correlations across different groups of samples in multi omic data.  
 Specific gene-gene interactions can be explored and gene-gene pair regression plots can be interactively shown.   
