@@ -92,29 +92,33 @@ library(nestedcv)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
 
-# fit a regularized linear model:
+# fit a regularized linear model
+# note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
+# example lightweight. Adjust these values as needed for your use case.
 fit.glmnet <- nestedcv::nestcv.glmnet(
 y = as.numeric(synthetic_metadata$response),
 x =  t(synthetic_rnaseqData),
 modifyX = "multiDEGGs_combined_filter",
 modifyX_options = list(filter_method = "ttest", 
-                       nfilter = 20,
+                       nfilter = 5,
                        dynamic_nfilter = TRUE, 
                        keep_single_genes = FALSE),
 modifyX_useY = TRUE,
-n_outer_folds = 5,
-n_inner_folds = 6)
+n_outer_folds = 4,
+n_inner_folds = 4)
 
 summary(fit.glmnet)
 
-# fit a random forest model:
+# fit a random forest model
+# note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
+# example lightweight. Adjust these values as needed for your use case.
 fit.rf <- nestedcv::nestcv.train(
   y = synthetic_metadata$response,
   x = t(synthetic_rnaseqData),
   method = "rf",
   modifyX = "multiDEGGs_combined_filter",
   modifyX_options = list(filter_method = "ttest", 
-                         nfilter = 10,
+                         nfilter = 5,
                          dynamic_nfilter = TRUE, 
                          keep_single_genes = FALSE),
   modifyX_useY = TRUE,

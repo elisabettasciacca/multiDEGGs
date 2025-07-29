@@ -1,9 +1,9 @@
 # multiDEGGs 1.1.0
-###### 29/07/2025
 ### New features for feature augmentation in ML
 Two new functions are provided for nested feature engineering. To use them in 
 combination with the `nestedcv` package their name must be passed to the 
 `modifyX` parameter of `nestcv.glmnet()` or `nestcv.train()`. 
+  
 - The `multiDEGGs_filter()` function performs feature selection based entirely 
 on differential network analysis. 
 - The `multiDEGGs_combined_filter()` function combines traditional statistical
@@ -15,7 +15,6 @@ results of a `multiDEGGs_filter` model.
 - The vignette has been updated to showcase the new feature
 
 # multiDEGGs 1.0.0
-###### 21/06/2025
 ### Initial Release
 - First public version of `multiDEGGs`
 - Provides tools for differential network analysis.

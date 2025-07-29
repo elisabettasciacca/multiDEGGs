@@ -50,8 +50,8 @@
 #'   modifyX_options = list(keep_single_genes = FALSE,
 #'                          nfilter = 5),
 #'   modifyX_useY = TRUE,
-#'   n_outer_folds = 3,
-#'   n_inner_folds = 2)
+#'   n_outer_folds = 4,
+#'   n_inner_folds = 4)
 #' 
 #' summary(fit.glmnet)
 #' 
@@ -238,8 +238,8 @@ multiDEGGs_filter <- function(y,
 #'                        dynamic_nfilter = TRUE, 
 #'                        keep_single_genes = FALSE),
 #' modifyX_useY = TRUE,
-#' n_outer_folds = 3,
-#' n_inner_folds = 2)
+#' n_outer_folds = 4,
+#' n_inner_folds = 4)
 #' 
 #' summary(fit.glmnet)
 #' 
