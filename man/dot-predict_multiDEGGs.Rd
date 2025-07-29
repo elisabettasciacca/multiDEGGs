@@ -4,7 +4,13 @@
 \alias{.predict_multiDEGGs}
 \title{Predict method for multiDEGGs_filter objects}
 \usage{
-.predict_multiDEGGs(object, newdata, interaction.type = "ratio", sep = ":")
+.predict_multiDEGGs(
+  object,
+  newdata,
+  interaction.type = "ratio",
+  sep = ":",
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted object of class \code{multiDEGGs_filter} containing
@@ -33,6 +39,8 @@ Default is "ratio".}
 
 \item{sep}{Character string used as separator when creating column names for
 combined predictors. Default is ":".}
+
+\item{...}{Additional arguments passed to the generic function.}
 }
 \value{
 A data frame containing:

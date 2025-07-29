@@ -375,6 +375,7 @@ multiDEGGs_combined_filter <- function(y,
 #'   Default is "ratio".
 #' @param sep Character string used as separator when creating column names for
 #'   combined predictors. Default is ":".
+#' @param ... Additional arguments passed to the generic function.
 #'
 #' @return A data frame containing:
 #'   \itemize{
@@ -394,7 +395,8 @@ multiDEGGs_combined_filter <- function(y,
 .predict_multiDEGGs <- function(object,
                                 newdata,
                                 interaction.type = "ratio",
-                                sep = ":") {
+                                sep = ":",
+                                ...) {
   result_data <- NULL
   keep <- object$keep
   
@@ -445,10 +447,8 @@ predict.multiDEGGs_filter <- function(object,
                                       interaction.type = "ratio",
                                       sep = ":", 
                                       ...) {
-  .predict_multiDEGGs(object,
-                      newdata,
-                      interaction.type = "ratio",
-                      sep = ":")
+  .predict_multiDEGGs(object, newdata, interaction.type = "ratio",
+                      sep = ":", ...)
 }
 
 
@@ -465,10 +465,8 @@ predict.multiDEGGs_filter_combined <- function(object,
                                                interaction.type = "ratio",
                                                sep = ":", 
                                                ...) {
-  .predict_multiDEGGs(object,
-                      newdata,
-                      interaction.type = "ratio",
-                      sep = ":")
+  .predict_multiDEGGs(object, newdata, interaction.type = "ratio",
+                      sep = ":", ...)
 }
 
 
