@@ -57,6 +57,7 @@ data("synthetic_rnaseqData")
 # fit a regularized linear model
 # Note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 # example lightweight. Adjust these values as needed for your use case.
+\dontrun{
 fit.glmnet <- nestcv.glmnet(
   y = as.numeric(synthetic_metadata$response),
   x =  t(synthetic_rnaseqData),
@@ -68,6 +69,7 @@ fit.glmnet <- nestcv.glmnet(
   n_inner_folds = 4)
 
 summary(fit.glmnet)
+}
 
 # fit a random forest model:
 # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -81,7 +83,7 @@ fit.rf <- nestcv.train(
                          nfilter = 5),
   modifyX_useY = TRUE,
   n_outer_folds = 2,
-  n_inner_folds = 3
+  n_inner_folds = 2
 )
 
 fit.rf$summary
