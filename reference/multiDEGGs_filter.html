@@ -107,69 +107,70 @@ the function will print a '0' and switch to t-test for that fold.</b></p></li>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_metadata"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"synthetic_rnaseqData"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># fit a regularized linear model:</span></span></span>
+<span class="r-in"><span><span class="co"># fit a regularized linear model</span></span></span>
+<span class="r-in"><span><span class="co"># Note that nfilter, n_outer_folds, n_inner_folds are set low to keep the</span></span></span>
+<span class="r-in"><span><span class="co"># example lightweight. Adjust these values as needed for your use case.</span></span></span>
 <span class="r-in"><span><span class="va">fit.glmnet</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html" class="external-link">nestcv.glmnet</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  x <span class="op">=</span>  <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_rnaseqData</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  modifyX <span class="op">=</span> <span class="st">"multiDEGGs_filter"</span>,</span></span>
 <span class="r-in"><span>  modifyX_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>keep_single_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>                         nfilter <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         nfilter <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  modifyX_useY <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">5</span>,</span></span>
-<span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">4</span>,</span></span>
+<span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit.glmnet</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Nested cross-validation with glmnet</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> No filter</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Modifier:  multiDEGGs_filter </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Outer loop:  5-fold CV</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Inner loop:  6-fold CV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Outer loop:  4-fold CV</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Inner loop:  4-fold CV</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 100 observations, 14 predictors</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        alpha  lambda n.filter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 1   0.1 0.09686        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 2   0.1 0.12757        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 3   0.1 0.15570        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 4   0.1 0.10091        7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 5   0.1 0.15698        7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 1   1.0 0.02378        5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 2   0.1 0.14159        5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 3   0.7 0.05901        5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fold 4   1.0 0.13463        5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Final parameters:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  lambda    alpha  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.07099  0.10000  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lambda   alpha  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.164   0.400  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Final coefficients:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.808953    -0.188626    -0.113628     0.050012    -0.034766    -0.030783 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> MAP2K2:MAPK3  FANCD2:FAN1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    -0.020656    -0.008568 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (Intercept) TNF:TNFRSF1A   IL1B:IL1R2  FANCD2:FAN1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     1.550074    -0.129532     0.008900    -0.002909 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Result:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        RMSE     R.squared   Pearson.r^2           MAE   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0.47925       0.05714       0.07489       0.44620   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     0.48381       0.03911       0.05242       0.44691   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># fit a random forest model:</span></span></span>
+<span class="r-in"><span><span class="co"># note that nfilter, n_outer_folds, n_inner_folds are set low to keep the</span></span></span>
+<span class="r-in"><span><span class="co"># example lightweight. Adjust these values as needed for your use case.</span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.train.html" class="external-link">nestcv.train</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  y <span class="op">=</span> <span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span>,</span></span>
 <span class="r-in"><span>  x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">synthetic_rnaseqData</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  method <span class="op">=</span> <span class="st">"rf"</span>,</span></span>
 <span class="r-in"><span>  modifyX <span class="op">=</span> <span class="st">"multiDEGGs_filter"</span>,</span></span>
 <span class="r-in"><span>  modifyX_options <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>keep_single_genes <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>                         nfilter <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         nfilter <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  modifyX_useY <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">5</span>,</span></span>
-<span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">6</span></span></span>
+<span class="r-in"><span>  n_outer_folds <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  n_inner_folds <span class="op">=</span> <span class="fl">3</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Fitting final model using CV on whole data</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 3.335825 secs</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Duration: 0.9245355 secs</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">fit.rf</span><span class="op">$</span><span class="va">summary</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                Reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Predicted       Non_responder Responder</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            58         1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 0        41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Non_responder            53        15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Responder                 5        27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               AUC            Accuracy   Balanced accuracy   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            0.9992              0.9900              0.9881   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            0.8633              0.8000              0.7783   </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
