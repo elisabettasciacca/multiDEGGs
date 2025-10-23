@@ -485,7 +485,7 @@ predict.multiDEGGs_filter_combined <- function(object,
 #' cat_parallel (from nestedcv)
 #' 
 #' Prints using shell echo from inside mclapply when run in Rstudio
-#' @param ... to be passed to system()
+#' @param \dots to be passed to system()
 cat_parallel <- function(...) {
   if (Sys.getenv("RSTUDIO") != "1") return()
   system(sprintf('echo "%s', paste0(..., '\\c"', collapse = "")))

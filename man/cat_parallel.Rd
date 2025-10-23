@@ -7,7 +7,7 @@
 cat_parallel(...)
 }
 \arguments{
-\item{...}{to be passed to system()}
+\item{\dots}{to be passed to system()}
 }
 \description{
 Prints using shell echo from inside mclapply when run in Rstudio

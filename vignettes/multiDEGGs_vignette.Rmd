@@ -485,12 +485,7 @@ fold, both functions automatically fall back to t-test-based selection to ensure
 robust performance across all scenarios. This fallback is indicated by a 
 printed "0" during execution.
 
-## Session Info
 
-```{r}
-sessionInfo()
-```
-  
 ## Citation
 ```{r}
 citation("multiDEGGs")
