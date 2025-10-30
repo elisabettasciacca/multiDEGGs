@@ -1,3 +1,5 @@
+# multiDEGGs (development version)
+
 # multiDEGGs 1.1.1
 Minor fixes in documetation
 

@@ -1,6 +1,6 @@
 Package: multiDEGGs
 Title: Multi-Omic Differentially Expressed Gene-Gene Pairs 
-Version: 1.1.1
+Version: 1.1.1.9000
 Authors@R: 
     c(person(given = "Elisabetta",
           family = "Sciacca",
