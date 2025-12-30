@@ -13,5 +13,7 @@ my_palette(n)
 a vector with colors
 }
 \description{
-This function return a color palette with the number of colors specified by n
+This function returns a color palette with the number of colors specified by n.
+Used internally by plot_regressions.
 }
+\keyword{internal}

@@ -1,9 +1,10 @@
 #' Internal function for colors 
 #'
-#' This function return a color palette with the number of colors specified by n
-#'
+#' This function returns a color palette with the number of colors specified by n.
+#' Used internally by plot_regressions.
 #' @param n number of colors needed
 #' @return a vector with colors
+#' @keywords internal
 my_palette <- function(n) {
   palette <- c("#3B4992", "#DF8F44", "#B24745", "#1B5E20", "#6B452B", "#8F7700",
                "#808180", "#91D1C2","#FABFD2")
@@ -30,11 +31,14 @@ my_palette <- function(n) {
 #' @param title plot title. If NULL (default), the name of the assayData will be 
 #' used. Use empty character "" for no title. 
 #' @param legend_position position of the legend in the plot. It can be
-#' specified by keyword or in any parameter accepted by `xy.coords` (defalut
+#' specified by keyword or in any parameter accepted by `xy.coords` (default
 #' "topright")
+#' @param verbose logical. Whether to print warnings during processing. 
+#' Default is TRUE
 #' @importFrom methods is
 #' @importFrom grDevices adjustcolor
-#' @importFrom graphics abline axis boxplot legend mtext points polygon text
+#' @importFrom stats predict vcov
+#' @importFrom graphics abline axis boxplot legend lines mtext points polygon text
 #' @return base graphics plot showing differential regressions across 
 #' categories. The p value of the interaction term of
 #' gene A ~ gene B \* category is reported on top.
@@ -65,156 +69,347 @@ plot_regressions <- function(deggs_object,
                              gene_A,
                              gene_B,
                              title = NULL, 
-                             legend_position = "topright") {
+                             legend_position = "topright",
+                             verbose = TRUE) {
   
+  # Input validation
   if (!is(deggs_object, "deggs")) {
     stop("deggs_object must be of class deggs")
   }
   
   if (!(is.character(gene_A) && is.character(gene_B))) {
-    stop("Both GeneA and GeneB must be character.")
+    stop("Both gene_A and gene_B must be character.")
   }
   
+  # Extract parameters from deggs object
   sig_var <- ifelse(deggs_object[["padj_method"]] == "none", "p.value", "p.adj")
   metadata <- deggs_object[["metadata"]]
   assayData <- deggs_object[["assayData"]][[assayDataName]]
   categories <- deggs_object[["category_subset"]]
   regression_method <- deggs_object[["regression_method"]]
+  mixedModel <- deggs_object[["mixedModel"]]
+  id_variable <- deggs_object[["id_variable"]]
+  lmer_ctrl <- deggs_object[["lmer_ctrl"]]
   
-  if (!gene_A %in% rownames(assayData)) (
+  # Validate gene names
+  if (!gene_A %in% rownames(assayData)) {
     stop("gene_A is not in rownames(", assayDataName, ")")
-  )
+  }
   
-  if (!gene_B %in% rownames(assayData)) (
+  if (!gene_B %in% rownames(assayData)) {
     stop("gene_B is not in rownames(", assayDataName, ")")
-  )
+  }
   
+  # Subset metadata to match assayData
   metadata <- metadata[colnames(assayData)]
   
-  if(length(unique(metadata)) == 1) (
+  if (length(unique(metadata)) == 1) {
     stop("All sample IDs in ", assayDataName, " belong to one category. 
          No differential analysis is possible.")
-  )
+  }
   
   if (is.null(categories)) {
     categories <- levels(metadata)
+  } else {
+    # Ensure categories follow the factor level order
+    categories <- intersect(levels(metadata), categories)
   }
   
   category_length <- length(categories)
-  if(is.null(title)) (
+  
+  # Set plot title
+  if (is.null(title)) {
     title <- ifelse(is.numeric(assayDataName), 
                     names(deggs_object[["diffNetworks"]])[assayDataName],
                     assayDataName)
-  )
+  }
   
-  # prepare data frame
-  # using both t() and as.vector() to be compatible with both matrices and dfs
-  df <- data.frame(as.vector(t(assayData[gene_A, ])),
-                   as.vector(t(assayData[gene_B, ])),
-                   metadata,
-                   check.names = FALSE)
-  colnames(df) <- c(gene_A, gene_B, "category")
+  # Extract gene values and prepare data
+  gene_A_values <- assayData[gene_A, ]
+  gene_B_values <- assayData[gene_B, ]
   
-  # compute gene-gene regression
+  # Compute interaction p-value and fits
   if (category_length == 2) {
+    binary_metadata <- as.numeric(metadata) - 1
+    
+    # Standard linear model
     if (regression_method == "lm") {
-      lmfit <- stats::lm(df[, 2] ~ df[, 1] * df[, 3])
-      # i.e.: gene_A ~ gene_B * category
-      p_interaction <- stats::coef(summary(lmfit))[4, 4]
-      fit <- lapply(categories, function(i) {
-        x <- df[df[, "category"] == i, 1]
-        y <- df[df[, "category"] == i, 2]
-        if (length(x) > 0 || length(y) > 0) return(stats::lm(y ~ x))
-      })
+      if (!mixedModel) {
+        p_interaction <- fit_lm_interaction(gene_A_values, gene_B_values, 
+                                            binary_metadata)
+        
+        # Fit separate models per category for plotting
+        fit <- lapply(categories, function(cat) {
+          gene_A_values = gene_A_values[metadata == cat]
+          gene_B_values = gene_B_values[metadata == cat]
+          stats::lm(gene_B_values ~ gene_A_values)
+        })
+      } else {
+        # Mixed linear model
+        lmm_fit <- lme4::lmer(gene_B_values ~ gene_A_values * binary_metadata + 
+                                (1 | id_variable),
+                              control = lmer_ctrl)
+        
+        # Check for singularity and fallback if needed
+        if (lme4::isSingular(lmm_fit)) {
+          mixedModel <- FALSE
+          if (verbose) warning("Singular fit detected. Using non-mixed model as fallback.")
+          p_interaction <- fit_lm_interaction(gene_A_values, gene_B_values, 
+                                              binary_metadata)
+          
+          # Fit separate models per category for plotting
+          fit <- lapply(categories, function(cat) {
+            gene_A_values = gene_A_values[metadata == cat]
+            gene_B_values = gene_B_values[metadata == cat]
+            stats::lm(gene_B_values ~ gene_A_values)
+          })
+        } else {
+          coef_summary <- summary(lmm_fit)$coefficients
+          if (nrow(coef_summary) >= 4) {
+            t_value <- coef_summary[4, 3]  # t value of the interaction term
+            dof <- length(binary_metadata) - length(lme4::fixef(lmm_fit))
+            p_interaction <- 2 * (1 - stats::pt(abs(t_value), df = dof))
+          } else {
+            p_interaction <- NA_real_
+          }
+          fit <- list(model = lmm_fit, categories = categories, is_robust = FALSE)
+        }
+      }
     }
+    
+    # Robust linear model
     if (regression_method == "rlm") {
-      robustfit <- MASS::rlm(df[, 2] ~ df[, 1] * df[, 3])
-      # i.e.: gene_A ~ gene_B * category
-      p_interaction <- sfsmisc::f.robftest(robustfit, var = 3)$p.value
-      fit <- lapply(categories, function(i) {
-        x <- df[df[, "category"] == i, 1]
-        y <- df[df[, "category"] == i, 2]
-        if (length(x) > 0 || length(y) > 0) return(MASS::rlm(y ~ x))
-      })
+      if (!mixedModel) {
+        robustfit <- MASS::rlm(gene_B_values ~ gene_A_values * binary_metadata)
+        p_interaction <- sfsmisc::f.robftest(robustfit, var = 3)$p.value
+        
+        # Fit separate robust models per category for plotting
+        fit <- lapply(categories, function(cat) {
+          gene_A_values = gene_A_values[metadata == cat]
+          gene_B_values = gene_B_values[metadata == cat]
+          MASS::rlm(gene_B_values ~ gene_A_values)
+        })
+      } else {
+        # Robust mixed linear model
+        rlmm_fit <- suppressMessages(
+          robustlmm::rlmer(gene_B_values ~ gene_A_values * 
+                             binary_metadata + (1 | id_variable))
+        ) 
+
+        # Check for singularity and fallback if needed
+        if (lme4::isSingular(rlmm_fit)) {
+          mixedModel <- FALSE
+          if (verbose) warning("Singular fit detected. Using non-mixed robust model as fallback.")
+          robustfit <- MASS::rlm(gene_B_values ~ gene_A_values * binary_metadata)
+          p_interaction <- sfsmisc::f.robftest(robustfit, var = 3)$p.value
+          
+          # Fit separate robust models per category for plotting
+          fit <- lapply(categories, function(cat) {
+            gene_A_values = gene_A_values[metadata == cat]
+            gene_B_values = gene_B_values[metadata == cat]
+            MASS::rlm(gene_B_values ~ gene_A_values)
+          })
+        } else {
+          coef_summary <- summary(rlmm_fit)$coefficients
+          
+          if (nrow(coef_summary) >= 4) {
+            t_value <- coef_summary[4, 3]  # t value of the interaction term
+            n <- length(gene_B_values)
+            k <- length(lme4::fixef(rlmm_fit))
+            dof <- n - k
+            p_interaction <- 2 * (1 - stats::pt(abs(t_value), df = dof))
+          } else {
+            p_interaction <- NA_real_
+          }
+          fit <- list(model = rlmm_fit, categories = categories, is_robust = TRUE)
+        }
+      }
     }
   }
+  
+  # Three or more categories case
   if (category_length >= 3) {
-    # one-way ANOVA
-    # i.e.: gene_A ~ gene_B * category
-    res_aov <- stats::aov(df[, 2] ~ df[, 1] * df[, 3], data = df)
-    p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
-    fit <- lapply(categories, function(i) {
-      x <- df[df[, "category"] == i, 1]
-      y <- df[df[, "category"] == i, 2]
-      if (regression_method == "lm") {
-        if (length(x) > 0 || length(y) > 0) return(stats::lm(y ~ x));
+    if (!mixedModel) {
+      # Standard ANOVA
+      res_aov <- stats::aov(gene_B_values ~ gene_A_values * metadata)
+      p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+      
+      # Fit separate models per category for plotting
+      fit <- lapply(categories, function(cat) {
+        gene_A_values = gene_A_values[metadata == cat]
+        gene_B_values = gene_B_values[metadata == cat]
+          if (regression_method == "lm") {
+            stats::lm(gene_B_values ~ gene_A_values)
+          } else if (regression_method == "rlm") {
+            MASS::rlm(gene_B_values ~ gene_A_values)
+          }
+      })
+    } else {
+      # Mixed model ANOVA
+      lmm_fit <- lme4::lmer(gene_B_values ~ gene_A_values * metadata + 
+                              (1 | id_variable), 
+                            control = lmer_ctrl)
+      
+      # Check for singularity and fallback if needed
+      if (lme4::isSingular(lmm_fit)) {
+        mixedModel <- FALSE
+        if (verbose) warning("Singular fit detected. Using non-mixed ANOVA as fallback.")
+        res_aov <- stats::aov(gene_B_values ~ gene_A_values * metadata)
+        p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+        
+        # Fit separate models per category for plotting
+        fit <- lapply(categories, function(cat) {
+          gene_A_values = gene_A_values[metadata == cat]
+          gene_B_values = gene_B_values[metadata == cat]
+          if (regression_method == "lm") {
+            stats::lm(gene_B_values ~ gene_A_values)
+          } else if (regression_method == "rlm") {
+            MASS::rlm(gene_B_values ~ gene_A_values)
+          }
+        })
+      } else {
+        anova_table <- car::Anova(lmm_fit, type = "III")
+        p_interaction <- anova_table[4, 3]  # "Pr(>Chisq)" of the interaction term
+        fit <- list(model = lmm_fit, categories = categories, is_robust = FALSE)
       }
-      if (regression_method == "rlm") {
-        if (length(x) > 0 || length(y) > 0) return(MASS::rlm(y ~ x))
+    }
+  }
+  
+  # Generate predictions for plotting
+  prefix <- ifelse(deggs_object[["padj_method"]] == "none", "P", "Padj")
+  
+  # Create color palette - colors are mapped to categories in order
+  col <- my_palette(n = category_length)
+  names(col) <- categories  # Name colors for explicit mapping
+  
+  x_adj <- (max(gene_A_values, na.rm = TRUE) - min(gene_A_values, na.rm = TRUE)) * 0.05
+  new_x <- seq(min(gene_A_values, na.rm = TRUE) - x_adj,
+               max(gene_A_values, na.rm = TRUE) + x_adj,
+               length.out = 100)
+  
+  if (!mixedModel) {
+    # Predictions for non-mixed models
+    preds <- lapply(fit, function(model) {
+      if (!is.null(model)) {
+        stats::predict(model, newdata = data.frame(gene_A_values = new_x), 
+                interval = 'confidence')
       }
+    })
+    
+  } else {
+    # Predictions for mixed models (population-level, marginalized over random effects)
+    is_robust <- fit$is_robust  #### !!!!!
+    
+    preds <- lapply(categories, function(cat) {
+      if (category_length == 2) {
+        binary_cat <- as.numeric(cat == categories[2])
+        pred_df <- data.frame(new_x, binary_cat)
+        colnames(pred_df) <- c("gene_A_values", "binary_metadata")
+      } else {
+        pred_df <- data.frame(new_x, cat)
+        colnames(pred_df) <- c("gene_A_values", "metadata")
+      }
+      
+      pred_vals <- predict(fit$model, newdata = pred_df, re.form = NA)
+      
+      # Compute SE differently for lmer vs rlmer
+      if (!is_robust) {
+        # Standard lmer: use fixed effects variance
+        if (category_length == 2) {
+          X <- cbind(1, new_x, binary_cat, new_x * binary_cat)
+        } else {
+          # For >2 categories, construct design matrix with dummy variables
+          X <- stats::model.matrix(~ new_x * cat)
+        }
+        vcov_fixed <- as.matrix(vcov(fit$model))
+        se_fit <- sqrt(diag(X %*% vcov_fixed %*% t(X)))
+      } else {
+        # Robust rlmer: extract variance-covariance matrix
+        vcov_fixed <- as.matrix(vcov(fit$model))
+        if (category_length == 2) {
+          X <- cbind(1, new_x, binary_cat, new_x * binary_cat)
+        } else {
+          X <- stats::model.matrix(~ new_x * cat)
+        }
+        
+        coef_names <- names(lme4::fixef(fit$model))
+        
+        # Only use columns that exist in vcov matrix
+        if (ncol(X) == length(coef_names)) {
+          colnames(X) <- coef_names
+          valid_cols <- colnames(X)[colnames(X) %in% rownames(vcov_fixed)]
+          if (length(valid_cols) > 0) {
+            X_sub <- X[, valid_cols, drop = FALSE]
+            vcov_sub <- vcov_fixed[valid_cols, valid_cols, drop = FALSE]
+            se_fit <- sqrt(diag(X_sub %*% vcov_sub %*% t(X_sub)))
+          } else {
+            # Fallback: use empirical SE from residuals
+            if (verbose) warning("Cannot compute SE for robust mixed model. Using empirical estimate.")
+            se_fit <- rep(stats::sd(stats::residuals(fit$model)) / 
+                            sqrt(length(gene_B_values)), 
+                          length(new_x))
+          }
+        } else {
+          # Fallback for dimension mismatch
+          if (verbose) warning("Cannot compute SE for robust mixed model. Using empirical estimate.")
+          se_fit <- rep(stats::sd(stats::residuals(fit$model)) / 
+                          sqrt(length(gene_B_values)), 
+                        length(new_x))
+        }
+      }
+      
+      cbind(fit = pred_vals,
+            lwr = pred_vals - 1.96 * se_fit,
+            upr = pred_vals + 1.96 * se_fit)
     })
   }
   
-  # Plot
-  prefix <- ifelse(deggs_object[["padj_method"]] == "none", "P", "Padj")
-  col <- my_palette(n = category_length)
-  x_adj <- (max(df[, 1], na.rm = TRUE) - min(df[, 1], na.rm = TRUE)) * 0.05
-  new_x <- seq(min(df[, 1], na.rm = TRUE) - x_adj,
-               max(df[, 1], na.rm = TRUE) + x_adj,
-               length.out = 100
-  )
-  
-  # prediction of the fitted model
-  preds <- lapply(fit, 
-                  function(i) stats::predict(i,
-                                             newdata = data.frame(x = new_x),
-                                             interval = 'confidence')
-                  )
-  
-  # we have the interaction p value for a single pair,
-  # adjusted p values can be found in the deggs_object if padj_method was NOT
-  # set to none
+  # Extract adjusted p-value from deggs object
   if (deggs_object[["padj_method"]] != "none") {
     all_interactions <- do.call(rbind, 
                                 deggs_object[["diffNetworks"]][[assayDataName]][categories])
     pair_index <- which(all_interactions$from == gene_A & 
                           all_interactions$to == gene_B)
-    # if you don't find gene_A-gene_B, try gene_B-gene_A:
-    if(length(pair_index) == 0)(
+    if (length(pair_index) == 0) {
       pair_index <- which(all_interactions$from == gene_B & 
                             all_interactions$to == gene_A)
-    )
+    }
     sig_interaction <- all_interactions[pair_index, sig_var]
   } else {
     sig_interaction <- p_interaction
   }
   
-  plot(df[, 1], df[, 2],
+  # Create plot
+  plot(gene_A_values, gene_B_values,
        type = 'n', bty = 'l', las = 1, cex.axis = 1.1,
-       font.main = 1, cex.lab = 1.3, xlab = colnames(df)[1],
-       ylab = colnames(df)[2],
-       main = title
-  )
+       font.main = 1, cex.lab = 1.3, xlab = gene_A,
+       ylab = gene_B,
+       main = title)
   
   for (i in seq_along(categories)) {
-    # plot confidence intervals
-    polygon(c(rev(new_x), new_x), c(rev(preds[[i]][, 3]), preds[[i]][, 2]),
-            col = adjustcolor(col[i], alpha.f = 0.15), border = NA
-    )
+    # Draw confidence intervals
+    polygon(c(rev(new_x), new_x),
+            c(rev(preds[[i]][, 3]), preds[[i]][, 2]),
+            col = adjustcolor(col[i], alpha.f = 0.15),
+            border = NA)
     
-    # plot regression lines
-    abline(fit[[i]], col = col[i], lwd = 1.5)
+    # Draw regression lines
+    if (!mixedModel) {
+      abline(fit[[i]], col = col[i], lwd = 1.5)
+    } else {
+      lines(new_x, preds[[i]][, 1], col = col[i], lwd = 1.5)
+    }
     
-    # plot dots 
-    cols <- col[df[df[, "category"] == categories[i], 3]]
-    pch <- c(16:(16 + category_length - 1))[df[df[, "category"] ==
-                                                 categories[i], 3]]
-    row <- points(df[df[, "category"] == categories[i], 1], # x coordinates from gene_A 
-                  df[df[, "category"] == categories[i], 2], # y coordinates from gene_B 
-                  cex = 1.5,
-                  pch = pch, col = adjustcolor(cols, alpha.f = 0.7)
-    )
+    # Draw data points
+    idx <- metadata == categories[i]
+    cols <- col[i]
+    pch <- 16 + i - 1
+    points(gene_A_values[idx], gene_B_values[idx],
+           cex = 1.5, pch = pch, 
+           col = adjustcolor(cols, alpha.f = 0.7))
   }
+  
+  # Add p-value annotation
   mtext(
     bquote(paste(
       .(prefix)["interaction"] * "=",
@@ -222,6 +417,8 @@ plot_regressions <- function(deggs_object,
     )),
     cex = 1.2, side = 3, adj = 0.04
   )
+  
+  # Add legend
   legend(
     x = legend_position, legend = categories,
     col = col, lty = 1,
@@ -229,6 +426,7 @@ plot_regressions <- function(deggs_object,
     cex = 0.8
   )
 }
+
 
 #' Boxplots of single nodes (genes,proteins, etc.)
 #'
@@ -506,7 +704,8 @@ View_diffNetworks <- function(deggs_object,
             gene_B = edges[input$current_edges_selection, "to"],
             assayDataName = ifelse(multiOmic, 
                    as.character(edges[input$current_edges_selection, "layer"]),
-                   1)
+                   1),
+            verbose = FALSE
           )
         } else {
           shiny::req(input$current_nodes_selection != "")
@@ -603,5 +802,3 @@ View_diffNetworks <- function(deggs_object,
   )
   shiny::shinyApp(ui = ui, server = server)
 }
-
-

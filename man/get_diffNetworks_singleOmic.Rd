@@ -9,6 +9,9 @@ get_diffNetworks_singleOmic(
   assayDataName,
   metadata,
   regression_method,
+  mixedModel,
+  id_variable,
+  lmer_ctrl,
   network,
   percentile_vector,
   padj_method,
@@ -18,13 +21,13 @@ get_diffNetworks_singleOmic(
 )
 }
 \arguments{
-\item{assayData}{a matrix or data.frame (or list of matrices or data.frames
-for multi-omic analysis) containing normalised assay data.
-Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of
-data.
-If unnamed, sequential names (assayData1, assayData2, etc.) will be
-assigned to identify each matrix or data.frame.}
+\item{assayData}{a matrix (or list of matrices for multi-omic analysis)
+containing normalised assay data. Sample IDs must be in columns and probe
+IDs (genes, proteins...) in rows. The matrix must be numeric.
+For multi-omic analysis, it is highly recommended to use a named list of
+matrices.
+If unnamed, sequential names (assayData1, assayData2, etc.) will
+be assigned to identify each matrix.}
 
 \item{assayDataName}{name of the assayData, to identify which omic is.}
 
@@ -43,6 +46,16 @@ Continuous variables are not allowed.}
 \item{regression_method}{whether to use robust linear modelling to calculate
 link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
 is faster and lighter.}
+
+\item{mixedModel}{logical. If TRUE, use mixed models with random intercept
+for id variable. Default FALSE.}
+
+\item{id_variable}{character. Name of the column in metadata containing the
+grouping variable for random effects (e.g., "slide_id", "batch"). Only used
+when mixedModel = TRUE. Default NULL.}
+
+\item{lmer_ctrl}{list of control parameters for lmer mixed models.
+Only used when mixedModel = TRUE. See ?lme4::lmerControl for details.}
 
 \item{network}{network of biological interactions provided by the user. The
 network must be provided in the form of a table of class data.frame with only

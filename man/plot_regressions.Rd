@@ -10,7 +10,8 @@ plot_regressions(
   gene_A,
   gene_B,
   title = NULL,
-  legend_position = "topright"
+  legend_position = "topright",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -35,8 +36,11 @@ etc.)}
 used. Use empty character "" for no title.}
 
 \item{legend_position}{position of the legend in the plot. It can be
-specified by keyword or in any parameter accepted by \code{xy.coords} (defalut
+specified by keyword or in any parameter accepted by \code{xy.coords} (default
 "topright")}
+
+\item{verbose}{logical. Whether to print warnings during processing.
+Default is TRUE}
 }
 \value{
 base graphics plot showing differential regressions across

@@ -2,13 +2,13 @@
 #'
 #' Generate a multi-layer differential network with interaction p values
 #'
-#' @param assayData a matrix or data.frame (or list of matrices or data.frames
-#' for multi-omic analysis) containing normalised assay data.
-#' Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-#' For multi omic analysis, it is highly recommended to use a named list of
-#' data. 
-#' If unnamed, sequential names (assayData1, assayData2, etc.) will be
-#' assigned to identify each matrix or data.frame. 
+#' @param assayData a matrix (or list of matrices for multi-omic analysis) 
+#' containing normalised assay data. Sample IDs must be in columns and probe 
+#' IDs (genes, proteins...) in rows. The matrix must be numeric.
+#' For multi-omic analysis, it is highly recommended to use a named list of
+#' matrices. 
+#' If unnamed, sequential names (assayData1, assayData2, etc.) will 
+#' be assigned to identify each matrix.
 #' @param metadata a named vector, matrix, or data.frame containing sample 
 #' annotations or categories. If matrix or data.frame, each row should
 #' correspond to a sample, with columns representing different sample 
@@ -26,6 +26,13 @@
 #' @param regression_method whether to use robust linear modelling to calculate
 #' link p values. Options are 'lm' (default) or 'rlm'. The lm implementation 
 #' is faster and lighter.  
+#' @param mixedModel logical. If TRUE, use mixed models with random intercept
+#' for id variable. Default FALSE.
+#' @param id_variable character. Name of the column in metadata containing the
+#' grouping variable for random effects (e.g., "slide_id", "batch"). Only used
+#' when mixedModel = TRUE. Default NULL.
+#' @param lmer_ctrl list of control parameters for lmer mixed models.
+#' Only used when mixedModel = TRUE. See ?lme4::lmerControl for details.
 #' @param category_subset optional character vector indicating a subset of 
 #' categories from the category variable. If not specified, all categories in
 #' `category_variable` will be used.
@@ -119,6 +126,9 @@ get_diffNetworks <- function(assayData,
                              metadata,
                              category_variable = NULL,
                              regression_method = 'lm',
+                             mixedModel = FALSE,
+                             id_variable = NULL,
+                             lmer_ctrl = NULL,
                              category_subset = NULL,
                              network = NULL,
                              percentile_vector = seq(0.35, 0.98, by = 0.05),
@@ -127,37 +137,95 @@ get_diffNetworks <- function(assayData,
                              verbose = TRUE, 
                              cores = parallel::detectCores() / 2) {
   
-  if (!(is.list(assayData) || 
-        is.matrix(assayData) || is.data.frame(assayData))) (
-          stop("assayDataList is not a list or a matrix or data.frame")
-        )
+  regression_method <- match.arg(regression_method, choices = c('lm', 'rlm'))
   
-  if (is.matrix(assayData) || is.data.frame(assayData)) (
+  # Check assayData validity (matrix or list)
+  if (!(is.list(assayData) || is.matrix(assayData))) {
+    stop("assayData must be a matrix or a list of matrices")
+  }
+  
+  # Convert single matrix to list
+  if (is.matrix(assayData)) {
     assayDataList <- list(assayData)
-  ) else (
+  } else {
+    # If it's a list, check that all elements are matrices
+    if (!all(vapply(assayData, is.matrix, logical(1)))) {
+      non_matrix <- which(!vapply(assayData, is.matrix, logical(1)))
+      stop("All elements of assayData list must be matrices. ",
+           "Elements ", paste(non_matrix, collapse = ", "), " are not matrices.")
+    }
     assayDataList <- assayData
-  )
+  }
   
+  # check that all matrices are numeric
+  check_numeric <- vapply(assayDataList, function(x) is.numeric(x), logical(1))
+  if (!all(check_numeric)) {
+    non_numeric <- which(!check_numeric)
+    stop("All matrices in assayData must be numeric. ",
+         "Elements ", paste(non_numeric, collapse = ", "), " are not numeric.")
+  }
+  
+  # Check category_variable validity
   if (!is.null(category_variable)) {
+    # If metadata is a matrix/data.frame, category_variable must be a column name
     if ((is.matrix(metadata) || is.data.frame(metadata)) && 
         !category_variable %in% colnames(metadata)) {
       stop("category_variable must be %in% colnames(metadata). If metadata is a 
        named vector category_variable must be NULL.")
     }
   } else if (is.matrix(metadata) || is.data.frame(metadata)) {
+    # If metadata is a matrix/data.frame, category_variable cannot be NULL
     stop("metadata is a matrix or dataframe but category_variable is NULL.
      Please specify category_variable to select the correct column 
      from metadata.")
+  }
+  
+  # Check id_variable for mixed models 
+  if (mixedModel && is.null(id_variable)) {
+    stop("id_variable must be provided when mixedModel = TRUE")
+  }
+  
+  # Check required packages for mixed models
+  if (mixedModel) {
+    if (regression_method == 'lm') {
+      if (!requireNamespace("lme4", quietly = TRUE)) {
+        stop("Package 'lme4' is required for mixed models. Please install it.")
+      }
+    } else {
+      if (!requireNamespace("robustlmm", quietly = TRUE)) {
+        stop("Package 'robustlmm' is required for robust mixed models. Please install it.")
+      }
+    }
+  }
+  
+  # set controls for mixed models 
+  if (mixedModel && regression_method == "lm") {
+    # Control settings for lmer
+    lmer_ctrl <- lme4::lmerControl(
+      optimizer = "bobyqa",  # Fast and generally reliable
+      check.conv.singular = "ignore",  # I handle this separately
+    )
   }
   
   if (is.null(names(assayDataList))) (
     names(assayDataList) <- paste0("assayData", seq_along(assayDataList))
   )
   
-  metadata <- tidy_metadata(
-    category_subset = category_subset, metadata = metadata,
-    category_variable = category_variable, verbose = verbose
-  )  # metadata will be a named vector from now on
+  tidy_data <- tidy_metadata(
+    category_subset = category_subset,
+    metadata = metadata,
+    category_variable = category_variable,
+    id_variable = id_variable,
+    verbose = verbose
+  )  
+  
+  if (is.list(tidy_data)) {
+    metadata <- tidy_data[["metadata"]] 
+    id_variable <- tidy_data[["id_vector"]] 
+  } else {
+    metadata <- tidy_data  
+  }
+  # metadata (and, when present id_variable) will be a named vector from now on
   
   diffNetworks_list <- lapply(seq_along(assayDataList), function(i){
     assayDataName <- names(assayDataList)[i]
@@ -165,16 +233,19 @@ get_diffNetworks <- function(assayData,
     
     diffNetworks <- 
       tryCatch({
-        get_diffNetworks_singleOmic(assayData,
-                                    assayDataName, 
-                                    metadata,
-                                    regression_method,
-                                    network,
-                                    percentile_vector,
-                                    padj_method,
-                                    show_progressBar,
-                                    verbose, 
-                                    cores)
+        get_diffNetworks_singleOmic(assayData = assayData,
+                                    assayDataName = assayDataName, 
+                                    metadata = metadata,
+                                    regression_method = regression_method,
+                                    mixedModel = mixedModel,
+                                    id_variable = id_variable,
+                                    lmer_ctrl = lmer_ctrl, 
+                                    network = network,
+                                    percentile_vector = percentile_vector,
+                                    padj_method = padj_method,
+                                    show_progressBar = show_progressBar,
+                                    verbose = verbose, 
+                                    cores = cores)
       }, error = function(e) { message(conditionMessage(e)) })
   })
   names(diffNetworks_list) <- names(assayDataList)
@@ -184,6 +255,9 @@ get_diffNetworks <- function(assayData,
     assayData = assayDataList,
     metadata = metadata,
     regression_method = regression_method,
+    mixedModel = mixedModel,
+    id_variable = id_variable,
+    lmer_ctrl = lmer_ctrl,
     category_subset = category_subset,
     padj_method = padj_method
   )
@@ -200,6 +274,9 @@ get_diffNetworks_singleOmic <- function(assayData,
                                         assayDataName,
                                         metadata,
                                         regression_method,
+                                        mixedModel,
+                                        id_variable,
+                                        lmer_ctrl,
                                         network,
                                         percentile_vector, 
                                         padj_method,
@@ -218,7 +295,7 @@ get_diffNetworks_singleOmic <- function(assayData,
   if(!any(colnames(assayData) %in% names(metadata))) (
     stop("Sample IDs in ", assayDataName, " don't match the IDs in metadata 
           (the metadata names/rownames must match the sample IDs used as column 
-          names of ", assayDataName, ".")
+          names of ", assayDataName, ".)")
   )
   
   # align metadata and assayData
@@ -268,7 +345,7 @@ get_diffNetworks_singleOmic <- function(assayData,
   edges$edge_ID <- paste(edges$from, edges$to)
   edges <- edges[!duplicated(edges$edge_ID), ]
   edges$edge_ID <- NULL
-  
+
   nodes <- c(edges[, 1], edges[, 2]) %>%
     unique()
   
@@ -299,7 +376,7 @@ get_diffNetworks_singleOmic <- function(assayData,
   # calculate interaction p values per percentile and select the percentile 
   # network with the highest number of significant interactions 
   sig_edges_count <- 0
-  
+
   if (Sys.info()["sysname"] == "Windows") {
     cl <- parallel::makeCluster(cores)
     
@@ -322,6 +399,9 @@ get_diffNetworks_singleOmic <- function(assayData,
             category_median_list = category_median_list,
             contrasts = contrasts,
             regression_method = regression_method,
+            mixedModel = mixedModel,
+            id_variable = id_variable,
+            lmer_ctrl = lmer_ctrl,
             edges = edges,
             categories_length = length(categories),
             sig_edges_count = sig_edges_count
@@ -339,6 +419,9 @@ get_diffNetworks_singleOmic <- function(assayData,
             category_median_list = category_median_list,
             contrasts = contrasts,
             regression_method = regression_method,
+            mixedModel = mixedModel,
+            id_variable = id_variable,
+            lmer_ctrl = lmer_ctrl,
             edges = edges,
             categories_length = length(categories),
             sig_edges_count = sig_edges_count
@@ -360,6 +443,9 @@ get_diffNetworks_singleOmic <- function(assayData,
             category_median_list = category_median_list,
             contrasts = contrasts,
             regression_method = regression_method,
+            mixedModel = mixedModel,
+            id_variable = id_variable,
+            lmer_ctrl = lmer_ctrl,
             edges = edges,
             categories_length = length(categories),
             sig_edges_count = sig_edges_count
@@ -378,6 +464,9 @@ get_diffNetworks_singleOmic <- function(assayData,
             category_median_list = category_median_list,
             contrasts = contrasts,
             regression_method = regression_method,
+            mixedModel = mixedModel,
+            id_variable = id_variable,
+            lmer_ctrl = lmer_ctrl,
             edges = edges,
             categories_length = length(categories),
             sig_edges_count = sig_edges_count
@@ -412,38 +501,57 @@ get_diffNetworks_singleOmic <- function(assayData,
             "th percentile are removed from networks.")
   )
   final_networks <- pvalues_list[[as.character(names(best_percentile))]]
+
+  # Report singularity issues if mixed model was used
+  if (mixedModel) {
+    if (verbose) {
+      n_singular <- sum(sapply(final_networks, function(network) {
+        if (is.data.frame(network)) sum(network$singular) else 0
+      }))
+      
+      n_total <- sum(sapply(final_networks, function(network) {
+        if (is.data.frame(network)) nrow(network) else 0
+      }))
+      
+      perc_singular <- round(100 * n_singular / n_total, 1)
+      
+      if (n_singular > 0) {
+        message(sprintf(
+          "Singularity detected in %d out of %d model fits (%.1f%%).",
+          n_singular, n_total, perc_singular
+        ))
+        message("Non-mixed models were used as fallback for singular fits.")
+        
+        if (perc_singular > 50) {
+          warning(
+            "More than 50% of models were singular. ",
+            "Consider using non-mixed models (mixedModel = FALSE) for this analysis."
+          )
+        }
+      }
+    }
+  }
   return(final_networks)
 }
 
 
-#' Tidying up of metadata. Samples belonging to undesidered categories
+#' Tidying up of metadata and id_variable (when provided). 
+#' 
+#' Samples belonging to undesidered categories
 #' (if specified) will be removed as well as categories with less than five 
 #' samples, and NAs.
+#' Both metadata and id_variable (when provided) will be returned as named factors. 
+#' Used internally by get_diffNetworks_singleOmic.
 #'
-#' @param category_subset optional character vector indicating which categories
-#' are used for comparison. If not specified, all categories in
-#' `category_variable` will be used.
-#' @param metadata a named vector, matrix, or data.frame containing sample 
-#' annotations or categories. If matrix or data.frame, each row should
-#' correspond to a sample, with columns representing different sample 
-#' characteristics (e.g., treatment group, condition, time point). The colname 
-#' of the sample characteristic to be used for differential analysis must be 
-#' specified in `category_variable`. Rownames must match the sample IDs used in
-#' assayData. 
-#' If named vector, each element must correspond to a sample characteristic to 
-#' be used for differential analysis, and names must match sample IDs used in
-#' the colnames of `assayData`.
-#' Continuous variables are not allowed.  
-#' @param category_variable column name in `metadata` (if data.frame or matrix)
-#' or NULL if `metadata` is already a named vector containing category 
-#' information.
-#' @param verbose Logical. Whether to print detailed output messages
-#' during processing. Default is FALSE.
-#' @return a tidy named factor vector of sample annotations.
-tidy_metadata <- function(category_subset = NULL,
+#' @inheritParams get_diffNetworks
+#' @return a tidy named factor vector of sample annotations, 
+#' or a list with metadata and id_vector when mixedModel = TRUE
+#' @keywords internal
+tidy_metadata <- function(category_subset,
                           metadata,
-                          category_variable = NULL, 
-                          verbose = FALSE) {
+                          category_variable,
+                          id_variable,
+                          verbose) {
   
   # Convert metadata to a named vector based on input type
   if (is.atomic(metadata) || is.factor(metadata)) {
@@ -466,7 +574,24 @@ tidy_metadata <- function(category_subset = NULL,
     stop("metadata must be a named vector/factor, matrix, or data.frame.")
   }
   
-  # Subset seleted categories (optional)
+  # Extract id_vector if id_variable is provided
+  if (!is.null(id_variable)) {
+    if (is.atomic(metadata) || is.factor(metadata)) {
+      stop("When id_variable is provided, metadata must be a matrix or data.frame.")
+    }
+    if (!id_variable %in% colnames(metadata)) {
+      stop("id_variable '", id_variable, "' not found in metadata.")
+    }
+    id_vector <- metadata[, id_variable]
+    names(id_vector) <- rownames(metadata)
+    
+    # Check for NAs in id_vector
+    if (any(is.na(id_vector))) {
+      stop("id_variable contains NA values. Please remove missing values.")
+    }
+  }
+  
+  # Subset selected categories (optional)
   if (!is.null(category_subset)) {
     if (!all(category_subset %in% category_vector)) (
       stop("category_subset values must be contained in metadata")
@@ -476,6 +601,9 @@ tidy_metadata <- function(category_subset = NULL,
       stop("No samples remain after filtering for specified category_subset.")
     }
     category_vector <- category_vector[keep_samples]
+    if (!is.null(id_variable)) {
+      id_vector <- id_vector[keep_samples]
+    }
   }
   
   # Convert to factor
@@ -483,6 +611,15 @@ tidy_metadata <- function(category_subset = NULL,
     category_vector <- as.factor(category_vector)
     if (verbose) {
       message("category values were converted to factor")
+    }
+  }
+  
+  if (!is.null(id_variable)) {
+    if (!is.factor(id_vector)) {
+      id_vector <- as.factor(id_vector)
+      if (verbose) {
+        message("id values were converted to factor")
+      }
     }
   }
   
@@ -502,6 +639,11 @@ tidy_metadata <- function(category_subset = NULL,
     category_vector <- category_vector[keep_samples]
     category_vector <- droplevels(category_vector)
     
+    if (!is.null(id_variable)) {
+      id_vector <- id_vector[keep_samples]
+      id_vector <- droplevels(id_vector)
+    }
+    
     if (nlevels(category_vector) < 2) {
       stop("At least two categories with at least 5 observations are required.")
     }
@@ -510,19 +652,29 @@ tidy_metadata <- function(category_subset = NULL,
   # Remove NAs
   NAs_number <- sum(is.na(category_vector))
   if (NAs_number > 0) {
-    category_vector <- stats::na.omit(category_vector)
+    keep_samples <- names(category_vector)[!is.na(category_vector)]
+    category_vector <- category_vector[keep_samples]
+    if (!is.null(id_variable)) {
+      id_vector <- id_vector[keep_samples]
+    }
     if (verbose) {
       message("category values contained NAs. ",
               NAs_number, " samples were removed.")
     }
   }
-  return(category_vector)
+  
+  # Return
+  if (is.null(id_variable)) {
+    return(category_vector)
+  } else {
+    return(list("metadata" = category_vector, "id_vector" = id_vector))
+  }
 }
 
 
 #' Compute interaction p values for a single percentile value
 #'
-#' @inheritParams get_diffNetworks
+#' @inheritParams get_diffNetworks_singleOmic
 #' @param categories_length integer number indicating the number of categories
 #' @param category_median_list list of category data.frames
 #' @param percentile a float number indicating the percentile to use.
@@ -541,12 +693,15 @@ calc_pvalues_percentile <- function(assayData,
                                     percentile,
                                     contrasts,
                                     regression_method,
+                                    mixedModel,
+                                    id_variable,
+                                    lmer_ctrl,
                                     edges,
                                     sig_edges_count) {
   
   # 1st filtering step: remove low expressed genes in each category
   # (genes under the percentile threshold)
-  cut_off <- stats::quantile(as.matrix(assayData), prob = percentile,
+  cut_off <- stats::quantile(assayData, prob = percentile,
                              na.rm = TRUE)
   user_message <- paste0("No gene above the threshold (", percentile * 100,
                          "th percentile).")
@@ -586,7 +741,7 @@ calc_pvalues_percentile <- function(assayData,
   if (user_message %in% common_links) (
     common_links <- common_links[!(common_links %in% user_message)]
   )
-  
+
   # 2nd filtering step
   # remove overlapping edges and format back to data.frame
   categories_network_list <- lapply(networks_to_string, function(subnetwork) {
@@ -608,7 +763,7 @@ calc_pvalues_percentile <- function(assayData,
   }) %>% 
     unlist() %>% 
     sum()
-  
+
   # calculate interaction p values
   pvalues_list <- lapply(categories_network_list, function(category_network) {
     return(calc_pvalues_network(
@@ -617,7 +772,10 @@ calc_pvalues_percentile <- function(assayData,
       metadata = metadata,
       regression_method = regression_method,
       categories_length = categories_length,
-      padj_method = padj_method
+      padj_method = padj_method,
+      mixedModel = mixedModel,
+      id_variable = id_variable,
+      lmer_ctrl = lmer_ctrl
     ))
   })
   # count significant p values
@@ -635,6 +793,9 @@ calc_pvalues_percentile <- function(assayData,
     }) %>% unlist()
     num_sig_pvalues <- sum(p_values_sig_count) # these are p values or adj p
     
+        if (num_sig_pvalues > sig_edges_count) {
+      sig_edges_count <<- num_sig_pvalues
+        }
     # The <<- operator here is used only for efficiency reasons and does not
     # alter the .GlobalEnv as the variable sig_edges_count is defined in the 
     # parent environment of the get_diffNetworks_singleOmic() parent function 
@@ -647,9 +808,7 @@ calc_pvalues_percentile <- function(assayData,
     # for a bigger number of significant edges in subsequent percentiles. 
     # The update of sig_edges_count will allow skipping unnecessary lm or rlm
     # iterations. 
-    if (num_sig_pvalues > sig_edges_count) {
-      sig_edges_count <<- num_sig_pvalues
-    }
+
     pvalues_list <- append(pvalues_list, num_sig_pvalues)
     names(pvalues_list)[length(pvalues_list)] <- "sig_pvalues_count"
     return(pvalues_list)
@@ -672,57 +831,151 @@ calc_pvalues_network <- function(assayData,
                                  metadata,
                                  padj_method,
                                  categories_length,
-                                 regression_method = 'lm',
-                                 category_network) {
+                                 regression_method,
+                                 category_network,
+                                 mixedModel,
+                                 id_variable,
+                                 lmer_ctrl) {
   
   if (!is.character(category_network)) {
     if (nrow(category_network) > 0) {
+      
+      # Track singularity and fallback to non-mixed models
+      singular <- rep(FALSE, nrow(category_network))
+      # For mixed-effects models, 
+      # the singular vector will be updated using the <<- operator in the code
+      # below. This is done for efficiency reasons and does not
+      # alter the .GlobalEnv as the variable singular is defined in the 
+      # parent environment of the calc_pvalues_percentile parent function 
+      # (see https://contributor.r-project.org/cran-cookbook/code_issues.html#writing-to-the-.globalenv).  
+
       p.value <- vapply(seq_len(nrow(category_network)), function(i){
         gene_A <- category_network[i, 1]
         gene_B <- category_network[i, 2]
         
+        binary.metadata <- as.numeric(metadata) - 1
+        
+        # Two categories case 
         if (categories_length == 2) {
+          
+          # Standard linear model
           if (regression_method == "lm") {
-            binary.metadata <- as.numeric(metadata) - 1
-            design.mat <- cbind(
-              1,
-              as.numeric(assayData[gene_A, ]),
-              binary.metadata,
-              as.numeric(assayData[gene_A, ]) * binary.metadata
-            )
-            lmfit <- stats::.lm.fit(x = design.mat,
-                                    y = as.numeric(assayData[gene_B, ]))
-            dof <- length(lmfit$residuals) - length(lmfit$coefficients)
-            # Mean Squared Error
-            sigma_squared <- sum((lmfit$residuals)^2) / dof
-            # variance-covariance of coefficients
-            XtX_inv <- solve(t(design.mat) %*% design.mat)
-            var_covar_matrix <- sigma_squared * XtX_inv
-            se_coefficients <- sqrt(diag(var_covar_matrix))
-            # t-statics for the interaction term (4th coeff) 
-            t_stat <- (lmfit$coefficients[4]) / se_coefficients[4]
-            p_interaction <- 2 * (1 - stats::pt(abs(t_stat), df = dof))
+            if (!mixedModel) {
+              p_interaction <- fit_lm_interaction(
+                assayData[gene_A, ], 
+                assayData[gene_B, ], 
+                binary.metadata
+              )
+            } else {
+              # Mixed linear model
+              lmm_fit <- lme4::lmer(assayData[gene_B, ] ~
+                                      assayData[gene_A, ] * 
+                                      binary.metadata + (1 | id_variable),
+                                    control = lmer_ctrl)
+              
+              # Check for singularity and fallback if needed
+              if (lme4::isSingular(lmm_fit)) {
+                singular[i] <<- TRUE
+                p_interaction <- fit_lm_interaction(
+                  assayData[gene_A, ], 
+                  assayData[gene_B, ], 
+                  binary.metadata
+                )
+              } else {
+                coef_summary <- summary(lmm_fit)$coefficients
+                if (nrow(coef_summary) >= 4) {
+                  t_value <- coef_summary[4, 3]
+                  dof <- length(binary.metadata) - length(lme4::fixef(lmm_fit))
+                  p_interaction <- 2 * (1 - stats::pt(abs(t_value), df = dof))
+                } else {
+                  p_interaction <- NA_real_
+                }
+              }
+            }
           }
+          
+          # Robust linear model
           if (regression_method == "rlm") {
-            # gene_B ~ gene_A * category
-            robustfit <- rlm(as.numeric(assayData[gene_B, ]) ~
-                    as.numeric(assayData[gene_A, ]) * metadata)
-
-            p_interaction <- try(
-              f.robftest(robustfit, var = 3)$p.value, silent = TRUE
-            )
-            if (inherits(p_interaction, "try-error")) (
-              p_interaction <- NA_real_
-            )
+            if (!mixedModel) {
+              robustfit <- rlm(assayData[gene_B, ] ~
+                                 assayData[gene_A, ] * binary.metadata)
+              
+              p_interaction <- try(
+                f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+              )
+              if (inherits(p_interaction, "try-error")) {
+                p_interaction <- NA_real_
+              }
+            } else {
+              # Robust mixed linear model
+              rlmm_fit <- suppressMessages(
+                robustlmm::rlmer(assayData[gene_B, ] ~
+                                   assayData[gene_A, ] * 
+                                   binary.metadata + (1 | id_variable))
+              )
+              
+              # Check for singularity and fallback if needed
+              if (lme4::isSingular(rlmm_fit)) {
+                singular[i] <<- TRUE
+                robustfit <- rlm(assayData[gene_B, ] ~
+                                   assayData[gene_A, ] * binary.metadata)
+                
+                p_interaction <- try(
+                  f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+                )
+                if (inherits(p_interaction, "try-error")) {
+                  p_interaction <- NA_real_
+                }
+              } else {
+                coef_summary <- summary(rlmm_fit)$coefficients
+                if (nrow(coef_summary) >= 4) {
+                  t_value <- coef_summary[4, 3]
+                  dof <- length(binary.metadata) - length(lme4::fixef(rlmm_fit))
+                  p_interaction <- 2 * (1 - stats::pt(abs(t_value), df = dof))
+                } else {
+                  p_interaction <- NA_real_
+                }
+              }
+            }
           }
         }
+        
+        # Three or more categories case 
         if (categories_length >= 3) {
-          # one-way ANOVA
-          # gene_B ~ gene_A * category
-          res_aov <- stats::aov(as.numeric(assayData[gene_B, ]) ~
-                                  as.numeric(assayData[gene_A, ]) * metadata)
-          p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+          if (!mixedModel) {
+            # Standard ANOVA
+            res_aov <- stats::aov(assayData[gene_B, ] ~
+                                    assayData[gene_A, ] * metadata)
+            p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+          } else {
+            # Mixed model ANOVA
+            if (!requireNamespace("car", quietly = TRUE)) {
+              stop("Package 'car' is required for mixed models and >2 categories. Please install it.")
+            }
+            lmm_fit <- suppressMessages(
+              lme4::lmer(assayData[gene_B, ] ~
+                           assayData[gene_A, ] *
+                           metadata + (1 | id_variable),
+                         control = lmer_ctrl)
+            )
+            
+            # Check for singularity and fallback if needed
+            if (lme4::isSingular(lmm_fit)) {
+              singular[i] <<- TRUE
+              res_aov <- stats::aov(assayData[gene_B, ] ~
+                                      assayData[gene_A, ] * metadata)
+              p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+            } else {
+              anova_table <- car::Anova(lmm_fit, type = "III")
+              if (nrow(anova_table) >= 4) {
+                p_interaction <- anova_table[4, 3]
+              } else {
+                p_interaction <- NA_real_
+              }
+            }
+          }
         }
+        
         return(p_interaction)
       }, FUN.VALUE = numeric(1))
     } else {
@@ -733,25 +986,23 @@ calc_pvalues_network <- function(assayData,
   }
   
   if (is.numeric(p.value)) {
-    category_network <- cbind(category_network, p.value)
+    category_network <- cbind(category_network, p.value, singular)
     
     if (padj_method == "q.value") {
-      # adding Storey's q values
       p.adj <- try(qvalue::qvalue(category_network[, "p.value"])$qvalues,
                    silent = TRUE)
       if (is(p.adj, "try-error")) {
-        if (nrow(category_network) > 1) (
+        if (nrow(category_network) > 1) {
           p.adj <- qvalue::qvalue(p = category_network[, "p.value"],
                                   pi0 = 1)$qvalues
-        ) else (
+        } else {
           p.adj <- NA
-        )
+        }
       }
       category_network$p.adj <- p.adj
     }
     
     if (!(padj_method %in% c("q.value", "none"))) {
-      # adjust p values
       p.adj <- try(stats::p.adjust(category_network[, "p.value"],
                                    method = padj_method))
       if (is(p.adj, "try-error")) {
@@ -765,8 +1016,40 @@ calc_pvalues_network <- function(assayData,
   } else {
     category_network <- p.value
   }
+  
   return(category_network)
 }
+
+
+#' Fit linear model and compute interaction p-value
+#'
+#' Helper function to fit a linear model with interaction term and compute
+#' the p-value for the interaction coefficient. Used internally by
+#' calc_pvalues_network and plot_regressions.
+#'
+#' @param gene_A_values numeric vector of values for gene A
+#' @param gene_B_values numeric vector of values for gene B
+#' @param binary_metadata numeric vector (0/1) indicating category membership
+#' @return numeric p-value for the interaction term
+#' @keywords internal
+fit_lm_interaction <- function(gene_A_values, gene_B_values, binary_metadata) {
+  design_mat <- cbind(
+    1,
+    gene_A_values,
+    binary_metadata,
+    gene_A_values * binary_metadata
+  )
+  lmfit <- stats::.lm.fit(x = design_mat, y = gene_B_values)
+  dof <- length(lmfit$residuals) - length(lmfit$coefficients)
+  sigma_squared <- sum((lmfit$residuals)^2) / dof
+  XtX_inv <- solve(t(design_mat) %*% design_mat)
+  var_covar_matrix <- sigma_squared * XtX_inv
+  se_coefficients <- sqrt(diag(var_covar_matrix))
+  t_stat <- (lmfit$coefficients[4]) / se_coefficients[4]
+  p_interaction <- 2 * (1 - stats::pt(abs(t_stat), df = dof))
+  return(p_interaction)
+}
+
 
 #' Get a table of all the significant interactions across categories
 #'
@@ -841,6 +1124,9 @@ get_sig_deggs <- function(deggs_object,
   
   # Combine all significant edges
   sig_edges <- do.call(rbind, sig_edges_list)
+  
+  # singular column not necessary if mixedModel = FALSE
+  if(!deggs_object[["mixedModel"]]) sig_edges$singular <- NULL
   return(sig_edges)
 }
 
@@ -915,6 +1201,8 @@ get_multiOmics_diffNetworks <- function(deggs_object,
     if (length(category_networks) > 0) {
       merged_network <- do.call(rbind, category_networks)
       merged_network$layer <- as.factor(merged_network$layer)
+      # singular column not necessary if mixedModel = FALSE
+      if(!deggs_object[["mixedModel"]]) merged_network$singular <- NULL
       return(merged_network)
     } else {
       message("No valid category_networks found for category: ", category, ".")

@@ -9,18 +9,21 @@ calc_pvalues_network(
   metadata,
   padj_method,
   categories_length,
-  regression_method = "lm",
-  category_network
+  regression_method,
+  category_network,
+  mixedModel,
+  id_variable,
+  lmer_ctrl
 )
 }
 \arguments{
-\item{assayData}{a matrix or data.frame (or list of matrices or data.frames
-for multi-omic analysis) containing normalised assay data.
-Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of
-data.
-If unnamed, sequential names (assayData1, assayData2, etc.) will be
-assigned to identify each matrix or data.frame.}
+\item{assayData}{a matrix (or list of matrices for multi-omic analysis)
+containing normalised assay data. Sample IDs must be in columns and probe
+IDs (genes, proteins...) in rows. The matrix must be numeric.
+For multi-omic analysis, it is highly recommended to use a named list of
+matrices.
+If unnamed, sequential names (assayData1, assayData2, etc.) will
+be assigned to identify each matrix.}
 
 \item{metadata}{a named vector, matrix, or data.frame containing sample
 annotations or categories. If matrix or data.frame, each row should
@@ -47,6 +50,16 @@ link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
 is faster and lighter.}
 
 \item{category_network}{network table for a specific category}
+
+\item{mixedModel}{logical. If TRUE, use mixed models with random intercept
+for id variable. Default FALSE.}
+
+\item{id_variable}{character. Name of the column in metadata containing the
+grouping variable for random effects (e.g., "slide_id", "batch"). Only used
+when mixedModel = TRUE. Default NULL.}
+
+\item{lmer_ctrl}{list of control parameters for lmer mixed models.
+Only used when mixedModel = TRUE. See ?lme4::lmerControl for details.}
 }
 \value{
 a list of p values

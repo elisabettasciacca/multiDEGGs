@@ -2,20 +2,19 @@
 % Please edit documentation in R/core_functions.R
 \name{tidy_metadata}
 \alias{tidy_metadata}
-\title{Tidying up of metadata. Samples belonging to undesidered categories
-(if specified) will be removed as well as categories with less than five
-samples, and NAs.}
+\title{Tidying up of metadata and id_variable (when provided).}
 \usage{
 tidy_metadata(
-  category_subset = NULL,
+  category_subset,
   metadata,
-  category_variable = NULL,
-  verbose = FALSE
+  category_variable,
+  id_variable,
+  verbose
 )
 }
 \arguments{
-\item{category_subset}{optional character vector indicating which categories
-are used for comparison. If not specified, all categories in
+\item{category_subset}{optional character vector indicating a subset of
+categories from the category variable. If not specified, all categories in
 \code{category_variable} will be used.}
 
 \item{metadata}{a named vector, matrix, or data.frame containing sample
@@ -30,18 +29,26 @@ be used for differential analysis, and names must match sample IDs used in
 the colnames of \code{assayData}.
 Continuous variables are not allowed.}
 
-\item{category_variable}{column name in \code{metadata} (if data.frame or matrix)
-or NULL if \code{metadata} is already a named vector containing category
-information.}
+\item{category_variable}{when metadata is a matrix or data.frame this is the
+column name of \code{metadata} that contains the sample annotations to be used for
+differential analysis}
 
-\item{verbose}{Logical. Whether to print detailed output messages
-during processing. Default is FALSE.}
+\item{id_variable}{character. Name of the column in metadata containing the
+grouping variable for random effects (e.g., "slide_id", "batch"). Only used
+when mixedModel = TRUE. Default NULL.}
+
+\item{verbose}{logical. Whether to print detailed output messages during
+processing. Default is TRUE}
 }
 \value{
-a tidy named factor vector of sample annotations.
+a tidy named factor vector of sample annotations,
+or a list with metadata and id_vector when mixedModel = TRUE
 }
 \description{
-Tidying up of metadata. Samples belonging to undesidered categories
+Samples belonging to undesidered categories
 (if specified) will be removed as well as categories with less than five
 samples, and NAs.
+Both metadata and id_variable (when provided) will be returned as named factors.
+Used internally by get_diffNetworks_singleOmic.
 }
+\keyword{internal}

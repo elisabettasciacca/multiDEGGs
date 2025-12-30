@@ -22,8 +22,8 @@ test_that("test get_diffNetworks multi_omics", {
   # check the structure of the result is correct 
   expect_s3_class(deggs_object, "deggs")
   expect_named(deggs_object, c("diffNetworks", "assayData", "metadata", 
-                               "regression_method", "category_subset",  
-                               "padj_method"))
+                               "regression_method", "mixedModel", "id_variable",
+                               "lmer_ctrl", "category_subset", "padj_method"))
   expect_equal(deggs_object$assayData, assayData_list)
   expect_equal(length(deggs_object$assayData), length(assayData_list))
   
@@ -39,7 +39,7 @@ test_that("test get_diffNetworks multi_omics", {
   expect_equal(deggs_object[["diffNetworks"]][["Proteomics"]][["Responder"]],
                "No specific links for this category.")
   expect_equal(ncol(deggs_object[["diffNetworks"]][["Olink"]][["Non_responder"]]),
-               4)
+               5)
   expect_equal(deggs_object[["diffNetworks"]][["Olink"]][["Responder"]],
                "No specific links for this category.")
   

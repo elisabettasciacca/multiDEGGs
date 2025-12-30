@@ -13,18 +13,21 @@ calc_pvalues_percentile(
   percentile,
   contrasts,
   regression_method,
+  mixedModel,
+  id_variable,
+  lmer_ctrl,
   edges,
   sig_edges_count
 )
 }
 \arguments{
-\item{assayData}{a matrix or data.frame (or list of matrices or data.frames
-for multi-omic analysis) containing normalised assay data.
-Sample IDs must be in columns and probe IDs (genes, proteins...) in rows.
-For multi omic analysis, it is highly recommended to use a named list of
-data.
-If unnamed, sequential names (assayData1, assayData2, etc.) will be
-assigned to identify each matrix or data.frame.}
+\item{assayData}{a matrix (or list of matrices for multi-omic analysis)
+containing normalised assay data. Sample IDs must be in columns and probe
+IDs (genes, proteins...) in rows. The matrix must be numeric.
+For multi-omic analysis, it is highly recommended to use a named list of
+matrices.
+If unnamed, sequential names (assayData1, assayData2, etc.) will
+be assigned to identify each matrix.}
 
 \item{metadata}{a named vector, matrix, or data.frame containing sample
 annotations or categories. If matrix or data.frame, each row should
@@ -55,6 +58,16 @@ When using "q.value" the \code{qvalue} package must be installed first.}
 \item{regression_method}{whether to use robust linear modelling to calculate
 link p values. Options are 'lm' (default) or 'rlm'. The lm implementation
 is faster and lighter.}
+
+\item{mixedModel}{logical. If TRUE, use mixed models with random intercept
+for id variable. Default FALSE.}
+
+\item{id_variable}{character. Name of the column in metadata containing the
+grouping variable for random effects (e.g., "slide_id", "batch"). Only used
+when mixedModel = TRUE. Default NULL.}
+
+\item{lmer_ctrl}{list of control parameters for lmer mixed models.
+Only used when mixedModel = TRUE. See ?lme4::lmerControl for details.}
 
 \item{edges}{network of biological interactions in the form of a table of
 class data.frame with two columns: "from" and "to".}
