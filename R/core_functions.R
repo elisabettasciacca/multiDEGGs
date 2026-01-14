@@ -221,7 +221,7 @@ get_diffNetworks_singleOmic <- function(assayData,
           names of ", assayDataName, ".")
   )
   
-  # align metadata and assayData
+  # check match between metadata and assayData
   if (length(intersect(colnames(assayData), names(metadata))) == 0) {
     stop("Sample IDs in metadata and ", assayDataName, " don't match.")
   }
@@ -230,24 +230,27 @@ get_diffNetworks_singleOmic <- function(assayData,
   # were missing or because they were filtered out due to the category_subset)
   assayData <- assayData[, which(colnames(assayData) %in% names(metadata)),
                          drop = FALSE]
+  # remove cols with 0 or 1 non-NA values (we need at least two points)
   assayData <- assayData[, colSums(is.na(assayData)) < (nrow(assayData) - 1)]
   
-  # check and remove metadata sample IDs that don't exist in assayData
+  # message on metadata sample IDs that don't exist in assayData
   missing_metadataSamples <- names(metadata)[which(!(names(metadata) %in% 
                                                        colnames(assayData)))]
   
   if (length(missing_metadataSamples) != 0) {
     missing_samples_formatted <- paste(missing_metadataSamples, collapse = ", ")
     message("The following samples IDs are missing in ", assayDataName, 
-                   ":\n", missing_samples_formatted)
-    metadata <- metadata[!(names(metadata) %in% missing_metadataSamples)]
-    
-    if(length(unique(metadata)) == 1) (
-      stop("All sample IDs in ", assayDataName, " belong to one category. 
-           No differential analysis is possible.")
-    )
+            ":\n", missing_samples_formatted)
   }
   
+  # align 
+  metadata <- metadata[colnames(assayData)]
+  if(length(unique(metadata)) == 1) (
+    stop("All sample IDs in ", assayDataName, " belong to one category. 
+           No differential analysis is possible.")
+  )
+  
+  # network
   if (!is.null(network)) (
     # user provided network
     network_to_use <- network
@@ -705,11 +708,11 @@ calc_pvalues_network <- function(assayData,
           }
           if (regression_method == "rlm") {
             # gene_B ~ gene_A * category
-            robustfit <- rlm(as.numeric(assayData[gene_B, ]) ~
+            robustfit <- MASS::rlm(as.numeric(assayData[gene_B, ]) ~
                     as.numeric(assayData[gene_A, ]) * metadata)
 
             p_interaction <- try(
-              f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+              sfsmisc::f.robftest(robustfit, var = 3)$p.value, silent = TRUE
             )
             if (inherits(p_interaction, "try-error")) (
               p_interaction <- NA_real_
