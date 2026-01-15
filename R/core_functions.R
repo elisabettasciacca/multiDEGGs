@@ -708,11 +708,11 @@ calc_pvalues_network <- function(assayData,
           }
           if (regression_method == "rlm") {
             # gene_B ~ gene_A * category
-            robustfit <- MASS::rlm(as.numeric(assayData[gene_B, ]) ~
+            robustfit <- rlm(as.numeric(assayData[gene_B, ]) ~
                     as.numeric(assayData[gene_A, ]) * metadata)
 
             p_interaction <- try(
-              sfsmisc::f.robftest(robustfit, var = 3)$p.value, silent = TRUE
+              f.robftest(robustfit, var = 3)$p.value, silent = TRUE
             )
             if (inherits(p_interaction, "try-error")) (
               p_interaction <- NA_real_
