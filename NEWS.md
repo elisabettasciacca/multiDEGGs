@@ -1,7 +1,11 @@
 # multiDEGGs (development version)
 
+# multiDEGGs 1.1.2
+Patch: `get_diffNetworks_singleOmic()` now double checks that `assayData` and 
+`metadata` are aligned for the layer 
+
 # multiDEGGs 1.1.1
-Minor fixes in documetation
+Minor fixes in documentation
 
 # multiDEGGs 1.1.0
 ### New features for feature augmentation in ML
