@@ -1,5 +1,7 @@
 # Changelog
 
+## multiDEGGs (development version)
+
 ## multiDEGGs 1.1.2
 
 CRAN release: 2026-01-15
