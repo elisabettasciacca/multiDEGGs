@@ -1,8 +1,12 @@
 # Changelog
 
-## multiDEGGs (development version)
+## multiDEGGs 1.1.2
+
+CRAN release: 2026-01-15
 
 ## multiDEGGs 1.1.2
+
+CRAN release: 2026-01-15
 
 Patch:
 [`get_diffNetworks_singleOmic()`](https://elisabettasciacca.github.io/multiDEGGs/reference/get_diffNetworks_singleOmic.md)
