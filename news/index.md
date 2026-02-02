@@ -1,10 +1,5 @@
 # Changelog
 
-## multiDEGGs (development version)
-
-Allowing the use of paired data (as in GeoMx data, for example) using
-mixed effects models (branch `mixed_model`).
-
 ## multiDEGGs 1.1.3
 
 Vignettes improvements.

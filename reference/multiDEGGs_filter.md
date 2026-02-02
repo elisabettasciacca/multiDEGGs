@@ -98,7 +98,7 @@ fit.rf <- nestcv.train(
   n_inner_folds = 2
 )
 #> Fitting final model using CV on whole data
-#> Duration: 0.8090286 secs
+#> Duration: 0.7517061 secs
 
 fit.rf$summary
 #>                Reference
