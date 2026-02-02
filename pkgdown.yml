@@ -2,8 +2,9 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
-  multiDEGGs_vignette: multiDEGGs_vignette.html
-last_built: 2026-01-16T08:58Z
+  Differential_Network_Analisis: Differential_Network_Analisis.html
+  Feature_Selection: Feature_Selection.html
+last_built: 2026-02-02T14:23Z
 urls:
   reference: https://elisabettasciacca.github.io/multiDEGGs/reference
   article: https://elisabettasciacca.github.io/multiDEGGs/articles

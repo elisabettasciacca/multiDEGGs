@@ -2,9 +2,12 @@
 
 ## multiDEGGs (development version)
 
-## multiDEGGs 1.1.2
+Allowing the use of paired data (as in GeoMx data, for example) using
+mixed effects models (branch `mixed_model`).
 
-CRAN release: 2026-01-15
+## multiDEGGs 1.1.3
+
+Vignettes improvements.
 
 ## multiDEGGs 1.1.2
 
