@@ -93,6 +93,7 @@ return. When `NULL`, all significant interactions found are included
 ##### Basic Usage: Pairs Only
 
 ```{r}
+library(multiDEGGs)
 library(nestedcv)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")

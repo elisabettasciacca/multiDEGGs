@@ -1,6 +1,9 @@
 # multiDEGGs (development version)
+Allowing the use of paired data (as in GeoMx data, for example) using mixed effects models 
+(branch `mixed_model`). 
 
-# multiDEGGs 1.1.2
+# multiDEGGs 1.1.3
+Vignettes improvements.
 
 # multiDEGGs 1.1.2
 Patch: `get_diffNetworks_singleOmic()` now double checks that `assayData` and 
