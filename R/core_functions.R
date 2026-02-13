@@ -479,6 +479,15 @@ get_diffNetworks_singleOmic <- function(assayData,
     )
     
   }
+  
+  # Extract values if warnings are present (for mc.cores = 1)
+  if (cores == 1 && !is.null(pvalues_list$value)) {
+    if (!is.null(pvalues_list$warning)) {
+      warning(pvalues_list$warning$message, call. = FALSE)
+    }
+    pvalues_list <- pvalues_list$value
+  }
+  
   names(pvalues_list) <- percentile_vector
   
   # Extract the network filtered at the optimal threshold percentile
@@ -876,7 +885,7 @@ calc_pvalues_network <- function(assayData,
                                       binary.metadata + (1 | id_variable),
                                     control = lmer_ctrl)
               
-              # Check for singularity and fallback if needed
+              # if singular, fallback to standard linear model (and extract p value)
               if (lme4::isSingular(lmm_fit)) {
                 singular[i] <<- TRUE
                 p_interaction <- fit_lm_interaction(
@@ -884,6 +893,7 @@ calc_pvalues_network <- function(assayData,
                   assayData[gene_B, ], 
                   binary.metadata
                 )
+              # if not singular, extract p value from the fitted mixed model
               } else {
                 coef_summary <- summary(lmm_fit)$coefficients
                 if (nrow(coef_summary) >= 4) {
@@ -917,7 +927,7 @@ calc_pvalues_network <- function(assayData,
                                    binary.metadata + (1 | id_variable))
               )
               
-              # Check for singularity and fallback if needed
+              # if singular, fallback to standard linear model (and extract p value)
               if (lme4::isSingular(rlmm_fit)) {
                 singular[i] <<- TRUE
                 robustfit <- rlm(assayData[gene_B, ] ~
@@ -929,6 +939,7 @@ calc_pvalues_network <- function(assayData,
                 if (inherits(p_interaction, "try-error")) {
                   p_interaction <- NA_real_
                 }
+              # if not singular, extract p value from the fitted mixed model
               } else {
                 coef_summary <- summary(rlmm_fit)$coefficients
                 if (nrow(coef_summary) >= 4) {
@@ -962,12 +973,13 @@ calc_pvalues_network <- function(assayData,
                          control = lmer_ctrl)
             )
             
-            # Check for singularity and fallback if needed
+            # if singular, fallback to standard linear model (and extract p value)
             if (lme4::isSingular(lmm_fit)) {
               singular[i] <<- TRUE
               res_aov <- stats::aov(assayData[gene_B, ] ~
                                       assayData[gene_A, ] * metadata)
               p_interaction <- summary(res_aov)[[1]][["Pr(>F)"]][3]
+              # if not singular, extract p value from the fitted mixed model
             } else {
               anova_table <- car::Anova(lmm_fit, type = "III")
               if (nrow(anova_table) >= 4) {
