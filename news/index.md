@@ -1,6 +1,10 @@
 # Changelog
 
+## multiDEGGs (development version)
+
 ## multiDEGGs 1.1.3
+
+CRAN release: 2026-02-02
 
 Vignettes improvements.
 
