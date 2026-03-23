@@ -1,4 +1,11 @@
-# multiDEGGs (development version)
+# multiDEGGs 1.2.0
+### Updated reference network
+- The reference network internally used by multiDEGGs is now updated with 28,352
+  additional links obtained from Omnipath. The internal `omic_network` object contains
+  now a total of 53,035 literature-reported biological links.
+  Running `get_diffNetworks()` on the same data might now result in differential
+  networks containing new additional links.
+- New citation added.
 
 # multiDEGGs 1.1.3
 Vignettes improvements.

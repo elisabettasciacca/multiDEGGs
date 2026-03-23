@@ -255,7 +255,7 @@ get_diffNetworks_singleOmic <- function(assayData,
     # user provided network
     network_to_use <- network
   ) else (
-    network_to_use <- metapathway_gene_symbols
+    network_to_use <- omic_network
   )
   
   edges <- network_to_use[network_to_use$from %in% rownames(assayData) & 
