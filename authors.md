@@ -13,17 +13,19 @@
 Source:
 [`inst/CITATION`](https://github.com/elisabettasciacca/multiDEGGs/blob/main/inst/CITATION)
 
-Sciacca E, et al. (2023). “DEGGs: An R package with shiny app for the
-identification of differentially expressed gene-gene interactions in
-high-Throughput sequencing data.” *Bioinformatics*, **39**, btad192.
-[doi:10.1093/bioinformatics/btad192](https://doi.org/10.1093/bioinformatics/btad192).
+Sciacca E, Wang S, Pitzalis C, Lewis M (2026). “multiDEGGs: Single or
+Multiomic Differential Network Analysis for Biomarker Discovery and
+Feature Engineering for Predictive Modeling.” *Computational and
+Structural Biotechnology Journal*, **35**(1), 0001.
+[doi:10.34133/csbj.0001](https://doi.org/10.34133/csbj.0001).
 
     @Article{,
-      title = {DEGGs: An R package with shiny app for the identification of differentially expressed gene-gene interactions in high-Throughput sequencing data},
-      author = {Elisabetta Sciacca and {et al.}},
-      journal = {Bioinformatics},
-      year = {2023},
-      volume = {39},
-      pages = {btad192},
-      doi = {10.1093/bioinformatics/btad192},
+      title = {multiDEGGs: Single or Multiomic Differential Network Analysis for Biomarker Discovery and Feature Engineering for Predictive Modeling},
+      author = {Elisabetta Sciacca and Susan S. Wang and Costantino Pitzalis and Myles J. Lewis},
+      journal = {Computational and Structural Biotechnology Journal},
+      year = {2026},
+      volume = {35},
+      number = {1},
+      pages = {0001},
+      doi = {10.34133/csbj.0001},
     }

@@ -307,21 +307,22 @@ fallback is indicated by a printed “0” during execution.
 citation("multiDEGGs")
 #> To cite package 'multiDEGGs' in publications use:
 #> 
-#>   Sciacca E, et al. (2023). "DEGGs: An R package with shiny app for the
-#>   identification of differentially expressed gene-gene interactions in
-#>   high-Throughput sequencing data." _Bioinformatics_, *39*, btad192.
-#>   doi:10.1093/bioinformatics/btad192
-#>   <https://doi.org/10.1093/bioinformatics/btad192>.
+#>   Sciacca E, Wang S, Pitzalis C, Lewis M (2026). "multiDEGGs: Single or
+#>   Multiomic Differential Network Analysis for Biomarker Discovery and
+#>   Feature Engineering for Predictive Modeling." _Computational and
+#>   Structural Biotechnology Journal_, *35*(1), 0001.
+#>   doi:10.34133/csbj.0001 <https://doi.org/10.34133/csbj.0001>.
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
 #>   @Article{,
-#>     title = {DEGGs: An R package with shiny app for the identification of differentially expressed gene-gene interactions in high-Throughput sequencing data},
-#>     author = {Elisabetta Sciacca and {et al.}},
-#>     journal = {Bioinformatics},
-#>     year = {2023},
-#>     volume = {39},
-#>     pages = {btad192},
-#>     doi = {10.1093/bioinformatics/btad192},
+#>     title = {multiDEGGs: Single or Multiomic Differential Network Analysis for Biomarker Discovery and Feature Engineering for Predictive Modeling},
+#>     author = {Elisabetta Sciacca and Susan S. Wang and Costantino Pitzalis and Myles J. Lewis},
+#>     journal = {Computational and Structural Biotechnology Journal},
+#>     year = {2026},
+#>     volume = {35},
+#>     number = {1},
+#>     pages = {0001},
+#>     doi = {10.34133/csbj.0001},
 #>   }
 ```

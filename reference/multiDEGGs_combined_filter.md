@@ -162,14 +162,14 @@ fit.rf <- nestedcv::nestcv.train(
 #> Fitting final model using CV on whole data
 #> Loading required package: ggplot2
 #> Loading required package: lattice
-#> Duration: 0.7729993 secs
+#> Duration: 1.005729 secs
 
 fit.rf$summary
 #>                Reference
 #> Predicted       Non_responder Responder
-#>   Non_responder            57         2
-#>   Responder                 1        40
+#>   Non_responder            57         1
+#>   Responder                 1        41
 #> 
 #>               AUC            Accuracy   Balanced accuracy   
-#>            0.9963              0.9700              0.9676   
+#>            0.9992              0.9800              0.9795   
 ```

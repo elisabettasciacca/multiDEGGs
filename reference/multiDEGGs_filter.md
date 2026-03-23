@@ -98,14 +98,14 @@ fit.rf <- nestcv.train(
   n_inner_folds = 2
 )
 #> Fitting final model using CV on whole data
-#> Duration: 0.7593913 secs
+#> Duration: 0.7422171 secs
 
 fit.rf$summary
 #>                Reference
 #> Predicted       Non_responder Responder
-#>   Non_responder            54        12
-#>   Responder                 4        30
+#>   Non_responder            54         7
+#>   Responder                 4        35
 #> 
 #>               AUC            Accuracy   Balanced accuracy   
-#>            0.8996              0.8400              0.8227   
+#>            0.9684              0.8900              0.8822   
 ```
