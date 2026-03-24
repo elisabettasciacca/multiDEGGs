@@ -162,7 +162,7 @@ fit.rf <- nestedcv::nestcv.train(
 #> Fitting final model using CV on whole data
 #> Loading required package: ggplot2
 #> Loading required package: lattice
-#> Duration: 1.005729 secs
+#> Duration: 1.001213 secs
 
 fit.rf$summary
 #>                Reference

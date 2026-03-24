@@ -279,9 +279,9 @@ We highly recommend to have at least 4 or 5 observations per group.
 ## Custom Reference Network
 
 The multiDEGGs package uses a human-specific reference network by
-default, consisting of 10,537 molecular interactions (from KEGG,
-mirTARbase, miRecords, and transmiR) obtained via the `exportgraph`
-function of the MITHrIL tool (Alaimo et al., Oncotarget, 2016).
+default, consisting of 53,035 molecular interactions obtained both from
+`Omnipath` (Turei et al., Molecular Systems Biology, 2021) and the
+`MITHrIL` tool (Alaimo et al., Oncotarget, 2016).
 
 Users working with non-human species or requiring custom interaction
 sets can provide their own reference network using the `network`
