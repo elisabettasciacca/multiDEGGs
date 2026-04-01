@@ -15,6 +15,9 @@ name: check-no-suggests.yaml
 
 permissions: read-all
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   check-no-suggests:
     runs-on: ${{ matrix.config.os }}

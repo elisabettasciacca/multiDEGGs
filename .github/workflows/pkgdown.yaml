@@ -12,6 +12,9 @@ name: pkgdown.yaml
 
 permissions: read-all
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
