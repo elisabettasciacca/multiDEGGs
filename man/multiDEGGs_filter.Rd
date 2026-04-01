@@ -8,12 +8,12 @@ multiDEGGs_filter(y, x, keep_single_genes = FALSE, nfilter = NULL)
 }
 \arguments{
 \item{y}{Numeric vector or factor. Response variable (outcome), i.e.
-the 'metadata' named vector, as passed by \link[nestedcv]{nestcv.train} or
-\link[nestedcv]{nestcv.glmnet}.}
+the 'metadata' named vector, as passed by \code{nestcv.train()} or
+\code{nestcv.glmnet()} (package \pkg{nestedcv}).}
 
 \item{x}{Predictor variables, i.e. the assayData matrix with genes in columns
-and IDs in rows, as passed by \link[nestedcv]{nestcv.train} or
-\link[nestedcv]{nestcv.glmnet}.}
+and IDs in rows, as passed by \code{nestcv.train()} or
+\code{nestcv.glmnet()} (package \pkg{nestedcv}).}
 
 \item{keep_single_genes}{Logical, default FALSE. If TRUE, the function will
 return unique individual genes along with significant pairs.}
@@ -45,11 +45,12 @@ the function will print a '0' and switch to t-test for that fold.}
 }
 \description{
 Function to be passed to the \code{modifyX} parameter of
-\link[nestedcv]{nestcv.train} or \link[nestedcv]{nestcv.glmnet} to allow
+\code{nestcv.train()} or \code{nestcv.glmnet()} (package \pkg{nestedcv}) to allow
 nested feature selection and augmentation via differential network analysis
 with multiDEGGs.
 }
 \examples{
+\dontrun{
 library(nestedcv)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
@@ -57,7 +58,6 @@ data("synthetic_rnaseqData")
 # fit a regularized linear model
 # Note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 # example lightweight. Adjust these values as needed for your use case.
-\dontrun{
 fit.glmnet <- nestcv.glmnet(
   y = as.numeric(synthetic_metadata$response),
   x =  t(synthetic_rnaseqData),
@@ -69,7 +69,6 @@ fit.glmnet <- nestcv.glmnet(
   n_inner_folds = 4)
 
 summary(fit.glmnet)
-}
 
 # fit a random forest model:
 # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -87,4 +86,5 @@ fit.rf <- nestcv.train(
 )
 
 fit.rf$summary
+}
 }

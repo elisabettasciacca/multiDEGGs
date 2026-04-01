@@ -11,7 +11,7 @@ test_that("test get_multiOmics_diffNetworks multi_omics", {
                                    metadata = synthetic_metadata,
                                    category_variable = "response",
                                    regression_method = "rlm",
-                                   padj_method = "q.value",
+                                   padj_method = "BH",
                                    verbose = FALSE,
                                    show_progressBar = FALSE,
                                    cores = 1)
@@ -52,7 +52,7 @@ test_that("plot on graphical device", {
                                      metadata = synthetic_metadata,
                                      category_variable = "response",
                                      regression_method = "rlm",
-                                     padj_method = "q.value",
+                                     padj_method = "BH",
                                      verbose = FALSE,
                                      show_progressBar = FALSE,
                                      cores = 1)
@@ -78,7 +78,7 @@ test_that("test View_diffNetworks multi_omics", {
                                    metadata = synthetic_metadata,
                                    category_variable = "response",
                                    regression_method = "rlm",
-                                   padj_method = "q.value",
+                                   padj_method = "BH",
                                    verbose = FALSE,
                                    show_progressBar = FALSE,
                                    cores = 1)

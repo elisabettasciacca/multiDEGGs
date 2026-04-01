@@ -1,16 +1,16 @@
 #' multiDEGGs_filter
 #' 
 #' Function to be passed to the `modifyX` parameter of 
-#' \link[nestedcv]{nestcv.train} or \link[nestedcv]{nestcv.glmnet} to allow 
+#' \code{nestcv.train()} or \code{nestcv.glmnet()} (package \pkg{nestedcv}) to allow 
 #' nested feature selection and augmentation via differential network analysis 
 #' with multiDEGGs.
 #' 
 #' @param y Numeric vector or factor. Response variable (outcome), i.e. 
-#'  the 'metadata' named vector, as passed by \link[nestedcv]{nestcv.train} or 
-#'  \link[nestedcv]{nestcv.glmnet}.
+#'  the 'metadata' named vector, as passed by \code{nestcv.train()} or 
+#'  \code{nestcv.glmnet()} (package \pkg{nestedcv}).
 #' @param x Predictor variables, i.e. the assayData matrix with genes in columns
-#'  and IDs in rows, as passed by \link[nestedcv]{nestcv.train} or
-#'   \link[nestedcv]{nestcv.glmnet}.
+#'  and IDs in rows, as passed by \code{nestcv.train()} or
+#'   \code{nestcv.glmnet()} (package \pkg{nestedcv}).
 #' @param keep_single_genes Logical, default FALSE. If TRUE, the function will 
 #' return unique individual genes along with significant pairs. 
 #' @param nfilter Integer. Maximum total number of predictors to return. 
@@ -36,6 +36,7 @@
 #' the function will print a '0' and switch to t-test for that fold.}
 #' 
 #' @examples
+#' \dontrun{
 #' library(nestedcv)
 #' data("synthetic_metadata")
 #' data("synthetic_rnaseqData")
@@ -43,7 +44,6 @@
 #' # fit a regularized linear model
 #' # Note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 #' # example lightweight. Adjust these values as needed for your use case.
-#' \dontrun{
 #' fit.glmnet <- nestcv.glmnet(
 #'   y = as.numeric(synthetic_metadata$response),
 #'   x =  t(synthetic_rnaseqData),
@@ -55,7 +55,6 @@
 #'   n_inner_folds = 4)
 #' 
 #' summary(fit.glmnet)
-#' }
 #' 
 #' # fit a random forest model:
 #' # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -73,6 +72,7 @@
 #' )
 #' 
 #' fit.rf$summary
+#' }
 #' @export
 multiDEGGs_filter <- function(y,
                               x, 
@@ -169,18 +169,18 @@ multiDEGGs_filter <- function(y,
 ##' Combined multiDEGGs filter
 #'
 #' This function can be passed to the `modifyX` parameter of 
-#' \link[nestedcv]{nestcv.train} or \link[nestedcv]{nestcv.glmnet}
+#' \code{nestcv.train()} or \code{nestcv.glmnet()} (package \pkg{nestedcv})
 #' to use one of the available statistical filters (t-test, wilcoxon, etc.) in 
 #' combination with multiDEGGs. 
 #' Single predictors will be selected by the selected statistical filter an 
 #' paired predictors will be added by multiDEGGs. 
 #' 
 #' @param y Numeric vector or factor. Response variable (outcome), i.e. 
-#'  the 'metadata' named vector, as passed by \link[nestedcv]{nestcv.train} or 
-#'  \link[nestedcv]{nestcv.glmnet}.
+#'  the 'metadata' named vector, as passed by \code{nestcv.train()} or 
+#'  \code{nestcv.glmnet()} (package \pkg{nestedcv}).
 #' @param x Predictor variables, i.e. the assayData matrix with genes in columns
-#'  and IDs in rows, as passed by \link[nestedcv]{nestcv.train} or
-#'   \link[nestedcv]{nestcv.glmnet}.
+#'  and IDs in rows, as passed by \code{nestcv.train()} or
+#'   \code{nestcv.glmnet()} (package \pkg{nestedcv}).
 #' @param filter_method Character string. Statistical filtering method to be
 #' used in combination with multiDEGGs for sigle feature selection. 
 #' Options are: "ttest", "wilcoxon", "ranger", "glmnet", "pls".
@@ -224,6 +224,7 @@ multiDEGGs_filter <- function(y,
 #' \item{keep}{Character vector of selected single gene names}
 #' \item{pairs}{Data frame of selected gene pairs with interaction information}
 #' @examples
+#' \dontrun{
 #' library(nestedcv)
 #' data("synthetic_metadata")
 #' data("synthetic_rnaseqData")
@@ -231,7 +232,6 @@ multiDEGGs_filter <- function(y,
 #' # fit a regularized linear model
 #' # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 #' # example lightweight. Adjust these values as needed for your use case.
-#' \dontrun{
 #' fit.glmnet <- nestedcv::nestcv.glmnet(
 #' y = as.numeric(synthetic_metadata$response),
 #' x =  t(synthetic_rnaseqData),
@@ -245,7 +245,6 @@ multiDEGGs_filter <- function(y,
 #' n_inner_folds = 4)
 #' 
 #' summary(fit.glmnet)
-#' }
 #' 
 #' # fit a random forest model
 #' # NOTE: nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -265,7 +264,7 @@ multiDEGGs_filter <- function(y,
 #' )
 #' 
 #' fit.rf$summary
-#' 
+#' }
 #' @export
 multiDEGGs_combined_filter <- function(y,
                                        x,

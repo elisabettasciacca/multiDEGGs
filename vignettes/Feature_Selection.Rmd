@@ -64,7 +64,7 @@ test data itself.
 The selected and combined features, and corresponding model, can then be 
 evaluated on the hold-out test data without introducing bias.
 
-Both \link[nestedcv](nestcv.glmnet) and \link[nestedcv](nestcv.train) from 
+Both `nestcv.glmnet` and `nestcv.train` from 
 `nestedcv` accept any user-defined function 
 that filters or transforms the feature matrix by passing the function name to 
 the `modifyX` parameter.  
@@ -92,7 +92,7 @@ return. When `NULL`, all significant interactions found are included
 
 ##### Basic Usage: Pairs Only
 
-```{r}
+```{r, eval=FALSE}
 library(multiDEGGs)
 library(nestedcv)
 data("synthetic_metadata")
@@ -116,9 +116,34 @@ fit.glmnet <- nestcv.glmnet(
 summary(fit.glmnet)
 ```
 
+```{r, echo=FALSE}
+cat("Nested cross-validation with glmnet 
+No filter 
+Modifier:  multiDEGGs_filter 
+Outer loop:  5-fold CV 
+Inner loop:  6-fold CV 
+100 observations, 14 predictors 
+ 
+ 
+Final parameters: 
+ lambda    alpha   
+0.05894  0.10000   
+
+Final coefficients: 
+ (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1  
+    1.823874    -0.193020    -0.119887     0.052089    -0.035947    -0.033527  
+MAP2K2:MAPK3  FANCD2:FAN1  
+   -0.021308    -0.008862  
+ 
+Result: 
+       RMSE     R.squared   Pearson.r^2           MAE    
+    0.47302       0.08148       0.09173       0.44153   " )
+```
+  
+  
 ##### Including Individual Genes (keep_single_genes = TRUE)
 
-```{r, fig.width = 3, fig.height = 3}
+```{r, eval=FALSE}
 # Random forest model including both pairs and individual genes
 fit.rf <- nestcv.train(
   y = synthetic_metadata$response,
@@ -140,6 +165,19 @@ fit.rf$summary
 # Plot ROC on outer folds
 plot(fit.rf$roc)
 ```
+
+```{r, echo=FALSE}
+cat("               Reference
+Predicted       Non_responder Responder
+  Non_responder            57         2
+  Responder                 1        40
+
+              AUC            Accuracy   Balanced accuracy   
+           0.9979              0.9700              0.9676   " )
+```
+
+![](roc.png){width=40%}
+<p>&nbsp;</p>
 
 #### How nfilter works with keep_single_genes
 
@@ -180,7 +218,7 @@ In dynamic mode, the function:
 This mode allows the feature space to expand based on the biological complexity 
 discovered in each fold.
 
-```{r}
+```{r, eval=FALSE}
 # Dynamic selection with t-test for single genes
 fit.dynamic <- nestcv.glmnet(
   y = as.numeric(synthetic_metadata$response),
@@ -209,7 +247,7 @@ In balanced mode, the function:
 This mode ensures a fixed feature space size while balancing single genes and 
 interactions.
 
-```{r}
+```{r, eval=FALSE}
 # Balanced selection with Wilcoxon-test importance
 fit.balanced <- nestcv.train(
   y = synthetic_metadata$response,
@@ -227,7 +265,7 @@ fit.balanced <- nestcv.train(
   verbose = FALSE
 )
 ```
-
+  
 #### Available Statistical Methods
 
 - **`"ttest"`**: Two-sample t-test for differential expression

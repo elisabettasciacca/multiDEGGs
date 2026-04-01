@@ -16,12 +16,12 @@ multiDEGGs_combined_filter(
 }
 \arguments{
 \item{y}{Numeric vector or factor. Response variable (outcome), i.e.
-the 'metadata' named vector, as passed by \link[nestedcv]{nestcv.train} or
-\link[nestedcv]{nestcv.glmnet}.}
+the 'metadata' named vector, as passed by \code{nestcv.train()} or
+\code{nestcv.glmnet()} (package \pkg{nestedcv}).}
 
 \item{x}{Predictor variables, i.e. the assayData matrix with genes in columns
-and IDs in rows, as passed by \link[nestedcv]{nestcv.train} or
-\link[nestedcv]{nestcv.glmnet}.}
+and IDs in rows, as passed by \code{nestcv.train()} or
+\code{nestcv.glmnet()} (package \pkg{nestedcv}).}
 
 \item{filter_method}{Character string. Statistical filtering method to be
 used in combination with multiDEGGs for sigle feature selection.
@@ -49,7 +49,7 @@ An object of class "multiDEGGs_filter" containing:
 }
 \description{
 This function can be passed to the \code{modifyX} parameter of
-\link[nestedcv]{nestcv.train} or \link[nestedcv]{nestcv.glmnet}
+\code{nestcv.train()} or \code{nestcv.glmnet()} (package \pkg{nestedcv})
 to use one of the available statistical filters (t-test, wilcoxon, etc.) in
 combination with multiDEGGs.
 Single predictors will be selected by the selected statistical filter an
@@ -88,6 +88,7 @@ The statistical filtering methods include:
 }
 }
 \examples{
+\dontrun{
 library(nestedcv)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
@@ -95,7 +96,6 @@ data("synthetic_rnaseqData")
 # fit a regularized linear model
 # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 # example lightweight. Adjust these values as needed for your use case.
-\dontrun{
 fit.glmnet <- nestedcv::nestcv.glmnet(
 y = as.numeric(synthetic_metadata$response),
 x =  t(synthetic_rnaseqData),
@@ -109,7 +109,6 @@ n_outer_folds = 4,
 n_inner_folds = 4)
 
 summary(fit.glmnet)
-}
 
 # fit a random forest model
 # NOTE: nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -129,5 +128,5 @@ fit.rf <- nestedcv::nestcv.train(
 )
 
 fit.rf$summary
-
+}
 }
