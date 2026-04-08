@@ -63,7 +63,7 @@ Imports:
     stats,
     utils,
     visNetwork
-Additional_repositories: https://cran.r-project.org/src/contrib/Archive/nestedcv/
+Additional_repositories: https://CRAN.R-project.org/package=nestedcv
 Depends: 
      R (>= 4.4.0)
 VignetteBuilder: knitr
