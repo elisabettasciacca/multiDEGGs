@@ -11,7 +11,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/elisabettasciacca/multiDEGGs/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/elisabettasciacca/multiDEGGs/blob/v1.2.1/inst/CITATION)
 
 Sciacca E, Wang S, Pitzalis C, Lewis M (2026). “multiDEGGs: Single or
 Multiomic Differential Network Analysis for Biomarker Discovery and
