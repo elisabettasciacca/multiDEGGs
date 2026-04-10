@@ -75,6 +75,19 @@ Plot differential regression fits for a single interaction
 
 ## Citation
 
-``` r
-citation("multiDEGGs")
-```
+To cite package ‘multiDEGGs’ in publications use:
+
+Sciacca E, Wang S, Pitzalis C, Lewis M (2026). “multiDEGGs: Single or
+Multiomic Differential Network Analysis for Biomarker Discovery and
+Feature Engineering for Predictive Modeling.” *Computational and
+Structural Biotechnology Journal*, *35*(1), 0001.
+<doi:10.34133/csbj.0001> <https://doi.org/10.34133/csbj.0001>.
+
+A BibTeX entry for LaTeX users is
+
+@Article{, title = {multiDEGGs: Single or Multiomic Differential Network
+Analysis for Biomarker Discovery and Feature Engineering for Predictive
+Modeling}, author = {Elisabetta Sciacca and Susan S. Wang and Costantino
+Pitzalis and Myles J. Lewis}, journal = {Computational and Structural
+Biotechnology Journal}, year = {2026}, volume = {35}, number = {1},
+pages = {0001}, doi = {10.34133/csbj.0001}, }

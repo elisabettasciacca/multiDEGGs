@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multiDEGGs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,10 +107,10 @@ ensuring that the attributes learned from the training part are applied
 to the test data without prior knowledge of the test data itself.<br>
 The selected and combined features, and corresponding model, can then be
 evaluated on the hold-out test data without introducing bias.</p>
-<p>Both (nestcv.glmnet) and (nestcv.train) from <code>nestedcv</code>
-accept any user-defined function that filters or transforms the feature
-matrix by passing the function name to the <code>modifyX</code>
-parameter.<br><strong>The multiDEGGs package provides two specialized functions for
+<p>Both <code>nestcv.glmnet</code> and <code>nestcv.train</code> from
+<code>nestedcv</code> accept any user-defined function that filters or
+transforms the feature matrix by passing the function name to the
+<code>modifyX</code> parameter.<br><strong>The multiDEGGs package provides two specialized functions for
 this purpose.</strong></p>
 </div>
 <div class="section level3">
@@ -164,39 +164,33 @@ significant pairs in addition to the pairs themselves</li>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit.glmnet</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Nested cross-validation with glmnet</span></span>
-<span><span class="co">#&gt; No filter</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit.glmnet</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Nested cross-validation with glmnet </span></span>
+<span><span class="co">#&gt; No filter </span></span>
 <span><span class="co">#&gt; Modifier:  multiDEGGs_filter </span></span>
-<span><span class="co">#&gt; Outer loop:  5-fold CV</span></span>
-<span><span class="co">#&gt; Inner loop:  6-fold CV</span></span>
-<span><span class="co">#&gt; 100 observations, 14 predictors</span></span>
+<span><span class="co">#&gt; Outer loop:  5-fold CV </span></span>
+<span><span class="co">#&gt; Inner loop:  6-fold CV </span></span>
+<span><span class="co">#&gt; 100 observations, 14 predictors </span></span>
+<span><span class="co">#&gt;  </span></span>
+<span><span class="co">#&gt;  </span></span>
+<span><span class="co">#&gt; Final parameters: </span></span>
+<span><span class="co">#&gt;  lambda    alpha   </span></span>
+<span><span class="co">#&gt; 0.05894  0.10000   </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;        alpha  lambda n.filter</span></span>
-<span><span class="co">#&gt; Fold 1   0.2 0.16011        7</span></span>
-<span><span class="co">#&gt; Fold 2   0.1 0.07423        7</span></span>
-<span><span class="co">#&gt; Fold 3   0.1 0.14076        7</span></span>
-<span><span class="co">#&gt; Fold 4   0.1 0.13511        7</span></span>
-<span><span class="co">#&gt; Fold 5   1.0 0.15091        7</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Final parameters:</span></span>
-<span><span class="co">#&gt;  lambda    alpha  </span></span>
-<span><span class="co">#&gt; 0.07099  0.10000  </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Final coefficients:</span></span>
-<span><span class="co">#&gt;  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1 </span></span>
-<span><span class="co">#&gt;     1.808953    -0.188626    -0.113628     0.050012    -0.034766    -0.030783 </span></span>
-<span><span class="co">#&gt; MAP2K2:MAPK3  FANCD2:FAN1 </span></span>
-<span><span class="co">#&gt;    -0.020656    -0.008568 </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Result:</span></span>
-<span><span class="co">#&gt;        RMSE     R.squared   Pearson.r^2           MAE   </span></span>
-<span><span class="co">#&gt;     0.48505       0.03419       0.04929       0.46076</span></span></code></pre></div>
+<span><span class="co">#&gt; Final coefficients: </span></span>
+<span><span class="co">#&gt;  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1  </span></span>
+<span><span class="co">#&gt;     1.823874    -0.193020    -0.119887     0.052089    -0.035947    -0.033527  </span></span>
+<span><span class="co">#&gt; MAP2K2:MAPK3  FANCD2:FAN1  </span></span>
+<span><span class="co">#&gt;    -0.021308    -0.008862  </span></span>
+<span><span class="co">#&gt;  </span></span>
+<span><span class="co">#&gt; Result: </span></span>
+<span><span class="co">#&gt;        RMSE     R.squared   Pearson.r^2           MAE    </span></span>
+<span><span class="co">#&gt;     0.47302       0.08148       0.09173       0.44153</span></span></code></pre>
 </div>
 <div class="section level5">
 <h5 id="including-individual-genes-keep_single_genes-true">Including Individual Genes (keep_single_genes = TRUE)<a class="anchor" aria-label="anchor" href="#including-individual-genes-keep_single_genes-true"></a>
 </h5>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Random forest model including both pairs and individual genes</span></span>
 <span><span class="va">fit.rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.train.html" class="external-link">nestcv.train</a></span><span class="op">(</span></span>
 <span>  y <span class="op">=</span> <span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span>,</span>
@@ -212,21 +206,21 @@ significant pairs in addition to the pairs themselves</li>
 <span>  n_inner_folds <span class="op">=</span> <span class="fl">6</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: ggplot2</span></span>
-<span><span class="co">#&gt; Loading required package: lattice</span></span>
 <span></span>
 <span><span class="va">fit.rf</span><span class="op">$</span><span class="va">summary</span></span>
-<span><span class="co">#&gt;                Reference</span></span>
-<span><span class="co">#&gt; Predicted       Non_responder Responder</span></span>
-<span><span class="co">#&gt;   Non_responder            57         1</span></span>
-<span><span class="co">#&gt;   Responder                 1        41</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;               AUC            Accuracy   Balanced accuracy   </span></span>
-<span><span class="co">#&gt;            0.9988              0.9800              0.9795</span></span>
 <span></span>
 <span><span class="co"># Plot ROC on outer folds</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit.rf</span><span class="op">$</span><span class="va">roc</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Feature_Selection_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="288"></p>
+<pre><code><span><span class="co">#&gt;                Reference</span></span>
+<span><span class="co">#&gt; Predicted       Non_responder Responder</span></span>
+<span><span class="co">#&gt;   Non_responder            57         2</span></span>
+<span><span class="co">#&gt;   Responder                 1        40</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               AUC            Accuracy   Balanced accuracy   </span></span>
+<span><span class="co">#&gt;            0.9979              0.9700              0.9676</span></span></code></pre>
+<img src="roc.png" style="width:40.0%"><p>
+ 
+</p>
 </div>
 </div>
 <div class="section level4">
@@ -288,7 +282,7 @@ interaction pairs found by multiDEGGs 3. Total predictors =
 <code>nfilter</code> single genes + number of significant pairs</p>
 <p>This mode allows the feature space to expand based on the biological
 complexity discovered in each fold.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Dynamic selection with t-test for single genes</span></span>
 <span><span class="va">fit.dynamic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html" class="external-link">nestcv.glmnet</a></span><span class="op">(</span></span>
 <span>  y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span><span class="op">)</span>,</span>
@@ -317,7 +311,7 @@ filter<br>
 3. Maintains consistent total number of predictors across all folds</p>
 <p>This mode ensures a fixed feature space size while balancing single
 genes and interactions.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Balanced selection with Wilcoxon-test importance</span></span>
 <span><span class="va">fit.balanced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/nestedcv/man/nestcv.train.html" class="external-link">nestcv.train</a></span><span class="op">(</span></span>
 <span>  y <span class="op">=</span> <span class="va">synthetic_metadata</span><span class="op">$</span><span class="va">response</span>,</span>
@@ -404,7 +398,7 @@ execution.</p>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"multiDEGGs"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; To cite package 'multiDEGGs' in publications use:</span></span>
 <span><span class="co">#&gt; </span></span>

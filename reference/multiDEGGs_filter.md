@@ -1,10 +1,11 @@
 # multiDEGGs_filter
 
 Function to be passed to the `modifyX` parameter of
-[nestcv.train](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html) or
-[nestcv.glmnet](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html) to
-allow nested feature selection and augmentation via differential network
-analysis with multiDEGGs.
+[`nestcv.train()`](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html)
+or
+[`nestcv.glmnet()`](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html)
+(package nestedcv) to allow nested feature selection and augmentation
+via differential network analysis with multiDEGGs.
 
 ## Usage
 
@@ -18,15 +19,19 @@ multiDEGGs_filter(y, x, keep_single_genes = FALSE, nfilter = NULL)
 
   Numeric vector or factor. Response variable (outcome), i.e. the
   'metadata' named vector, as passed by
-  [nestcv.train](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html) or
-  [nestcv.glmnet](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html).
+  [`nestcv.train()`](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html)
+  or
+  [`nestcv.glmnet()`](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html)
+  (package nestedcv).
 
 - x:
 
   Predictor variables, i.e. the assayData matrix with genes in columns
   and IDs in rows, as passed by
-  [nestcv.train](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html) or
-  [nestcv.glmnet](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html).
+  [`nestcv.train()`](https://rdrr.io/pkg/nestedcv/man/nestcv.train.html)
+  or
+  [`nestcv.glmnet()`](https://rdrr.io/pkg/nestedcv/man/nestcv.glmnet.html)
+  (package nestedcv).
 
 - keep_single_genes:
 
@@ -62,6 +67,7 @@ a list containing two types of predictors:
 ## Examples
 
 ``` r
+if (FALSE) { # \dontrun{
 library(nestedcv)
 data("synthetic_metadata")
 data("synthetic_rnaseqData")
@@ -69,7 +75,6 @@ data("synthetic_rnaseqData")
 # fit a regularized linear model
 # Note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
 # example lightweight. Adjust these values as needed for your use case.
-if (FALSE) { # \dontrun{
 fit.glmnet <- nestcv.glmnet(
   y = as.numeric(synthetic_metadata$response),
   x =  t(synthetic_rnaseqData),
@@ -81,7 +86,6 @@ fit.glmnet <- nestcv.glmnet(
   n_inner_folds = 4)
 
 summary(fit.glmnet)
-} # }
 
 # fit a random forest model:
 # note that nfilter, n_outer_folds, n_inner_folds are set low to keep the
@@ -97,15 +101,7 @@ fit.rf <- nestcv.train(
   n_outer_folds = 2,
   n_inner_folds = 2
 )
-#> Fitting final model using CV on whole data
-#> Duration: 0.7272782 secs
 
 fit.rf$summary
-#>                Reference
-#> Predicted       Non_responder Responder
-#>   Non_responder            54         7
-#>   Responder                 4        35
-#> 
-#>               AUC            Accuracy   Balanced accuracy   
-#>            0.9684              0.8900              0.8822   
+} # }
 ```

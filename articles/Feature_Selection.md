@@ -42,7 +42,7 @@ test data without prior knowledge of the test data itself.
 The selected and combined features, and corresponding model, can then be
 evaluated on the hold-out test data without introducing bias.
 
-Both (nestcv.glmnet) and (nestcv.train) from `nestedcv` accept any
+Both `nestcv.glmnet` and `nestcv.train` from `nestedcv` accept any
 user-defined function that filters or transforms the feature matrix by
 passing the function name to the `modifyX` parameter.  
 **The multiDEGGs package provides two specialized functions for this
@@ -96,34 +96,29 @@ fit.glmnet <- nestcv.glmnet(
 )
 
 summary(fit.glmnet)
-#> Nested cross-validation with glmnet
-#> No filter
-#> Modifier:  multiDEGGs_filter 
-#> Outer loop:  5-fold CV
-#> Inner loop:  6-fold CV
-#> 100 observations, 14 predictors
-#> 
-#>        alpha  lambda n.filter
-#> Fold 1   0.2 0.16011        7
-#> Fold 2   0.1 0.07423        7
-#> Fold 3   0.1 0.14076        7
-#> Fold 4   0.1 0.13511        7
-#> Fold 5   1.0 0.15091        7
-#> 
-#> Final parameters:
-#>  lambda    alpha  
-#> 0.07099  0.10000  
-#> 
-#> Final coefficients:
-#>  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1 
-#>     1.808953    -0.188626    -0.113628     0.050012    -0.034766    -0.030783 
-#> MAP2K2:MAPK3  FANCD2:FAN1 
-#>    -0.020656    -0.008568 
-#> 
-#> Result:
-#>        RMSE     R.squared   Pearson.r^2           MAE   
-#>     0.48505       0.03419       0.04929       0.46076
 ```
+
+    #> Nested cross-validation with glmnet 
+    #> No filter 
+    #> Modifier:  multiDEGGs_filter 
+    #> Outer loop:  5-fold CV 
+    #> Inner loop:  6-fold CV 
+    #> 100 observations, 14 predictors 
+    #>  
+    #>  
+    #> Final parameters: 
+    #>  lambda    alpha   
+    #> 0.05894  0.10000   
+    #> 
+    #> Final coefficients: 
+    #>  (Intercept) TNF:TNFRSF1A    AKT2:MTOR   IL1B:IL1R2    FASLG:FAS TGFB3:TGFBR1  
+    #>     1.823874    -0.193020    -0.119887     0.052089    -0.035947    -0.033527  
+    #> MAP2K2:MAPK3  FANCD2:FAN1  
+    #>    -0.021308    -0.008862  
+    #>  
+    #> Result: 
+    #>        RMSE     R.squared   Pearson.r^2           MAE    
+    #>     0.47302       0.08148       0.09173       0.44153
 
 ##### Including Individual Genes (keep_single_genes = TRUE)
 
@@ -143,23 +138,24 @@ fit.rf <- nestcv.train(
   n_inner_folds = 6,
   verbose = FALSE
 )
-#> Loading required package: ggplot2
-#> Loading required package: lattice
 
 fit.rf$summary
-#>                Reference
-#> Predicted       Non_responder Responder
-#>   Non_responder            57         1
-#>   Responder                 1        41
-#> 
-#>               AUC            Accuracy   Balanced accuracy   
-#>            0.9988              0.9800              0.9795
 
 # Plot ROC on outer folds
 plot(fit.rf$roc)
 ```
 
-![](Feature_Selection_files/figure-html/unnamed-chunk-3-1.png)
+    #>                Reference
+    #> Predicted       Non_responder Responder
+    #>   Non_responder            57         2
+    #>   Responder                 1        40
+    #> 
+    #>               AUC            Accuracy   Balanced accuracy   
+    #>            0.9979              0.9700              0.9676
+
+![](roc.png)
+
+ 
 
 #### How nfilter works with keep_single_genes
 
