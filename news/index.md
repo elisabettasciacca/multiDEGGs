@@ -1,6 +1,10 @@
 # Changelog
 
+## multiDEGGs (development version)
+
 ## multiDEGGs 1.2.1
+
+CRAN release: 2026-04-10
 
 `nestedcv` and `qvalue` are no longer required in examples, tests, and
 vignettes, in compliance with CRAN’s `--no-suggests` check.
