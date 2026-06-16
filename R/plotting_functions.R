@@ -35,9 +35,15 @@ my_palette <- function(n) {
 #' @importFrom methods is
 #' @importFrom grDevices adjustcolor
 #' @importFrom graphics abline axis boxplot legend mtext points polygon text
-#' @return base graphics plot showing differential regressions across 
-#' categories. The p value of the interaction term of
-#' gene A ~ gene B \* category is reported on top.
+#' @return a base graphics plot showing differential regressions across
+#' categories. The p value (or adjusted p value) of the interaction term is
+#' reported on top of the plot.
+#' When `mixedModel = TRUE` was used in `get_diffNetworks`, the regression lines
+#' and confidence intervals shown are fitted by standard `lm` or `rlm` (i.e.
+#' without random effects), as mixed model fits do not produce simple per-category
+#' regression lines suitable for visualisation. The p value displayed is always
+#' the one stored in the `deggs_object`, which correctly reflects the mixed model
+#' (or its fallback, if the fit was singular).
 #' @examples
 #' data("synthetic_metadata")
 #' data("synthetic_rnaseqData")
@@ -338,6 +344,7 @@ View_diffNetworks <- function(deggs_object,
   server <- function(input, output, session) {
     empty_df <- data.frame("from" = NA, "to" = NA, "p.value" = 1, "p.adj" = 1, 
                            "layer" = NA)
+    if (deggs_object[["mixedModel"]]) empty_df$singular <- NA
     
     # check if the category_network has data 
     outVar <- shiny::reactive({
@@ -579,7 +586,7 @@ View_diffNetworks <- function(deggs_object,
         # Table
         shiny::tags$div(DT::DTOutput('tbl'), style = "font-size: 75%"),
         
-        # Searchbox
+        # Search box
         shinydashboard::sidebarSearchForm(
           textId = "searchText",
           buttonId = "searchButton",
